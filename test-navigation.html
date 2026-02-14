@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Navigation Test - FEVOURD-K</title>
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://unpkg.com/@inertiajs/inertia@latest/dist/index.umd.js"></script>
+</head>
+<body>
+    <div id="app">
+        <h1>Navigation Test</h1>
+        <a href="/login" onclick="console.log('Login clicked')">Login</a> | 
+        <a href="/register" onclick="console.log('Register clicked')">Register</a> | 
+        <a href="/donate" onclick="console.log('Donate clicked')">Donate</a>
+    </div>
+    
+    <script>
+        const { createApp } = Vue;
+        
+        createApp({
+            data() {
+                return {
+                    message: 'Navigation test loaded'
+                }
+            }
+        }).mount('#app');
+    </script>
+</body>
+</html>

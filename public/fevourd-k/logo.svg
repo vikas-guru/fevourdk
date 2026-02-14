@@ -1,0 +1,8 @@
+<svg width="200" height="60" viewBox="0 0 200 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="200" height="60" fill="#1e40af" rx="4"/>
+  
+  <!-- Text - FEVOURD-K -->
+  <text x="100" y="25" font-family="Arial, sans-serif" font-size="16" font-weight="bold" text-anchor="middle" fill="white">FEVOURD-K</text>
+  <text x="100" y="40" font-family="Arial, sans-serif" font-size="9" text-anchor="middle" fill="#93c5fd">Voluntary Action | Karnataka</text>
+</svg>

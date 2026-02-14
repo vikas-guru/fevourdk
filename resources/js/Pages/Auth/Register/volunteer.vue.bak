@@ -1,0 +1,793 @@
+<template>
+    <AppLayout title="Volunteer Registration - FEVOURD-K">
+        <div class="min-h-screen bg-gradient-to-br from-orange-50 to-yellow-50 py-12">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <!-- Registration Type Selection -->
+                <div class="mb-8">
+                    <div class="text-center mb-6">
+                        <h1 class="text-3xl font-bold text-gray-900 mb-2">Volunteer Registration</h1>
+                        <p class="text-gray-600">Choose your preferred registration method</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                        <!-- AI Registration Option -->
+                        <Link href="/register/volunteer-chat" class="group relative bg-gradient-to-br from-orange-600 to-yellow-600 rounded-2xl p-6 text-white hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-orange-300">
+                            <div class="relative z-10">
+                                <div class="flex items-center justify-between mb-4">
+                                    <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
+                                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z"/>
+                                            <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z"/>
+                                        </svg>
+                                    </div>
+                                    <span class="bg-yellow-400 text-orange-900 text-xs font-bold px-2 py-1 rounded-full">RECOMMENDED</span>
+                                </div>
+                                <h3 class="text-xl font-bold mb-2">AI-Powered Registration</h3>
+                                <p class="text-orange-100 text-sm mb-4">Complete registration in 3 minutes using natural language and AI assistance</p>
+                                <div class="flex items-center space-x-2">
+                                    <span class="bg-white/20 px-2 py-1 rounded text-xs">⚡ Fast</span>
+                                    <span class="bg-white/20 px-2 py-1 rounded text-xs">🤖 Smart</span>
+                                    <span class="bg-white/20 px-2 py-1 rounded text-xs">💬 Voice</span>
+                                </div>
+                            </div>
+                            <div class="absolute top-2 right-2 w-20 h-20 bg-white/5 rounded-full animate-pulse"></div>
+                            <div class="absolute bottom-2 right-2 w-16 h-16 bg-white/5 rounded-full animate-bounce"></div>
+                        </Link>
+                        
+                        <!-- Traditional Form Option -->
+                        <div class="bg-white rounded-2xl p-6 border-2 border-gray-200 hover:border-orange-300 transition-all duration-300 shadow-lg">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                    <svg class="w-6 h-6 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
+                                        <path d="M13 6a3 3 0 11-6 0H7a3 3 0 00-3 3v8a3 3 0 003 3h6a3 3 0 003-3V6z"/>
+                                    </svg>
+                                </div>
+                                <span class="bg-gray-100 text-gray-700 text-xs font-bold px-2 py-1 rounded-full">TRADITIONAL</span>
+                            </div>
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">Manual Form</h3>
+                            <p class="text-gray-600 text-sm mb-4">Fill out registration form step by step with detailed fields</p>
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-gray-100 px-2 py-1 rounded text-xs">📝 Detailed</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded text-xs">✏️ Editable</span>
+                                <span class="bg-gray-100 px-2 py-1 rounded text-xs">📋 Structured</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Registration Container -->
+                <div class="mb-8">
+                    <!-- Progress Bar -->
+                    <div class="mb-8">
+                        <div class="flex items-center justify-center mb-4">
+                            <div class="flex items-center space-x-1">
+                                <!-- Step 1 -->
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                         :class="currentStep >= 1 ? 'bg-orange-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
+                                        1
+                                    </div>
+                                    <div class="w-16 h-2 transition-all duration-300"
+                                         :class="currentStep >= 2 ? 'bg-orange-600' : 'bg-gray-300'"></div>
+                                </div>
+                                
+                                <!-- Step 2 -->
+                                <div class="flex items-center">
+                                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                         :class="currentStep >= 2 ? 'bg-orange-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
+                                        2
+                                    </div>
+                                    <div class="w-16 h-2 transition-all duration-300"
+                                         :class="currentStep >= 3 ? 'bg-orange-600' : 'bg-gray-300'"></div>
+                                </div>
+                            
+                            <!-- Step 3 -->
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                     :class="currentStep >= 3 ? 'bg-orange-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
+                                    3
+                                </div>
+                                <div class="w-16 h-2 transition-all duration-300"
+                                     :class="currentStep >= 4 ? 'bg-orange-600' : 'bg-gray-300'"></div>
+                            </div>
+                            
+                            <!-- Step 4 -->
+                            <div class="flex items-center">
+                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                     :class="currentStep >= 4 ? 'bg-orange-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
+                                    4
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <h2 class="text-2xl font-bold text-gray-900">{{ stepTitles[currentStep - 1] }}</h2>
+                        <p class="text-gray-600 mt-2">{{ stepDescriptions[currentStep - 1] }}</p>
+                    </div>
+                </div>
+
+                <!-- Registration Form -->
+                <form @submit.prevent="submitForm" class="bg-white rounded-2xl shadow-xl p-8">
+                    <!-- Step 1: Personal Information -->
+                    <div v-if="currentStep === 1" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Personal Details</h3>
+                                
+                                <!-- Name Fields -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">First Name *</label>
+                                        <input 
+                                            v-model="form.first_name"
+                                            type="text" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                            :class="{ 'border-red-500': form.errors.first_name }"
+                                            placeholder="John"
+                                        >
+                                        <div v-if="form.errors.first_name" class="text-red-500 text-sm mt-1">{{ form.errors.first_name }}</div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Last Name *</label>
+                                        <input 
+                                            v-model="form.last_name"
+                                            type="text" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                            :class="{ 'border-red-500': form.errors.last_name }"
+                                            placeholder="Doe"
+                                        >
+                                        <div v-if="form.errors.last_name" class="text-red-500 text-sm mt-1">{{ form.errors.last_name }}</div>
+                                    </div>
+                                </div>
+
+                                <!-- Email and Phone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Email Address *</label>
+                                    <input 
+                                        v-model="form.email"
+                                        type="email" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.email }"
+                                        placeholder="john.doe@example.com"
+                                    >
+                                    <div v-if="form.errors.email" class="text-red-500 text-sm mt-1">{{ form.errors.email }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Phone Number *</label>
+                                    <input 
+                                        v-model="form.phone"
+                                        type="tel" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.phone }"
+                                        placeholder="+91 98765 43210"
+                                    >
+                                    <div v-if="form.errors.phone" class="text-red-500 text-sm mt-1">{{ form.errors.phone }}</div>
+                                </div>
+
+                                <!-- Date of Birth and Gender -->
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Date of Birth *</label>
+                                        <input 
+                                            v-model="form.date_of_birth"
+                                            type="date" 
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-2">Gender *</label>
+                                        <select 
+                                            v-model="form.gender"
+                                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        >
+                                            <option value="">Select Gender</option>
+                                            <option value="male">Male</option>
+                                            <option value="female">Female</option>
+                                            <option value="other">Other</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Additional Information</h3>
+
+                                <!-- Password -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Password *</label>
+                                    <input 
+                                        v-model="form.password"
+                                        type="password" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.password }"
+                                        placeholder="Min. 8 characters"
+                                    >
+                                    <div v-if="form.errors.password" class="text-red-500 text-sm mt-1">{{ form.errors.password }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Confirm Password *</label>
+                                    <input 
+                                        v-model="form.password_confirmation"
+                                        type="password" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="Confirm password"
+                                    >
+                                </div>
+
+                                <!-- Profile Picture -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Profile Picture (Optional)</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                                        <div v-if="!profilePreview" class="space-y-2">
+                                            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 48 48">
+                                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                            <div class="flex text-sm text-gray-600">
+                                                <label for="profile-upload" class="relative cursor-pointer rounded-md font-medium text-orange-600 hover:text-orange-500">
+                                                    <span>Upload a file</span>
+                                                    <input id="profile-upload" name="profile_picture" type="file" class="sr-only" @change="handleProfileUpload" accept="image/*">
+                                                </label>
+                                                <p class="pl-1">or drag and drop</p>
+                                            </div>
+                                            <p class="text-xs text-gray-500">PNG, JPG, GIF up to 10MB</p>
+                                        </div>
+                                        <div v-else class="space-y-2">
+                                            <img :src="profilePreview" alt="Profile preview" class="mx-auto h-24 w-24 object-cover rounded-lg">
+                                            <button type="button" @click="removeProfile" class="text-sm text-red-600 hover:text-red-500">Remove</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 2: Location & Preferences -->
+                    <div v-if="currentStep === 2" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Location Information</h3>
+                                
+                                <!-- Location Dropdowns -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
+                                    <select 
+                                        v-model="form.state_id"
+                                        @change="onStateChange"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.state_id }"
+                                    >
+                                        <option value="">Select State</option>
+                                        <option v-for="state in states" :key="state.id" :value="state.id">
+                                            {{ state.name }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.state_id" class="text-red-500 text-sm mt-1">{{ form.errors.state_id }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">District *</label>
+                                    <select 
+                                        v-model="form.district_id"
+                                        @change="onDistrictChange"
+                                        :disabled="!form.state_id"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.district_id }"
+                                    >
+                                        <option value="">Select District</option>
+                                        <option v-for="district in districts" :key="district.id" :value="district.id">
+                                            {{ district.name }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.district_id" class="text-red-500 text-sm mt-1">{{ form.errors.district_id }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                                    <select 
+                                        v-model="form.city_id"
+                                        :disabled="!form.district_id"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.city_id }"
+                                    >
+                                        <option value="">Select City</option>
+                                        <option v-for="city in cities" :key="city.id" :value="city.id">
+                                            {{ city.name }}
+                                        </option>
+                                    </select>
+                                    <div v-if="form.errors.city_id" class="text-red-500 text-sm mt-1">{{ form.errors.city_id }}</div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                                    <textarea 
+                                        v-model="form.address"
+                                        rows="3"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="Enter your complete address"
+                                    ></textarea>
+                                    <div v-if="form.errors.address" class="text-red-500 text-sm mt-1">{{ form.errors.address }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Volunteer Preferences</h3>
+
+                                <!-- Areas of Interest -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Areas of Interest *</label>
+                                    <div class="grid grid-cols-2 gap-3">
+                                        <label v-for="interest in volunteerInterests" :key="interest" class="flex items-center">
+                                            <input 
+                                                type="checkbox" 
+                                                :value="interest"
+                                                v-model="form.interests"
+                                                class="rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                                            >
+                                            <span class="ml-2 text-sm text-gray-700">{{ interest }}</span>
+                                        </label>
+                                    </div>
+                                    </div>
+                                    <div v-if="form.errors.interests" class="text-red-500 text-sm mt-1">{{ form.errors.interests }}</div>
+                                </div>
+
+                                <!-- Skills -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Skills & Experience (Optional)</label>
+                                    <textarea 
+                                        v-model="form.skills"
+                                        rows="4"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="Tell us about your skills and relevant experience..."
+                                    ></textarea>
+                                </div>
+
+                                <!-- Availability -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Availability *</label>
+                                    <select 
+                                        v-model="form.availability"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select availability</option>
+                                        <option value="weekdays">Weekdays</option>
+                                        <option value="weekends">Weekends</option>
+                                        <option value="flexible">Flexible</option>
+                                        <option value="remote">Remote tasks</option>
+                                        <option value="events">Events only</option>
+                                    </select>
+                                </div>
+
+                                <!-- Hours per Week -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Hours per Week</label>
+                                    <select 
+                                        v-model="form.hours_per_week"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select hours</option>
+                                        <option value="1-5">1-5 hours</option>
+                                        <option value="6-10">6-10 hours</option>
+                                        <option value="11-20">11-20 hours</option>
+                                        <option value="20+">20+ hours</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3: Emergency Contact -->
+                    <div v-if="currentStep === 3" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Emergency Contact</h3>
+
+                                <!-- Emergency Contact Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Name *</label>
+                                    <input 
+                                        v-model="form.emergency_contact_name"
+                                        type="text" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.emergency_contact_name }"
+                                        placeholder="Jane Doe"
+                                    >
+                                    <div v-if="form.errors.emergency_contact_name" class="text-red-500 text-sm mt-1">{{ form.errors.emergency_contact_name }}</div>
+                                </div>
+
+                                <!-- Emergency Contact Relationship -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Relationship *</label>
+                                    <select 
+                                        v-model="form.emergency_contact_relationship"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select relationship</option>
+                                        <option value="parent">Parent</option>
+                                        <option value="spouse">Spouse</option>
+                                        <option value="sibling">Sibling</option>
+                                        <option value="friend">Friend</option>
+                                        <option value="relative">Relative</option>
+                                        <option value="colleague">Colleague</option>
+                                    </select>
+                                </div>
+
+                                <!-- Emergency Contact Phone -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Emergency Contact Phone *</label>
+                                    <input 
+                                        v-model="form.emergency_contact_phone"
+                                        type="tel" 
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        :class="{ 'border-red-500': form.errors.emergency_contact_phone }"
+                                        placeholder="+91 98765 43210"
+                                    >
+                                    <div v-if="form.errors.emergency_contact_phone" class="text-red-500 text-sm mt-1">{{ form.errors.emergency_contact_phone }}</div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Background Check</h3>
+
+                                <!-- Background Check Consent -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Background Check Consent *</label>
+                                    <select 
+                                        v-model="form.background_check_consent"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select option</option>
+                                        <option value="yes">I consent to background check</option>
+                                        <option value="no">I do not consent</option>
+                                    </select>
+                                </div>
+
+                                <!-- Why Volunteer -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Why do you want to volunteer? *</label>
+                                    <textarea 
+                                        v-model="form.motivation"
+                                        rows="4"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                        placeholder="Share your motivation for volunteering..."
+                                    ></textarea>
+                                    <div v-if="form.errors.motivation" class="text-red-500 text-sm mt-1">{{ form.errors.motivation }}</div>
+                                </div>
+
+                                <!-- Previous Volunteer Experience -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">Previous Volunteer Experience</label>
+                                    <select 
+                                        v-model="form.previous_experience"
+                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent"
+                                    >
+                                        <option value="">Select experience level</option>
+                                        <option value="none">No previous experience</option>
+                                        <option value="some">Some volunteer experience</option>
+                                        <option value="moderate">Moderate experience</option>
+                                        <option value="extensive">Extensive volunteer experience</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Review & Submit -->
+                    <div v-if="currentStep === 4" class="space-y-6">
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                            <!-- Left Column - Review -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Review Your Information</h3>
+                                
+                                <div class="bg-gray-50 rounded-lg p-6 space-y-4">
+                                    <div class="border-b pb-3">
+                                        <h4 class="font-semibold text-gray-900">Personal Details</h4>
+                                        <p class="text-sm text-gray-600 mt-1"><strong>Name:</strong> {{ form.first_name }} {{ form.last_name }}</p>
+                                        <p class="text-sm text-gray-600"><strong>Email:</strong> {{ form.email }}</p>
+                                        <p class="text-sm text-gray-600"><strong>Phone:</strong> {{ form.phone }}</p>
+                                        <p class="text-sm text-gray-600"><strong>Gender:</strong> {{ form.gender || 'Not specified' }}</p>
+                                    </div>
+
+                                    <div class="border-b pb-3">
+                                        <h4 class="font-semibold text-gray-900">Location</h4>
+                                        <p class="text-sm text-gray-600 mt-1"><strong>City:</strong> {{ getCityName() }}</p>
+                                        <p class="text-sm text-gray-600"><strong>Address:</strong> {{ form.address || 'Not provided' }}</p>
+                                    </div>
+
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900">Preferences</h4>
+                                        <div class="flex flex-wrap gap-2 mt-2">
+                                            <span v-for="interest in form.interests" :key="interest" class="px-2 py-1 bg-orange-100 text-orange-800 text-xs rounded-full">
+                                                {{ interest }}
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Right Column - Terms -->
+                            <div class="space-y-6">
+                                <h3 class="text-xl font-bold text-gray-900 mb-4">Terms & Conditions</h3>
+                                
+                                <!-- Terms and Conditions -->
+                                <div class="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                                    <h4 class="font-semibold text-orange-800 mb-2">Volunteer Agreement</h4>
+                                    <p class="text-sm text-orange-700 mb-3">
+                                        By submitting this volunteer registration, you confirm that you are genuinely interested in contributing 
+                                        your time and skills to social causes through the FEVOURD-K platform.
+                                    </p>
+                                    <label class="flex items-start">
+                                        <input 
+                                            type="checkbox" 
+                                            v-model="form.terms_accepted"
+                                            class="mt-1 mr-3"
+                                            id="terms"
+                                        >
+                                        <span class="text-sm text-gray-700">
+                                            I agree to the 
+                                            <a href="#" class="text-orange-600 hover:text-orange-700">Volunteer Code of Conduct</a> and 
+                                            <a href="#" class="text-orange-600 hover:text-orange-700">Platform Terms</a>
+                                        </span>
+                                    </label>
+                                </div>
+
+                                <!-- Notification Settings -->
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                                    <h4 class="font-semibold text-yellow-800 mb-2">Notification Preferences</h4>
+                                    <div class="space-y-3">
+                                        <label class="flex items-start">
+                                            <input 
+                                                type="checkbox" 
+                                                v-model="form.email_notifications"
+                                                class="mt-1 mr-3"
+                                                checked
+                                            >
+                                            <span class="text-sm text-gray-700">
+                                                Receive volunteer opportunities via email
+                                            </span>
+                                        </label>
+                                        <label class="flex items-start">
+                                            <input 
+                                                type="checkbox" 
+                                                v-model="form.sms_notifications"
+                                                class="mt-1 mr-3"
+                                            >
+                                            <span class="text-sm text-gray-700">
+                                                Receive urgent volunteer requests via SMS
+                                            </span>
+                                        </label>
+                                        <label class="flex items-start">
+                                            <input 
+                                                type="checkbox" 
+                                                v-model="form.newsletter_subscribed"
+                                                class="mt-1 mr-3"
+                                                checked
+                                            >
+                                            <span class="text-sm text-gray-700">
+                                                Subscribe to volunteer newsletter
+                                            </span>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex justify-between mt-8">
+                        <button 
+                            type="button"
+                            @click="previousStep"
+                            v-if="currentStep > 1"
+                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                        >
+                            Previous
+                        </button>
+                        <div v-else></div>
+
+                        <button 
+                            type="button"
+                            @click="nextStep"
+                            v-if="currentStep < 4"
+                            class="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors"
+                        >
+                            Next
+                        </button>
+
+                        <button 
+                            type="submit"
+                            v-if="currentStep === 4"
+                            :disabled="form.processing || !form.terms_accepted"
+                            class="px-8 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        >
+                            <span v-if="form.processing">Creating Account...</span>
+                            <span v-else>Complete Registration</span>
+                        </button>
+                    </div>
+                </form>
+
+                <!-- Back Link -->
+                <div class="text-center mt-8">
+                    <inertia-link href="/register" class="text-gray-600 hover:text-gray-800 transition-colors">
+                        ← Back to Role Selection
+                    </inertia-link>
+                </div>
+            </div>
+        </div>
+    </AppLayout>
+</template>
+
+<script setup>
+import { ref, computed } from 'vue'
+import { useForm, router } from '@inertiajs/vue3'
+import AppLayout from '@/Layouts/AppLayout.vue'
+
+const props = defineProps({
+    states: Array
+})
+
+const currentStep = ref(1)
+const profilePreview = ref(null)
+
+const stepTitles = [
+    'Personal Information',
+    'Location & Preferences',
+    'Emergency Contact & Background',
+    'Review & Submit'
+]
+
+const stepDescriptions = [
+    'Tell us about yourself and contact details',
+    'Share your location and volunteer preferences',
+    'Provide emergency contact and background information',
+    'Review your information and complete registration'
+]
+
+const volunteerInterests = [
+    'Education',
+    'Healthcare',
+    'Environment',
+    'Women Empowerment',
+    'Child Welfare',
+    'Rural Development',
+    'Animal Welfare',
+    'Arts & Culture',
+    'Sports',
+    'Senior Citizen Care',
+    'Disability Support',
+    'Disaster Relief'
+]
+
+const form = useForm({
+    // Step 1: Personal Information
+    first_name: '',
+    last_name: '',
+    email: '',
+    phone: '',
+    password: '',
+    password_confirmation: '',
+    date_of_birth: '',
+    gender: '',
+    profile_picture: null,
+    
+    // Step 2: Location & Preferences
+    state_id: '',
+    district_id: '',
+    city_id: '',
+    address: '',
+    interests: [],
+    skills: '',
+    availability: '',
+    hours_per_week: '',
+    
+    // Step 3: Emergency Contact & Background
+    emergency_contact_name: '',
+    emergency_contact_relationship: '',
+    emergency_contact_phone: '',
+    background_check_consent: '',
+    motivation: '',
+    previous_experience: '',
+    
+    // Step 4: Additional fields
+    email_notifications: true,
+    sms_notifications: false,
+    newsletter_subscribed: true,
+    terms_accepted: false
+})
+
+const districts = computed(() => {
+    if (!form.state_id) return []
+    const state = props.states.find(s => s.id === form.state_id)
+    return state ? state.districts : []
+})
+
+const cities = computed(() => {
+    if (!form.district_id) return []
+    const district = districts.value.find(d => d.id === form.district_id)
+    return district ? district.cities : []
+})
+
+const nextStep = () => {
+    if (validateCurrentStep()) {
+        currentStep.value++
+    }
+}
+
+const previousStep = () => {
+    currentStep.value--
+}
+
+const validateCurrentStep = () => {
+    if (currentStep.value === 1) {
+        if (!form.first_name || !form.last_name || !form.email || !form.phone || !form.password || !form.password_confirmation) {
+            return false
+        }
+    } else if (currentStep.value === 2) {
+        if (!form.state_id || !form.district_id || !form.city_id || form.interests.length === 0) {
+            return false
+        }
+    } else if (currentStep.value === 3) {
+        if (!form.emergency_contact_name || !form.emergency_contact_phone || !form.background_check_consent) {
+            return false
+        }
+    } else if (currentStep.value === 4) {
+        if (!form.terms_accepted) {
+            return false
+        }
+    }
+    return true
+}
+
+const onStateChange = () => {
+    form.district_id = ''
+    form.city_id = ''
+}
+
+const onDistrictChange = () => {
+    form.city_id = ''
+}
+
+const getCityName = () => {
+    if (!form.city_id) return 'Not selected'
+    const district = districts.value.find(d => d.id === form.district_id)
+    if (!district) return 'Not selected'
+    const city = district.cities.find(c => c.id === form.city_id)
+    return city ? city.name : 'Not selected'
+}
+
+const handleProfileUpload = (event) => {
+    const file = event.target.files[0]
+    if (file) {
+        form.profile_picture = file
+        const reader = new FileReader()
+        reader.onload = (e) => {
+            profilePreview.value = e.target.result
+        }
+        reader.readAsDataURL(file)
+    }
+}
+
+const removeProfile = () => {
+    form.profile_picture = null
+    profilePreview.value = null
+}
+
+const submitForm = () => {
+    if (!validateCurrentStep()) {
+        return
+    }
+
+    form.post('/register/volunteer', {
+        onSuccess: () => {
+            router.push('/dashboard')
+        }
+    })
+}
+</script>

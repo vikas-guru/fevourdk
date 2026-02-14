@@ -1,0 +1,22 @@
+{
+  "name": "Fevourd-K - NGO CSR Platform",
+  "short_name": "Fevourd-K",
+  "description": "Digital infrastructure for social impact, connecting NGOs, Corporates, and Citizens",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "/icons/icon-144x144.svg",
+      "sizes": "144x144",
+      "type": "image/svg+xml"
+    }
+  ],
+  "categories": ["business", "education", "health", "social"],
+  "lang": "en",
+  "dir": "ltr",
+  "scope": "/",
+  "prefer_related_applications": false
+}

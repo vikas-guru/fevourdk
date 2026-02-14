@@ -1,0 +1,73 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Donation;
+use App\Models\Campaign;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+
+class DonationController extends Controller
+{
+    public function donate()
+    {
+        $featuredCampaigns = Campaign::with(['ngo'])
+            ->where('status', 'active')
+            ->where('is_featured', true)
+            ->orderBy('created_at', 'desc')
+            ->take(6)
+            ->get();
+
+        return Inertia::render('Donate', [
+            'featuredCampaigns' => $featuredCampaigns,
+        ]);
+    }
+
+    public function index()
+    {
+        $donations = Donation::with(['user', 'campaign'])
+            ->select('id', 'amount', 'created_at', 'user_id', 'campaign_id')
+            ->latest()
+            ->paginate(10);
+
+        return Inertia::render('Admin/Donations/Index', [
+            'donations' => $donations,
+        ]);
+    }
+
+    public function process(Request $request)
+    {
+        $validated = $request->validate([
+            'campaign_id' => 'required|exists:campaigns,id',
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'required|string',
+            'transaction_id' => 'nullable|string',
+        ]);
+
+        $donation = Donation::create([
+            'user_id' => auth()->id(),
+            'campaign_id' => $validated['campaign_id'],
+            'amount' => $validated['amount'],
+            'payment_method' => $validated['payment_method'],
+            'transaction_id' => $validated['transaction_id'],
+            'status' => 'completed',
+        ]);
+
+        // Update campaign raised amount
+        $campaign = Campaign::find($validated['campaign_id']);
+        $campaign->increment('raised_amount', $validated['amount']);
+
+        return redirect()->route('donations.success')
+            ->with('success', 'Donation processed successfully!');
+    }
+
+    public function success()
+    {
+        return inertia('DonationSuccess');
+    }
+
+    public function failure()
+    {
+        return inertia('DonationFailure');
+    }
+}
