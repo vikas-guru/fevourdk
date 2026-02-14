@@ -10,11 +10,16 @@ class NGOController extends Controller
 {
     public function index()
     {
-        $ngos = NGO::select('id', 'name', 'verification_status', 'created_at')
+        // Get verified NGOs with location information
+        $ngos = NGO::with(['state', 'district', 'city'])
+            ->where('verification_status', 'verified')
+            ->where('is_active', true)
+            ->select('id', 'name', 'slug', 'description', 'logo', 'focus_areas', 
+                   'state_id', 'district_id', 'city_id', 'verification_status', 'created_at')
             ->latest()
-            ->paginate(10);
+            ->paginate(12);
 
-        return Inertia::render('Admin/NGOs/Index', [
+        return Inertia::render('NGOs/Index', [
             'ngos' => $ngos,
         ]);
     }

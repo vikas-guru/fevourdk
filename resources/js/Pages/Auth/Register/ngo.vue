@@ -56,7 +56,7 @@
                     </div>
                     
                     <!-- CSR Registration Option -->
-                    <div class="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 text-white hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-green-300">
+                    <!-- <div class="bg-gradient-to-br from-green-600 to-emerald-600 rounded-2xl p-6 text-white hover:shadow-2xl transition-all duration-300 border-2 border-transparent hover:border-green-300">
                         <div class="relative z-10">
                             <div class="flex items-center justify-between mb-4">
                                 <div class="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
@@ -80,7 +80,7 @@
                     </div>
                     <Link href="/csr/register" class="block w-full text-center text-green-900 hover:text-green-800 font-medium transition-colors">
                         Register as Corporate Partner
-                    </Link>
+                    </Link> -->
                 </div>
                 
                 <!-- Progress Bar -->
