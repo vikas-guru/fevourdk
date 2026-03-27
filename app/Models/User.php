@@ -104,6 +104,11 @@ class User extends Authenticatable
         return $this->hasOne(Donor::class);
     }
 
+    public function ngo(): BelongsTo
+    {
+        return $this->belongsTo(NGO::class);
+    }
+
     public function ngoUser(): HasOne
     {
         return $this->hasOne(NGOUser::class);

@@ -5,11 +5,13 @@ namespace App\Http\Controllers\Auth;
 use App\Http\Controllers\Controller;
 use App\Mail\OtpCodeMail;
 use App\Mail\RegistrationCredentialsMail;
+use App\Mail\WelcomeNgoMail;
 use App\Mail\WelcomeIndividualDonorMail;
 use App\Models\Donor;
 use App\Models\User;
 use App\Models\NGO;
 use App\Models\Corporate;
+use App\Models\NgoRegistrationDraft;
 use App\Models\Volunteer;
 use App\Services\OtpService;
 use Illuminate\Http\Request;
@@ -20,6 +22,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class MultiRoleRegistrationController extends Controller
@@ -170,25 +173,60 @@ class MultiRoleRegistrationController extends Controller
      */
     public function registerNGOChat(Request $request)
     {
+        $existingNgoByEmail = $request->filled('email')
+            ? NGO::query()->where('email', $request->email)->first()
+            : null;
+        $existingUserByEmail = $request->filled('email')
+            ? User::query()->where('email', $request->email)->first()
+            : null;
+
+        $uploadError = $this->detectUploadErrorForNgoDocs();
+        if ($uploadError) {
+            return response()->json([
+                'success' => false,
+                'errors' => [
+                    $uploadError['field'] => [$uploadError['message']],
+                ],
+            ], 422);
+        }
+
+        if (is_string($request->input('focus_areas'))) {
+            $decoded = json_decode($request->input('focus_areas'), true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $request->merge(['focus_areas' => $decoded]);
+            }
+        }
+
         $validator = Validator::make($request->all(), [
             'ngo_name' => 'required|string|max:255',
-            'registration_number' => 'required|string|max:50|unique:ngos,registration_number',
-            'pan' => 'nullable|string|size:10|unique:ngos,pan',
+            'founder_name' => 'required|string|max:255',
+            'founder_phone' => 'required|string|max:20',
+            'founder_email' => 'nullable|string|email|max:255',
+            'cofounder_name' => 'nullable|string|max:255',
+            'cofounder_phone' => 'nullable|string|max:20',
+            'cofounder_email' => 'nullable|string|email|max:255',
+            'registration_number' => ['required', 'string', 'max:50', Rule::unique('ngos', 'registration_number')->ignore($existingNgoByEmail?->id)],
+            'pan' => ['required', 'string', 'size:10', Rule::unique('ngos', 'pan')->ignore($existingNgoByEmail?->id)],
             'legal_structure' => 'nullable|string|in:trust,society,section8,other',
-            'email' => 'required|string|email|max:255|unique:ngos,email',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('ngos', 'email')->ignore($existingNgoByEmail?->id), Rule::unique('users', 'email')->ignore($existingUserByEmail?->id)],
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
             'state_name' => 'nullable|string|max:100',
             'postal_code' => 'nullable|string|max:10',
+            'theme_color' => ['nullable', 'regex:/^#(?:[0-9a-fA-F]{3}){1,2}$/'],
             'latitude' => 'nullable|numeric|between:-90,90',
             'longitude' => 'nullable|numeric|between:-180,180',
             'description' => 'required|string|max:2000',
             'focus_areas' => 'required|array|min:1',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'documents' => 'nullable|array',
-            'documents.registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'documents.pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'documents.registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documents.pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'otp_code' => $this->otpCodeValidationRule(),
+            'login_pin' => 'required|string|min:5|max:12|confirmed',
             'accept_terms' => 'required|accepted'
         ]);
 
@@ -199,35 +237,90 @@ class MultiRoleRegistrationController extends Controller
             ], 422);
         }
 
+        if (!($request->hasFile('registration_certificate') || $request->hasFile('documents.registration_certificate'))) {
+            return response()->json([
+                'success' => false,
+                'errors' => [
+                    'registration_certificate' => ['Please upload registration certificate (PDF/JPG/PNG, max 5MB).'],
+                ],
+            ], 422);
+        }
+
+        if (!($request->hasFile('pan_card') || $request->hasFile('documents.pan_card'))) {
+            return response()->json([
+                'success' => false,
+                'errors' => [
+                    'pan_card' => ['Please upload PAN card document (PDF/JPG/PNG, max 5MB).'],
+                ],
+            ], 422);
+        }
+
         try {
-            // Generate slug from NGO name
-            $slug = Str::slug($request->ngo_name);
-            $originalSlug = $slug;
-            $counter = 1;
-            
-            while (NGO::where('slug', $slug)->exists()) {
-                $slug = $originalSlug . '-' . $counter;
-                $counter++;
+            if (!$this->verifyOTP($request->phone, $request->otp_code)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invalid OTP. Please verify your NGO email/phone OTP and try again.',
+                ], 422);
             }
 
-            // Create NGO
-            $ngo = NGO::create([
+            if ($existingNgoByEmail && strcasecmp((string) $existingNgoByEmail->name, (string) $request->ngo_name) !== 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This email is already linked to another NGO profile.',
+                ], 422);
+            }
+
+            // Generate slug from NGO name
+            $slug = $existingNgoByEmail?->slug;
+            if (!$slug) {
+                $slug = Str::slug($request->ngo_name);
+                $originalSlug = $slug;
+                $counter = 1;
+
+                while (NGO::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+            }
+
+            $resolvedStateId = $this->getStateIdByName($request->state_name);
+            $resolvedCityId = $this->getCityIdByName($request->city, $resolvedStateId);
+
+            if (!$resolvedCityId) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Unable to map city from location data. Please enter a known city name and try again.',
+                ], 422);
+            }
+
+            $ngoData = [
                 'name' => $request->ngo_name,
                 'slug' => $slug,
+                'founder_name' => $request->founder_name,
+                'founder_phone' => $request->founder_phone,
+                'founder_email' => $request->founder_email,
+                'cofounder_name' => $request->cofounder_name,
+                'cofounder_phone' => $request->cofounder_phone,
+                'cofounder_email' => $request->cofounder_email,
                 'registration_number' => $request->registration_number,
                 'pan' => $request->pan,
                 'email' => $request->email,
                 'phone' => $request->phone,
+                'theme_color' => $request->theme_color ?: '#2563eb',
                 'address' => $request->address,
-                'state_id' => $this->getStateIdByName($request->state_name),
-                'city_id' => $this->getCityIdByName($request->city),
+                'state_id' => $resolvedStateId,
+                'city_id' => $resolvedCityId,
                 'latitude' => $request->latitude,
                 'longitude' => $request->longitude,
                 'description' => $request->description,
                 'focus_areas' => $request->focus_areas,
                 'verification_status' => 'pending',
-                'is_active' => false
-            ]);
+                'is_active' => false,
+            ];
+
+            $ngo = $existingNgoByEmail ?: new NGO();
+            $ngo->fill($ngoData);
+            $ngo->save();
 
             // Handle logo upload
             if ($request->hasFile('logo')) {
@@ -242,17 +335,15 @@ class MultiRoleRegistrationController extends Controller
             ];
 
             foreach ($documentTypes as $field => $type) {
-                if ($request->hasFile("documents.{$field}")) {
-                    $document = $request->file("documents.{$field}");
+                $document = $request->file($field) ?: $request->file("documents.{$field}");
+                if ($document) {
                     $path = $document->store('ngo_documents', 'public');
                     
                     $ngo->documents()->create([
                         'document_type' => $type,
                         'file_path' => $path,
-                        'file_name' => $document->getClientOriginalName(),
-                        'file_type' => $document->getClientOriginalExtension(),
-                        'file_size' => $document->getSize(),
-                        'status' => 'pending_verification'
+                        'status' => 'pending',
+                        'remarks' => 'Uploaded during NGO chat onboarding',
                     ]);
                 }
             }
@@ -261,22 +352,71 @@ class MultiRoleRegistrationController extends Controller
             $this->generateNGOWebsite($ngo);
             $verification = $this->performNgoRegistrationVerification(
                 (string) $request->registration_number,
-                (string) ($request->legal_structure ?? 'other')
+                (string) ($request->legal_structure ?? 'other'),
+                [
+                    'pan' => $request->pan,
+                    'ngo_name' => $request->ngo_name,
+                    'state_name' => $request->state_name,
+                ]
             );
+
+            if ($existingUserByEmail && $existingUserByEmail->ngo_id && (int) $existingUserByEmail->ngo_id !== (int) $ngo->id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'This email already belongs to another user account.',
+                ], 422);
+            }
+
+            $adminUser = $existingUserByEmail ?: new User();
+            $adminUser->fill([
+                'name' => $request->ngo_name . ' Admin',
+                'first_name' => $request->ngo_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'user_type' => 'ngo',
+                'ngo_id' => $ngo->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+            ]);
+            $adminUser->password = Hash::make((string) $request->login_pin);
+            $adminUser->save();
+
+            if ($adminUser) {
+                try {
+                    $adminUser->assignRole('ngo_admin');
+                } catch (\Throwable $e) {
+                    // If role seed is missing in an environment, do not block onboarding.
+                }
+
+                Mail::to($adminUser->email)->send(new WelcomeNgoMail($ngo, $adminUser));
+
+                $credentialsMail = new RegistrationCredentialsMail($adminUser, (string) $request->login_pin);
+                $credentialsMail->withSymfonyMessage(function ($message) {
+                    $headers = $message->getHeaders();
+                    $headers->addTextHeader('X-Priority', '1 (Highest)');
+                    $headers->addTextHeader('X-MSMail-Priority', 'High');
+                    $headers->addTextHeader('Importance', 'High');
+                });
+                Mail::to($adminUser->email)->send($credentialsMail);
+
+                Auth::login($adminUser);
+            }
 
             return response()->json([
                 'success' => true,
                 'message' => 'NGO registration submitted successfully!',
                 'ngo_id' => $ngo->id,
                 'website_url' => $ngo->website_url,
+                'dashboard_url' => route('dashboard'),
                 'verification' => $verification,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed. Please try again.',
-                'error' => $e->getMessage()
+                'message' => 'Registration failed: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
@@ -286,24 +426,103 @@ class MultiRoleRegistrationController extends Controller
         $validated = $request->validate([
             'registration_number' => 'required|string|max:50',
             'legal_structure' => 'nullable|string|in:trust,society,section8,other',
+            'pan' => 'nullable|string|size:10',
+            'ngo_name' => 'nullable|string|max:255',
+            'state_name' => 'nullable|string|max:100',
         ]);
 
         return response()->json([
             'success' => true,
             'verification' => $this->performNgoRegistrationVerification(
                 $validated['registration_number'],
-                $validated['legal_structure'] ?? 'other'
+                $validated['legal_structure'] ?? 'other',
+                [
+                    'pan' => $validated['pan'] ?? null,
+                    'ngo_name' => $validated['ngo_name'] ?? null,
+                    'state_name' => $validated['state_name'] ?? null,
+                ]
             ),
+        ]);
+    }
+
+    public function saveNgoChatDraft(Request $request)
+    {
+        $validated = $request->validate([
+            'draft_id' => 'nullable|string|max:80',
+            'draft' => 'nullable|array',
+            'selected_focus_areas' => 'nullable|array',
+            'step_index' => 'nullable|integer|min:0',
+            'messages' => 'nullable|array',
+        ]);
+
+        $draftId = $validated['draft_id'] ?: ('NGO-DRAFT-' . strtoupper(Str::random(10)));
+        $payload = [
+            'draft' => $validated['draft'] ?? [],
+            'selected_focus_areas' => $validated['selected_focus_areas'] ?? [],
+            'step_index' => $validated['step_index'] ?? 0,
+            'messages' => $validated['messages'] ?? [],
+        ];
+
+        $draft = NgoRegistrationDraft::query()->updateOrCreate(
+            ['draft_id' => $draftId],
+            [
+                'payload' => $payload,
+                'ip_address' => (string) $request->ip(),
+                'user_agent' => substr((string) ($request->userAgent() ?? ''), 0, 512),
+                'last_saved_at' => now(),
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'draft_id' => $draft->draft_id,
+            'saved_at' => $draft->last_saved_at?->toIso8601String(),
+        ]);
+    }
+
+    public function getNgoChatDraft(string $draftId)
+    {
+        $draft = NgoRegistrationDraft::query()->where('draft_id', $draftId)->first();
+        if (!$draft) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Draft not found',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'draft_id' => $draft->draft_id,
+            'payload' => $draft->payload ?? [],
+            'saved_at' => $draft->last_saved_at?->toIso8601String(),
         ]);
     }
 
     /**
      * Get city ID by name (helper method)
      */
-    private function getCityIdByName($cityName)
+    private function getCityIdByName($cityName, $stateId = null)
     {
-        $city = \App\Models\City::where('name', 'like', "%{$cityName}%")->first();
-        return $city ? $city->id : null;
+        if (!$cityName) {
+            return null;
+        }
+
+        $cityQuery = \App\Models\City::query();
+        if ($stateId) {
+            $cityQuery->where('state_id', $stateId);
+        }
+
+        $city = (clone $cityQuery)->where('name', 'like', "%{$cityName}%")->first();
+        if ($city) {
+            return $city->id;
+        }
+
+        // Fallback: any city in the selected state (or global first city).
+        $fallback = $stateId
+            ? \App\Models\City::query()->where('state_id', $stateId)->first()
+            : \App\Models\City::query()->first();
+
+        return $fallback?->id;
     }
 
     private function getStateIdByName($stateName)
@@ -316,19 +535,34 @@ class MultiRoleRegistrationController extends Controller
         return $state ? $state->id : null;
     }
 
-    private function performNgoRegistrationVerification(string $registrationNumber, string $legalStructure = 'other'): array
+    private function performNgoRegistrationVerification(string $registrationNumber, string $legalStructure = 'other', array $context = []): array
     {
+        $startedAt = microtime(true);
         $registrationNumber = strtoupper(trim($registrationNumber));
+        $pan = strtoupper(trim((string) ($context['pan'] ?? '')));
+        $ngoName = trim((string) ($context['ngo_name'] ?? ''));
+        $stateName = trim((string) ($context['state_name'] ?? ''));
         $checks = [];
+        $providers = [];
         $score = 30;
         $cinMatched = preg_match('/^[A-Z][0-9]{5}[A-Z]{2}[0-9]{4}(NPL|PLC|PTC|SGC|GAP|GAT|UAT|FTC|DDL|GOI|NPL)[0-9]{6}$/', $registrationNumber) === 1;
         $isSection8 = $legalStructure === 'section8';
+        $isTrustOrSociety = in_array($legalStructure, ['trust', 'society'], true);
+        $genericTrustSocietyFormat = preg_match('/^[A-Z0-9\/\-\.\(\)\s]{6,50}$/', $registrationNumber) === 1;
 
         if (strlen($registrationNumber) >= 6) {
             $checks[] = ['name' => 'Basic format length', 'status' => 'pass'];
             $score += 10;
         } else {
             $checks[] = ['name' => 'Basic format length', 'status' => 'fail'];
+        }
+
+        $existsInPlatform = NGO::query()->where('registration_number', $registrationNumber)->exists();
+        if ($existsInPlatform) {
+            $checks[] = ['name' => 'Already exists in FEVOURD-K registry', 'status' => 'warn'];
+        } else {
+            $checks[] = ['name' => 'Not found in FEVOURD-K registry', 'status' => 'pass'];
+            $score += 5;
         }
 
         if ($isSection8 && $cinMatched) {
@@ -338,10 +572,31 @@ class MultiRoleRegistrationController extends Controller
             $checks[] = ['name' => 'CIN format for Section 8', 'status' => 'warn'];
         }
 
+        if ($isTrustOrSociety && $genericTrustSocietyFormat) {
+            $checks[] = ['name' => 'Trust/Society registration pattern', 'status' => 'pass'];
+            $score += 15;
+        } elseif ($isTrustOrSociety) {
+            $checks[] = ['name' => 'Trust/Society registration pattern', 'status' => 'warn'];
+        }
+
+        if ($pan !== '') {
+            $panValid = preg_match('/^[A-Z]{5}[0-9]{4}[A-Z]$/', $pan) === 1;
+            if ($panValid) {
+                $checks[] = ['name' => 'PAN format', 'status' => 'pass'];
+                $score += 10;
+            } else {
+                $checks[] = ['name' => 'PAN format', 'status' => 'fail'];
+            }
+        } else {
+            $checks[] = ['name' => 'PAN provided for cross-check', 'status' => 'warn'];
+        }
+
         $external = null;
         if ($isSection8 && $cinMatched) {
             try {
+                $providerStart = microtime(true);
                 $response = Http::timeout(6)->get("https://api.opencorporates.com/v0.4/companies/in/{$registrationNumber}");
+                $latencyMs = (int) ((microtime(true) - $providerStart) * 1000);
                 if ($response->ok()) {
                     $company = data_get($response->json(), 'results.company');
                     if ($company) {
@@ -354,12 +609,51 @@ class MultiRoleRegistrationController extends Controller
                         ];
                         $checks[] = ['name' => 'OpenCorporates record', 'status' => 'pass'];
                         $score += 30;
+                        $providers[] = [
+                            'name' => 'OpenCorporates',
+                            'status' => 'pass',
+                            'latency_ms' => $latencyMs,
+                            'details' => 'Live public lookup matched a company record.',
+                        ];
+                    } else {
+                        $providers[] = [
+                            'name' => 'OpenCorporates',
+                            'status' => 'warn',
+                            'latency_ms' => $latencyMs,
+                            'details' => 'Lookup completed, but no matching company record found.',
+                        ];
                     }
+                } else {
+                    $providers[] = [
+                        'name' => 'OpenCorporates',
+                        'status' => 'warn',
+                        'latency_ms' => $latencyMs,
+                        'details' => 'Provider responded with non-OK status.',
+                    ];
                 }
             } catch (\Throwable $e) {
                 $checks[] = ['name' => 'OpenCorporates lookup', 'status' => 'warn'];
+                $providers[] = [
+                    'name' => 'OpenCorporates',
+                    'status' => 'warn',
+                    'latency_ms' => null,
+                    'details' => 'Lookup failed or timed out.',
+                ];
             }
         }
+
+        $providers[] = [
+            'name' => 'NGO Darpan',
+            'status' => 'info',
+            'latency_ms' => null,
+            'details' => 'No fully open public verification API. Use official portal for manual confirmation.',
+        ];
+        $providers[] = [
+            'name' => 'Income Tax (12A/80G)',
+            'status' => 'info',
+            'latency_ms' => null,
+            'details' => 'Public API not available; check approval docs and portal.',
+        ];
 
         $score = min(100, $score);
         $confidence = $score >= 80 ? 'high' : ($score >= 55 ? 'medium' : 'low');
@@ -370,12 +664,16 @@ class MultiRoleRegistrationController extends Controller
             'score' => $score,
             'confidence' => $confidence,
             'checks' => $checks,
+            'providers' => $providers,
             'external' => $external,
+            'ngo_name' => $ngoName !== '' ? $ngoName : null,
+            'state_name' => $stateName !== '' ? $stateName : null,
             'official_links' => [
                 ['label' => 'NGO Darpan Portal', 'url' => 'https://ngodarpan.gov.in/'],
                 ['label' => 'MCA Company Search (Section 8)', 'url' => 'https://www.mca.gov.in/'],
                 ['label' => 'Income Tax Exemption Search (12A/80G)', 'url' => 'https://www.incometax.gov.in/'],
             ],
+            'runtime_ms' => (int) ((microtime(true) - $startedAt) * 1000),
             'note' => 'Free public verification is limited in India; this is a pre-verification assist and does not replace admin approval.',
         ];
     }
@@ -501,10 +799,8 @@ class MultiRoleRegistrationController extends Controller
                 $ngo->documents()->create([
                     'document_type' => $type,
                     'file_path' => $path,
-                    'file_name' => $document->getClientOriginalName(),
-                    'file_type' => $document->getClientOriginalExtension(),
-                    'file_size' => $document->getSize(),
-                    'status' => 'pending_verification'
+                    'status' => 'pending',
+                    'remarks' => 'Uploaded during NGO registration',
                 ]);
             }
         }
@@ -805,6 +1101,39 @@ class MultiRoleRegistrationController extends Controller
         return app(OtpService::class)->verify($phone, $otp);
     }
 
+    private function detectUploadErrorForNgoDocs(): ?array
+    {
+        $fieldMap = [
+            'registration_certificate' => 'registration_certificate',
+            'pan_card' => 'pan_card',
+        ];
+
+        foreach ($fieldMap as $fileField => $errorField) {
+            if (!isset($_FILES[$fileField])) {
+                continue;
+            }
+
+            $error = (int) ($_FILES[$fileField]['error'] ?? UPLOAD_ERR_OK);
+            if ($error === UPLOAD_ERR_OK) {
+                continue;
+            }
+
+            $message = match ($error) {
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Upload failed: file exceeds server limit. Please use a file under 2 MB.',
+                UPLOAD_ERR_PARTIAL => 'Upload failed: file upload was interrupted. Please retry.',
+                UPLOAD_ERR_NO_FILE => 'Please select a file to upload.',
+                default => 'Upload failed due to server upload error. Please retry with a smaller file.',
+            };
+
+            return [
+                'field' => $errorField,
+                'message' => $message,
+            ];
+        }
+
+        return null;
+    }
+
     private function extractUserAgentMeta(string $ua): array
     {
         $browserName = 'Unknown';
@@ -883,29 +1212,8 @@ class MultiRoleRegistrationController extends Controller
      */
     private function generateNGOWebsite($ngo)
     {
-        // Create NGO website directory structure
-        $websitePath = public_path("ngo-websites/{$ngo->slug}");
-        
-        if (!is_dir($websitePath)) {
-            mkdir($websitePath, 0755, true);
-        }
-
-        // Generate basic website files
-        $this->generateNGOHomePage($ngo, $websitePath);
-        $this->generateNGOAboutPage($ngo, $websitePath);
-        $this->generateNGOContactPage($ngo, $websitePath);
-        
-        // Create .htaccess for clean URLs
-        $htaccessContent = "
-RewriteEngine On
-RewriteRule ^about$ about.php [L]
-RewriteRule ^contact$ contact.php [L]
-RewriteRule ^donate$ https://fevourd-k.org/campaigns?ngo={$ngo->slug} [L,R=301]
-";
-        file_put_contents($websitePath . '/.htaccess', $htaccessContent);
-        
-        // Store website URL in NGO record
-        $ngo->update(['website_url' => url("ngo-websites/{$ngo->slug}")]);
+        // Dynamic website route style: https://fevourd-k.org/{ngo-slug}
+        $ngo->update(['website_url' => url($ngo->slug)]);
     }
 
     /**

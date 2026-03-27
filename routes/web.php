@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\MultiRoleRegistrationController;
 use App\Http\Controllers\NGOController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\DonationController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
@@ -17,6 +18,7 @@ use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CSRController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\NGO\NGOWebsiteController;
 
 // Static Pages
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -57,6 +59,12 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/ngo-chat/verify-registration', [MultiRoleRegistrationController::class, 'verifyNgoRegistration'])
         ->middleware('throttle:20,1')
         ->name('register.ngo-chat.verify-registration');
+    Route::post('/register/ngo-chat/draft', [MultiRoleRegistrationController::class, 'saveNgoChatDraft'])
+        ->middleware('throttle:40,1')
+        ->name('register.ngo-chat.draft.save');
+    Route::get('/register/ngo-chat/draft/{draftId}', [MultiRoleRegistrationController::class, 'getNgoChatDraft'])
+        ->middleware('throttle:60,1')
+        ->name('register.ngo-chat.draft.get');
     Route::post('/register/corporate', [MultiRoleRegistrationController::class, 'registerCorporate'])->name('register.corporate');
     Route::get('/csr', [CSRController::class, 'index'])->name('csr.index');
     Route::get('/csr/register', [CSRController::class, 'create'])->name('csr.create');
@@ -113,6 +121,11 @@ Route::middleware('auth')->group(function () {
         Route::get('/donations', [\App\Http\Controllers\NGO\NGODashboardController::class, 'donations'])->name('donations');
         Route::get('/documents', [\App\Http\Controllers\NGO\NGODashboardController::class, 'documents'])->name('documents');
         Route::get('/banking', [\App\Http\Controllers\NGO\NGODashboardController::class, 'banking'])->name('banking');
+        Route::get('/digitalization', [\App\Http\Controllers\NGO\NGODashboardController::class, 'digitalization'])->name('digitalization');
+        Route::put('/digitalization', [\App\Http\Controllers\NGO\NGODashboardController::class, 'updateDigitalization'])->name('digitalization.update');
+        Route::get('/ledger', [\App\Http\Controllers\NGO\NGODashboardController::class, 'ledger'])->name('ledger');
+        Route::post('/ledger', [\App\Http\Controllers\NGO\NGODashboardController::class, 'storeLedgerEntry'])->name('ledger.store');
+        Route::get('/website-preview', [NGOWebsiteController::class, 'preview'])->name('website.preview');
     });
 });
 
@@ -152,6 +165,7 @@ Route::middleware(['auth', 'role:super_admin|state_admin'])->prefix('admin')->na
     Route::get('/test', function () {
         return inertia('Admin/Test');
     })->name('test');
+    Route::get('/ngos', [NGOController::class, 'index'])->name('ngos.index');
     Route::post('/ngos', [NGOController::class, 'store'])->name('ngos.store');
     Route::get('/ngos/{ngo}', [NGOController::class, 'show'])->name('ngos.show');
     Route::get('/ngos/{ngo}/edit', [NGOController::class, 'edit'])->name('ngos.edit');
@@ -182,6 +196,18 @@ Route::middleware(['auth', 'role:super_admin|state_admin'])->prefix('admin')->na
     
     Route::get('/ngos/pending', [NGOController::class, 'pending'])->name('ngos.pending');
     Route::post('/ngos/{ngo}/verify', [NGOController::class, 'verify'])->name('ngos.verify');
+    Route::post('/ngos/{ngo}/reject', [NGOController::class, 'reject'])->name('ngos.reject');
+
+    Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
+    Route::get('/users/create', [AdminUserController::class, 'create'])->name('users.create');
+    Route::post('/users', [AdminUserController::class, 'store'])->name('users.store');
+    Route::get('/users/{user}/edit', [AdminUserController::class, 'edit'])->name('users.edit');
+    Route::put('/users/{user}', [AdminUserController::class, 'update'])->name('users.update');
+    Route::delete('/users/{user}', [AdminUserController::class, 'destroy'])->name('users.destroy');
+
+    Route::get('/individuals', [AdminUserController::class, 'individuals'])->name('individuals.index');
+    Route::get('/individuals/{user}', [AdminUserController::class, 'showIndividual'])->name('individuals.show');
+    Route::post('/individuals/{user}/approve', [AdminUserController::class, 'approveIndividual'])->name('individuals.approve');
 });
 
 // CSR Routes
@@ -193,3 +219,8 @@ Route::middleware(['auth', 'role:corporate_csr_manager'])->prefix('csr')->name('
 Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
 });
+
+// Public NGO website microsites: /{ngo-slug}
+Route::get('/{ngoSlug}', [NGOWebsiteController::class, 'showBySlug'])
+    ->where('ngoSlug', '^(?!admin|api|storage|build|assets|icons|login|register|dashboard|ngo|csr|donor|campaigns|donate|about|team|events|gallery|partners|contact|terms|privacy|accessibility|focus|programs|test|test-auth).+$')
+    ->name('ngo.website.show');

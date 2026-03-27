@@ -113,4 +113,45 @@ class UserController extends Controller
             'user' => $user,
         ]);
     }
+
+    public function individuals()
+    {
+        $users = User::query()
+            ->where('user_type', 'individual')
+            ->with(['roles', 'donor'])
+            ->select('id', 'name', 'email', 'phone', 'is_active', 'email_verified_at', 'created_at')
+            ->latest()
+            ->paginate(15);
+
+        return Inertia::render('Admin/Individuals/Index', [
+            'users' => $users,
+        ]);
+    }
+
+    public function showIndividual(User $user)
+    {
+        if ($user->user_type !== 'individual') {
+            abort(404);
+        }
+
+        $user->load(['roles', 'donor', 'donations']);
+
+        return Inertia::render('Admin/Individuals/Show', [
+            'user' => $user,
+        ]);
+    }
+
+    public function approveIndividual(User $user)
+    {
+        if ($user->user_type !== 'individual') {
+            abort(404);
+        }
+
+        $user->update([
+            'is_active' => true,
+            'email_verified_at' => $user->email_verified_at ?? now(),
+        ]);
+
+        return back()->with('success', 'Individual approved successfully.');
+    }
 }

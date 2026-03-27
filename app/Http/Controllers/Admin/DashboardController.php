@@ -16,33 +16,40 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        // Get overall statistics
         $stats = [
             'total_users' => User::count(),
             'total_ngos' => NGO::count(),
             'total_campaigns' => Campaign::count(),
-            'total_donations' => Donation::count(),
+            'total_donations' => Donation::where('status', 'completed')->count(),
+            'total_donation_amount' => (float) Donation::where('status', 'completed')->sum('amount'),
             'total_programs' => Program::count(),
             'active_programs' => Program::where('is_active', true)->count(),
             'featured_programs' => Program::where('is_featured', true)->count(),
             'pending_ngos' => NGO::where('verification_status', 'pending')->count(),
             'verified_ngos' => NGO::where('verification_status', 'verified')->count(),
+            'pending_individuals' => User::query()
+                ->where('user_type', 'individual')
+                ->where(function ($q) {
+                    $q->whereNull('email_verified_at')->orWhere('is_active', false);
+                })
+                ->count(),
         ];
 
-        // Get donation statistics
         $donationStats = Donation::selectRaw('
                 COUNT(*) as total_donations,
                 COALESCE(SUM(amount), 0) as total_amount,
                 COALESCE(AVG(amount), 0) as avg_amount
             ')->first();
 
-        // Get recent activities
         $recentUsers = User::latest()->take(5)->get(['id', 'name', 'email', 'created_at']);
-        $recentNGOs = NGO::latest()->take(5)->get(['id', 'name', 'verification_status', 'created_at']);
+        $recentNGOs = NGO::latest()->take(8)->get(['id', 'name', 'email', 'verification_status', 'is_active', 'created_at']);
         $recentCampaigns = Campaign::with('ngo')->latest()->take(5)->get(['id', 'title', 'ngo_id', 'target_amount', 'raised_amount', 'created_at']);
-        $recentPrograms = Program::latest()->take(5)->get(['id', 'title', 'category', 'is_featured', 'is_active', 'created_at']);
+        $recentIndividuals = User::query()
+            ->where('user_type', 'individual')
+            ->latest()
+            ->take(8)
+            ->get(['id', 'name', 'email', 'phone', 'is_active', 'email_verified_at', 'created_at']);
 
-        // Get monthly donation trends (last 6 months)
         $monthlyDonations = Donation::selectRaw('
                 DATE_FORMAT(created_at, "%Y-%m") as month,
                 COUNT(*) as count,
@@ -53,29 +60,25 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
-        // Get NGO status distribution
         $ngoStatusDistribution = NGO::selectRaw('verification_status as status, COUNT(*) as count')
             ->groupBy('verification_status')
             ->get();
 
-        // Get top campaigns by donations
         $topCampaigns = Campaign::with(['ngo'])
             ->withCount('donations')
             ->orderBy('donations_count', 'desc')
             ->take(5)
             ->get(['id', 'title', 'ngo_id', 'target_amount', 'raised_amount']);
 
-        // Get user role distribution
         $userRoleDistribution = DB::table('model_has_roles')
             ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
             ->selectRaw('roles.name as role, COUNT(*) as count')
             ->groupBy('roles.name')
             ->get();
 
-        // Get page visit analytics (last 30 days)
-        $pageVisits = DB::table('sessions')
-            ->where('last_activity', '>=', now()->subDays(30))
-            ->selectRaw('DATE(FROM_UNIXTIME(last_activity)) as date, COUNT(*) as visits')
+        $pageVisits = DB::table('analytics_page_views')
+            ->where('viewed_at', '>=', now()->subDays(30))
+            ->selectRaw('DATE(viewed_at) as date, COUNT(*) as visits')
             ->groupBy('date')
             ->orderBy('date', 'desc')
             ->take(30)
@@ -84,7 +87,6 @@ class DashboardController extends Controller
         $totalPageViews = $pageVisits->sum('visits');
         $avgDailyPageViews = $pageVisits->count() > 0 ? round($totalPageViews / $pageVisits->count()) : 0;
 
-        // Get user registration trends (last 6 months)
         $userRegistrationTrends = User::selectRaw('
                 DATE_FORMAT(created_at, "%Y-%m") as month,
                 COUNT(*) as count
@@ -94,13 +96,28 @@ class DashboardController extends Controller
             ->orderBy('month')
             ->get();
 
-        return Inertia::render('Admin/Dashboard', [
+        $topPaths = DB::table('analytics_page_views')
+            ->selectRaw('path, COUNT(*) as visits')
+            ->where('viewed_at', '>=', now()->subDays(30))
+            ->groupBy('path')
+            ->orderByDesc('visits')
+            ->limit(10)
+            ->get();
+
+        $deviceDistribution = DB::table('analytics_page_views')
+            ->selectRaw('COALESCE(device_type, "unknown") as device_type, COUNT(*) as count')
+            ->where('viewed_at', '>=', now()->subDays(30))
+            ->groupBy('device_type')
+            ->orderByDesc('count')
+            ->get();
+
+        return Inertia::render('Admin/DashboardSimple', [
             'stats' => $stats,
             'donationStats' => $donationStats,
             'recentUsers' => $recentUsers,
             'recentNGOs' => $recentNGOs,
+            'recentIndividuals' => $recentIndividuals,
             'recentCampaigns' => $recentCampaigns,
-            'recentPrograms' => $recentPrograms,
             'monthlyDonations' => $monthlyDonations,
             'ngoStatusDistribution' => $ngoStatusDistribution,
             'topCampaigns' => $topCampaigns,
@@ -109,6 +126,8 @@ class DashboardController extends Controller
             'totalPageViews' => $totalPageViews,
             'avgDailyPageViews' => $avgDailyPageViews,
             'userRegistrationTrends' => $userRegistrationTrends,
+            'topPaths' => $topPaths,
+            'deviceDistribution' => $deviceDistribution,
         ]);
     }
 }

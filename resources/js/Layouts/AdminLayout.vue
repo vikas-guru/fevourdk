@@ -20,6 +20,7 @@ const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
     { name: 'Programs & Activities', href: '/admin/programs', icon: DocumentTextIcon },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
+    { name: 'Individuals', href: '/admin/individuals', icon: ClipboardDocumentListIcon },
     { name: 'NGOs', href: '/admin/ngos', icon: BuildingOfficeIcon },
     { name: 'Campaigns', href: '/admin/campaigns', icon: GiftIcon },
     { name: 'Donations', href: '/admin/donations', icon: BanknotesIcon },

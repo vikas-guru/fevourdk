@@ -8,20 +8,41 @@ use Inertia\Inertia;
 
 class NGOController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        // Get verified NGOs with location information
+        if ($request->is('admin/*')) {
+            $ngos = NGO::query()
+                ->with(['state', 'district', 'city'])
+                ->withCount('documents')
+                ->select([
+                    'id',
+                    'name',
+                    'slug',
+                    'email',
+                    'phone',
+                    'verification_status',
+                    'is_active',
+                    'state_id',
+                    'district_id',
+                    'city_id',
+                    'created_at',
+                ])
+                ->latest()
+                ->paginate(15);
+
+            return Inertia::render('Admin/NGOs/Index', [
+                'ngos' => $ngos,
+            ]);
+        }
+
         $ngos = NGO::with(['state', 'district', 'city'])
             ->where('verification_status', 'verified')
             ->where('is_active', true)
-            ->select('id', 'name', 'slug', 'description', 'logo', 'focus_areas', 
-                   'state_id', 'district_id', 'city_id', 'verification_status', 'created_at')
+            ->select('id', 'name', 'slug', 'description', 'logo', 'focus_areas', 'state_id', 'district_id', 'city_id', 'verification_status', 'created_at')
             ->latest()
             ->paginate(12);
 
-        return Inertia::render('NGOs/Index', [
-            'ngos' => $ngos,
-        ]);
+        return Inertia::render('NGOs/Index', ['ngos' => $ngos]);
     }
 
     public function create()
@@ -39,7 +60,7 @@ class NGOController extends Controller
     public function show(NGO $ngo)
     {
         return Inertia::render('Admin/NGOs/Show', [
-            'ngo' => $ngo,
+            'ngo' => $ngo->load(['state', 'district', 'city', 'documents']),
         ]);
     }
 
@@ -78,8 +99,23 @@ class NGOController extends Controller
 
     public function verify(NGO $ngo)
     {
-        $ngo->update(['verification_status' => 'verified']);
-        return redirect()->route('admin.ngos.pending')
+        $ngo->update([
+            'verification_status' => 'verified',
+            'is_active' => true,
+            'verified_at' => now(),
+        ]);
+        return redirect()->route('admin.ngos.index')
             ->with('success', 'NGO verified successfully.');
+    }
+
+    public function reject(Request $request, NGO $ngo)
+    {
+        $ngo->update([
+            'verification_status' => 'suspended',
+            'is_active' => false,
+        ]);
+
+        return redirect()->route('admin.ngos.index')
+            ->with('success', 'NGO marked as rejected/suspended.');
     }
 }

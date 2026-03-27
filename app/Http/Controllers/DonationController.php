@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Donation;
 use App\Models\Campaign;
+use App\Models\NGOLedgerEntry;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -57,6 +58,26 @@ class DonationController extends Controller
         // Update campaign raised amount
         $campaign = Campaign::find($validated['campaign_id']);
         $campaign->increment('raised_amount', $validated['amount']);
+
+        // Auto-post to NGO ledger so finance stays auditable.
+        if ($campaign?->ngo_id) {
+            $lastBalance = (float) (NGOLedgerEntry::query()
+                ->where('ngo_id', $campaign->ngo_id)
+                ->latest('id')
+                ->value('balance_after') ?? 0);
+
+            NGOLedgerEntry::query()->create([
+                'ngo_id' => $campaign->ngo_id,
+                'entry_date' => now()->toDateString(),
+                'type' => 'credit',
+                'category' => 'donation',
+                'reference_type' => Donation::class,
+                'reference_id' => $donation->id,
+                'description' => "Donation received for campaign: {$campaign->title}",
+                'amount' => $validated['amount'],
+                'balance_after' => $lastBalance + (float) $validated['amount'],
+            ]);
+        }
 
         UserNotification::query()->create([
             'user_id' => auth()->id(),

@@ -856,6 +856,8 @@ const appSidebarLinks = computed(() => {
         links.push({ section: 'NGO Workspace', items: [
             { label: 'NGO Dashboard', href: '/ngo/dashboard', icon: 'ND' },
             { label: 'Campaign Manager', href: '/ngo/campaigns', icon: 'CM' },
+            { label: 'Digitalization', href: '/ngo/digitalization', icon: 'DG' },
+            { label: 'Ledger', href: '/ngo/ledger', icon: 'LG' },
             { label: 'Documents', href: '/ngo/documents', icon: 'DC' },
         ] })
     }

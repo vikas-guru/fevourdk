@@ -18,6 +18,12 @@ class NGO extends Model
     protected $fillable = [
         'name',
         'slug',
+        'founder_name',
+        'founder_phone',
+        'founder_email',
+        'cofounder_name',
+        'cofounder_phone',
+        'cofounder_email',
         'description',
         'registration_number',
         'pan',
@@ -25,6 +31,7 @@ class NGO extends Model
         'phone',
         'website',
         'logo',
+        'theme_color',
         'address',
         'state_id',
         'district_id',
@@ -35,6 +42,16 @@ class NGO extends Model
         'focus_areas',
         'is_active',
         'verified_at',
+        'website_url',
+        'custom_domain',
+        'custom_domain_status',
+        'tawk_property_id',
+        'tawk_widget_id',
+        'facebook_url',
+        'instagram_url',
+        'google_business_location_id',
+        'google_business_auto_post',
+        'digitalization_settings',
     ];
 
     protected $casts = [
@@ -43,36 +60,53 @@ class NGO extends Model
         'focus_areas' => 'array',
         'is_active' => 'boolean',
         'verified_at' => 'datetime',
+        'google_business_auto_post' => 'boolean',
+        'digitalization_settings' => 'array',
     ];
 
     public function campaigns(): HasMany
     {
-        return $this->hasMany(Campaign::class);
+        return $this->hasMany(Campaign::class, 'ngo_id');
     }
 
     public function donations(): HasMany
     {
-        return $this->hasMany(Donation::class);
+        return $this->hasMany(Donation::class, 'ngo_id');
     }
 
     public function documents(): HasMany
     {
-        return $this->hasMany(NGODocument::class);
+        return $this->hasMany(NGODocument::class, 'ngo_id');
     }
 
     public function bankAccounts(): HasMany
     {
-        return $this->hasMany(NGOBankAccount::class);
+        return $this->hasMany(NGOBankAccount::class, 'ngo_id');
     }
 
     public function paymentGateways(): HasMany
     {
-        return $this->hasMany(NGOPaymentGateway::class);
+        return $this->hasMany(NGOPaymentGateway::class, 'ngo_id');
     }
 
     public function users(): HasMany
     {
-        return $this->hasMany(NGOUser::class);
+        return $this->hasMany(NGOUser::class, 'ngo_id');
+    }
+
+    public function socialChannels(): HasMany
+    {
+        return $this->hasMany(NGOSocialChannel::class, 'ngo_id');
+    }
+
+    public function socialPostJobs(): HasMany
+    {
+        return $this->hasMany(NGOSocialPostJob::class, 'ngo_id');
+    }
+
+    public function ledgerEntries(): HasMany
+    {
+        return $this->hasMany(NGOLedgerEntry::class, 'ngo_id');
     }
 
     public function auditLogs(): MorphMany

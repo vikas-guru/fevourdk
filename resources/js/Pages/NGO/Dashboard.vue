@@ -169,6 +169,20 @@
                                         <span class="font-medium text-gray-900">Banking Settings</span>
                                     </div>
                                 </inertia-link>
+
+                                <inertia-link href="/ngo/digitalization" class="block w-full text-left p-3 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-rocket text-indigo-600 mr-3"></i>
+                                        <span class="font-medium text-gray-900">Digitalization Center</span>
+                                    </div>
+                                </inertia-link>
+
+                                <inertia-link href="/ngo/ledger" class="block w-full text-left p-3 bg-emerald-50 rounded-lg hover:bg-emerald-100 transition-colors">
+                                    <div class="flex items-center">
+                                        <i class="fas fa-book text-emerald-600 mr-3"></i>
+                                        <span class="font-medium text-gray-900">Ledger &amp; Accounts</span>
+                                    </div>
+                                </inertia-link>
                             </div>
                         </div>
 
@@ -265,7 +279,8 @@ import { Link } from '@inertiajs/vue3'
 defineProps({
     ngo: Object,
     stats: Object,
-    recentDonations: Array
+    recentDonations: Array,
+    ledgerSummary: Object,
 })
 
 const formatDate = (dateString) => {
