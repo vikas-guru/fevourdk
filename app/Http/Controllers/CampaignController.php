@@ -10,10 +10,32 @@ class CampaignController extends Controller
 {
     public function index()
     {
-        // For public campaigns listing, we'll use sample data for now
-        // In production, this would fetch from database
+        $campaigns = Campaign::query()
+            ->with('ngo:id,name,logo')
+            ->where('is_active', true)
+            ->orderByDesc('is_featured')
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function (Campaign $campaign) {
+                return [
+                    'id' => $campaign->id,
+                    'title' => $campaign->title,
+                    'slug' => $campaign->slug,
+                    'description' => $campaign->description,
+                    'featured_image' => $campaign->featured_image,
+                    'category' => data_get($campaign->focus_areas, '0', 'General'),
+                    'goal_amount' => (float) $campaign->target_amount,
+                    'raised_amount' => (float) $campaign->raised_amount,
+                    'progress_percentage' => round($campaign->progress_percentage, 2),
+                    'donors_count' => (int) ($campaign->donor_count ?? 0),
+                    'days_left' => $campaign->days_left,
+                    'ngo_name' => $campaign->ngo?->name,
+                    'created_at' => $campaign->created_at?->toDateString(),
+                ];
+            });
+
         return Inertia::render('Campaigns/Index', [
-            'campaigns' => [], // This will be populated by the Vue component
+            'campaigns' => $campaigns,
         ]);
     }
 

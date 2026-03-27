@@ -3,16 +3,24 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\OtpCodeMail;
+use App\Mail\RegistrationCredentialsMail;
+use App\Mail\WelcomeIndividualDonorMail;
+use App\Models\Donor;
 use App\Models\User;
 use App\Models\NGO;
 use App\Models\Corporate;
 use App\Models\Volunteer;
+use App\Services\OtpService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\Registered;
+use Illuminate\Validation\ValidationException;
 
 class MultiRoleRegistrationController extends Controller
 {
@@ -37,7 +45,7 @@ class MultiRoleRegistrationController extends Controller
         }
 
         // Get states for location selection
-        $states = \App\Models\State::all();
+        $states = \App\Models\State::with('districts.cities')->get();
         $cities = \App\Models\City::all();
         
         return inertia("Auth/Register/{$userType}", [
@@ -58,14 +66,24 @@ class MultiRoleRegistrationController extends Controller
             'last_name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'phone' => 'required|string|max:20',
-            'password' => 'required|string|min:8|confirmed',
-            'state_id' => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
-            'city_id' => 'required|exists:cities,id',
+            'password' => 'required|string|min:5|confirmed',
+            'state_id' => 'nullable|exists:states,id',
+            'district_id' => 'nullable|exists:districts,id',
+            'city_id' => 'nullable|exists:cities,id',
+            'state_name' => 'required|string|max:150',
+            'district_name' => 'required|string|max:150',
+            'city_name' => 'required|string|max:150',
+            'mandal_name' => 'nullable|string|max:150',
+            'address' => 'required|string|max:500',
             'postal_code' => 'nullable|string|max:10',
             'date_of_birth' => 'nullable|date|before:today',
             'gender' => 'nullable|in:male,female,other',
-            'otp_code' => 'required|string|size:6'
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
+            'location_permission' => 'nullable|in:granted,denied,prompt',
+            'notification_permission' => 'nullable|in:granted,denied,default',
+            'notification_token' => 'nullable|string|max:2000',
+            'otp_code' => $this->otpCodeValidationRule(),
         ]);
 
         if ($validator->fails()) {
@@ -73,13 +91,15 @@ class MultiRoleRegistrationController extends Controller
                      ->withInput();
         }
 
-        // Verify OTP (simplified for now)
-        if (!$this->verifyOTP($request->phone, $request->otp_code)) {
+        if (! app(OtpService::class)->verify($request->phone, $request->otp_code)) {
             return back()->with('error', 'Invalid OTP code')
                      ->withInput();
         }
 
+        $agent = $this->extractUserAgentMeta($request->userAgent() ?? '');
+
         $user = User::create([
+            'name' => trim($request->first_name.' '.$request->last_name),
             'first_name' => $request->first_name,
             'last_name' => $request->last_name,
             'email' => $request->email,
@@ -88,16 +108,55 @@ class MultiRoleRegistrationController extends Controller
             'state_id' => $request->state_id,
             'district_id' => $request->district_id,
             'city_id' => $request->city_id,
+            'state_name' => $request->state_name,
+            'district_name' => $request->district_name,
+            'city_name' => $request->city_name,
+            'mandal_name' => $request->mandal_name,
+            'address' => $request->address,
             'postal_code' => $request->postal_code,
             'date_of_birth' => $request->date_of_birth,
             'gender' => $request->gender,
+            'latitude' => $request->latitude,
+            'longitude' => $request->longitude,
+            'location_permission' => $request->location_permission,
+            'notification_permission' => $request->notification_permission,
+            'notification_token' => $request->notification_token,
+            'user_agent' => $request->userAgent(),
+            'browser_name' => $agent['browser_name'],
+            'browser_version' => $agent['browser_version'],
+            'os_name' => $agent['os_name'],
+            'device_type' => $agent['device_type'],
+            'ip_address' => $request->ip(),
+            'registration_meta' => [
+                'accept_language' => $request->header('Accept-Language'),
+                'timezone_offset' => $request->input('timezone_offset'),
+                'screen' => [
+                    'width' => $request->input('screen_width'),
+                    'height' => $request->input('screen_height'),
+                ],
+            ],
             'user_type' => 'individual',
             'email_verified_at' => now(),
             'phone_verified_at' => now(),
         ]);
 
-        // Assign individual role
-        $user->assignRole('Donor');
+        $user->assignRole('donor');
+
+        Donor::firstOrCreate(
+            ['user_id' => $user->id],
+            ['donor_type' => 'individual']
+        );
+
+        Mail::to($user->email)->send(new WelcomeIndividualDonorMail($user));
+
+        $credentialsMail = new RegistrationCredentialsMail($user, (string) $request->password);
+        $credentialsMail->withSymfonyMessage(function ($message) {
+            $headers = $message->getHeaders();
+            $headers->addTextHeader('X-Priority', '1 (Highest)');
+            $headers->addTextHeader('X-MSMail-Priority', 'High');
+            $headers->addTextHeader('Importance', 'High');
+        });
+        Mail::to($user->email)->send($credentialsMail);
 
         event(new Registered($user));
         
@@ -114,17 +173,22 @@ class MultiRoleRegistrationController extends Controller
         $validator = Validator::make($request->all(), [
             'ngo_name' => 'required|string|max:255',
             'registration_number' => 'required|string|max:50|unique:ngos,registration_number',
-            'pan' => 'required|string|size:10|unique:ngos,pan',
-            'email' => 'required|string|email|max:255|unique:users',
+            'pan' => 'nullable|string|size:10|unique:ngos,pan',
+            'legal_structure' => 'nullable|string|in:trust,society,section8,other',
+            'email' => 'required|string|email|max:255|unique:ngos,email',
             'phone' => 'required|string|max:20',
             'address' => 'required|string|max:500',
             'city' => 'required|string|max:100',
+            'state_name' => 'nullable|string|max:100',
+            'postal_code' => 'nullable|string|max:10',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'description' => 'required|string|max:2000',
             'focus_areas' => 'required|array|min:1',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'documents' => 'required|array|min:1',
-            'documents.registration_certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'documents.pan_card' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'documents' => 'nullable|array',
+            'documents.registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'documents.pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'accept_terms' => 'required|accepted'
         ]);
 
@@ -155,7 +219,10 @@ class MultiRoleRegistrationController extends Controller
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'address' => $request->address,
+                'state_id' => $this->getStateIdByName($request->state_name),
                 'city_id' => $this->getCityIdByName($request->city),
+                'latitude' => $request->latitude,
+                'longitude' => $request->longitude,
                 'description' => $request->description,
                 'focus_areas' => $request->focus_areas,
                 'verification_status' => 'pending',
@@ -168,7 +235,7 @@ class MultiRoleRegistrationController extends Controller
                 $ngo->update(['logo' => $logoPath]);
             }
 
-            // Handle document uploads
+            // Handle optional document uploads
             $documentTypes = [
                 'registration_certificate' => 'registration_certificate',
                 'pan_card' => 'pan_card'
@@ -192,12 +259,17 @@ class MultiRoleRegistrationController extends Controller
 
             // Generate NGO website
             $this->generateNGOWebsite($ngo);
+            $verification = $this->performNgoRegistrationVerification(
+                (string) $request->registration_number,
+                (string) ($request->legal_structure ?? 'other')
+            );
 
             return response()->json([
                 'success' => true,
                 'message' => 'NGO registration submitted successfully!',
                 'ngo_id' => $ngo->id,
-                'website_url' => $ngo->website_url
+                'website_url' => $ngo->website_url,
+                'verification' => $verification,
             ]);
 
         } catch (\Exception $e) {
@@ -209,6 +281,22 @@ class MultiRoleRegistrationController extends Controller
         }
     }
 
+    public function verifyNgoRegistration(Request $request)
+    {
+        $validated = $request->validate([
+            'registration_number' => 'required|string|max:50',
+            'legal_structure' => 'nullable|string|in:trust,society,section8,other',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'verification' => $this->performNgoRegistrationVerification(
+                $validated['registration_number'],
+                $validated['legal_structure'] ?? 'other'
+            ),
+        ]);
+    }
+
     /**
      * Get city ID by name (helper method)
      */
@@ -216,6 +304,80 @@ class MultiRoleRegistrationController extends Controller
     {
         $city = \App\Models\City::where('name', 'like', "%{$cityName}%")->first();
         return $city ? $city->id : null;
+    }
+
+    private function getStateIdByName($stateName)
+    {
+        if (!$stateName) {
+            return null;
+        }
+
+        $state = \App\Models\State::where('name', 'like', "%{$stateName}%")->first();
+        return $state ? $state->id : null;
+    }
+
+    private function performNgoRegistrationVerification(string $registrationNumber, string $legalStructure = 'other'): array
+    {
+        $registrationNumber = strtoupper(trim($registrationNumber));
+        $checks = [];
+        $score = 30;
+        $cinMatched = preg_match('/^[A-Z][0-9]{5}[A-Z]{2}[0-9]{4}(NPL|PLC|PTC|SGC|GAP|GAT|UAT|FTC|DDL|GOI|NPL)[0-9]{6}$/', $registrationNumber) === 1;
+        $isSection8 = $legalStructure === 'section8';
+
+        if (strlen($registrationNumber) >= 6) {
+            $checks[] = ['name' => 'Basic format length', 'status' => 'pass'];
+            $score += 10;
+        } else {
+            $checks[] = ['name' => 'Basic format length', 'status' => 'fail'];
+        }
+
+        if ($isSection8 && $cinMatched) {
+            $checks[] = ['name' => 'CIN format for Section 8', 'status' => 'pass'];
+            $score += 20;
+        } elseif ($isSection8) {
+            $checks[] = ['name' => 'CIN format for Section 8', 'status' => 'warn'];
+        }
+
+        $external = null;
+        if ($isSection8 && $cinMatched) {
+            try {
+                $response = Http::timeout(6)->get("https://api.opencorporates.com/v0.4/companies/in/{$registrationNumber}");
+                if ($response->ok()) {
+                    $company = data_get($response->json(), 'results.company');
+                    if ($company) {
+                        $external = [
+                            'provider' => 'OpenCorporates (free public API)',
+                            'match' => true,
+                            'company_name' => data_get($company, 'name'),
+                            'company_number' => data_get($company, 'company_number'),
+                            'incorporation_date' => data_get($company, 'incorporation_date'),
+                        ];
+                        $checks[] = ['name' => 'OpenCorporates record', 'status' => 'pass'];
+                        $score += 30;
+                    }
+                }
+            } catch (\Throwable $e) {
+                $checks[] = ['name' => 'OpenCorporates lookup', 'status' => 'warn'];
+            }
+        }
+
+        $score = min(100, $score);
+        $confidence = $score >= 80 ? 'high' : ($score >= 55 ? 'medium' : 'low');
+
+        return [
+            'registration_number' => $registrationNumber,
+            'legal_structure' => $legalStructure,
+            'score' => $score,
+            'confidence' => $confidence,
+            'checks' => $checks,
+            'external' => $external,
+            'official_links' => [
+                ['label' => 'NGO Darpan Portal', 'url' => 'https://ngodarpan.gov.in/'],
+                ['label' => 'MCA Company Search (Section 8)', 'url' => 'https://www.mca.gov.in/'],
+                ['label' => 'Income Tax Exemption Search (12A/80G)', 'url' => 'https://www.incometax.gov.in/'],
+            ],
+            'note' => 'Free public verification is limited in India; this is a pre-verification assist and does not replace admin approval.',
+        ];
     }
     public function registerNGO(Request $request)
     {
@@ -409,7 +571,7 @@ class MultiRoleRegistrationController extends Controller
             'gst_number' => 'nullable|string|max:15',
             'documents' => 'required|array|min:1',
             'documents.*' => 'file|mimes:pdf,jpg,jpeg,png|max:5120',
-            'otp_code' => 'required|string|size:6'
+            'otp_code' => $this->otpCodeValidationRule(),
         ]);
 
         if ($validator->fails()) {
@@ -519,7 +681,7 @@ class MultiRoleRegistrationController extends Controller
             'emergency_contact_phone' => 'required|string|max:20',
             'emergency_contact_relation' => 'required|string|max:100',
             'motivation' => 'required|string|max:1000',
-            'otp_code' => 'required|string|size:6'
+            'otp_code' => $this->otpCodeValidationRule(),
         ]);
 
         if ($validator->fails()) {
@@ -571,7 +733,7 @@ class MultiRoleRegistrationController extends Controller
         $volunteer->interests()->attach($request->volunteer_interests);
 
         // Assign Volunteer role
-        $user->assignRole('Volunteer');
+        $user->assignRole('volunteer');
 
         event(new Registered($user));
         
@@ -583,35 +745,113 @@ class MultiRoleRegistrationController extends Controller
     /**
      * Send OTP for phone verification
      */
-    public function sendOTP(Request $request)
+    public function sendOTP(Request $request, OtpService $otpService)
     {
         $request->validate([
-            'phone' => 'required|string|max:20'
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
         ]);
 
-        $phone = $request->phone;
-        $otp = rand(100000, 999999);
-        
-        // Store OTP in cache (simplified - in production use Redis/Database)
-        cache(['otp_' . $phone => $otp], now()->addMinutes(10));
+        try {
+            $plainOtp = $otpService->send($request->phone);
+            $pilot = $otpService->isPilotMode();
+            $emailSent = false;
 
-        // Send OTP via SMS (integrate with SMS gateway)
-        // $this->sendSMS($phone, "Your FEVOURD-K OTP is: $otp");
+            if ($request->filled('email') && $plainOtp) {
+                Mail::to($request->email)->send(new OtpCodeMail(
+                    otp: $plainOtp,
+                    minutes: 10,
+                    phone: $request->phone
+                ));
+                $emailSent = true;
+            }
 
-        return response()->json([
-            'success' => true,
-            'message' => 'OTP sent successfully',
-            'otp' => $otp // Remove in production
-        ]);
+            return response()->json([
+                'success' => true,
+                'message' => $emailSent
+                    ? 'OTP sent to your phone and email.'
+                    : ($pilot
+                        ? 'Pilot mode: use the test OTP below (SMS may not be required for demos).'
+                        : 'OTP sent successfully.'),
+                'pilot' => $pilot,
+                'email_sent' => $emailSent,
+                'otp_plain' => $plainOtp,
+                'debug_otp' => $plainOtp,
+            ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => collect($e->errors())->flatten()->first() ?? 'Validation failed',
+                'errors' => $e->errors(),
+            ], 422);
+        }
     }
 
     /**
-     * Verify OTP
+     * Dynamic OTP length: 4 digits in pilot (default 1234), 6 in production SMS mode.
+     */
+    private function otpCodeValidationRule(): string
+    {
+        $len = app(OtpService::class)->otpCodeLength();
+
+        return "required|string|size:{$len}|regex:/^[0-9]+$/";
+    }
+
+    /**
+     * Verify OTP (delegates to OtpService; used by NGO/corporate/volunteer flows).
      */
     private function verifyOTP($phone, $otp)
     {
-        $cachedOTP = cache('otp_' . $phone);
-        return $cachedOTP && $cachedOTP == $otp;
+        return app(OtpService::class)->verify($phone, $otp);
+    }
+
+    private function extractUserAgentMeta(string $ua): array
+    {
+        $browserName = 'Unknown';
+        $browserVersion = null;
+        $osName = 'Unknown';
+        $deviceType = 'desktop';
+
+        if (preg_match('/Edg\/([0-9\.]+)/', $ua, $m)) {
+            $browserName = 'Edge';
+            $browserVersion = $m[1];
+        } elseif (preg_match('/Chrome\/([0-9\.]+)/', $ua, $m)) {
+            $browserName = 'Chrome';
+            $browserVersion = $m[1];
+        } elseif (preg_match('/Firefox\/([0-9\.]+)/', $ua, $m)) {
+            $browserName = 'Firefox';
+            $browserVersion = $m[1];
+        } elseif (preg_match('/Version\/([0-9\.]+).*Safari/', $ua, $m)) {
+            $browserName = 'Safari';
+            $browserVersion = $m[1];
+        }
+
+        if (str_contains($ua, 'Android')) {
+            $osName = 'Android';
+            $deviceType = 'mobile';
+        } elseif (str_contains($ua, 'iPhone') || str_contains($ua, 'iPad')) {
+            $osName = 'iOS';
+            $deviceType = str_contains($ua, 'iPad') ? 'tablet' : 'mobile';
+        } elseif (str_contains($ua, 'Windows')) {
+            $osName = 'Windows';
+        } elseif (str_contains($ua, 'Mac OS X')) {
+            $osName = 'macOS';
+        } elseif (str_contains($ua, 'Linux')) {
+            $osName = 'Linux';
+        }
+
+        if (str_contains($ua, 'Mobile')) {
+            $deviceType = 'mobile';
+        } elseif (str_contains($ua, 'Tablet') || str_contains($ua, 'iPad')) {
+            $deviceType = 'tablet';
+        }
+
+        return [
+            'browser_name' => $browserName,
+            'browser_version' => $browserVersion,
+            'os_name' => $osName,
+            'device_type' => $deviceType,
+        ];
     }
 
     /**

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Donation;
 use App\Models\Campaign;
+use App\Models\UserNotification;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -56,6 +57,18 @@ class DonationController extends Controller
         // Update campaign raised amount
         $campaign = Campaign::find($validated['campaign_id']);
         $campaign->increment('raised_amount', $validated['amount']);
+
+        UserNotification::query()->create([
+            'user_id' => auth()->id(),
+            'type' => 'donation',
+            'title' => 'Donation successful',
+            'body' => "Your donation of ₹{$validated['amount']} was recorded successfully.",
+            'target_url' => $campaign?->slug ? "/campaigns/{$campaign->slug}" : '/donate',
+            'meta' => [
+                'campaign_id' => $campaign?->id,
+                'amount' => $validated['amount'],
+            ],
+        ]);
 
         return redirect()->route('donations.success')
             ->with('success', 'Donation processed successfully!');

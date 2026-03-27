@@ -2,7 +2,7 @@
     <AppLayout>
         <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <!-- Hero Section -->
-            <section class="relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white overflow-hidden">
+            <section v-if="!isStandaloneMode" class="relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white overflow-hidden">
                 <!-- Background Pattern -->
                 <div class="absolute inset-0 opacity-10">
                     <div class="absolute inset-0 bg-pattern-dots"></div>
@@ -54,8 +54,12 @@
             </section>
 
             <!-- Filters Section -->
-            <section class="py-12 bg-white/80 backdrop-blur-sm sticky top-0 z-40 border-b border-gray-200">
+            <section class="py-6 bg-white/90 backdrop-blur-sm sticky top-0 z-40 border-b border-gray-200">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div v-if="isStandaloneMode" class="mb-4">
+                        <h1 class="text-2xl font-bold text-gray-900">Campaigns</h1>
+                        <p class="text-sm text-gray-500">Filter and support active causes quickly.</p>
+                    </div>
                     <div class="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
                         <!-- Search -->
                         <div class="relative w-full lg:w-96">
@@ -239,7 +243,7 @@
             </section>
 
             <!-- Donor Wall Section -->
-            <section class="py-20 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50">
+            <section v-if="!isStandaloneMode" class="py-20 bg-gradient-to-br from-blue-50 via-purple-50 to-indigo-50">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <div class="text-center mb-16">
                         <div class="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl shadow-2xl mb-6">
@@ -399,6 +403,13 @@ import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link, router } from '@inertiajs/vue3'
 import { ref, computed, onMounted } from 'vue'
 
+const props = defineProps({
+    campaigns: {
+        type: Array,
+        default: () => [],
+    },
+})
+
 // Sample campaigns data
 const campaigns = ref([
     {
@@ -497,6 +508,7 @@ const campaigns = ref([
 const searchQuery = ref('')
 const selectedCategory = ref('')
 const sortBy = ref('newest')
+const isStandaloneMode = ref(false)
 
 // Computed properties
 const filteredCampaigns = computed(() => {
@@ -632,6 +644,14 @@ const showShareSuccess = () => {
         message.remove()
     }, 3000)
 }
+
+onMounted(() => {
+    if (props.campaigns.length > 0) {
+        campaigns.value = props.campaigns
+    }
+    isStandaloneMode.value =
+        window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
+})
 </script>
 
 <style scoped>

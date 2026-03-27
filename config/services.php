@@ -35,4 +35,18 @@ return [
         ],
     ],
 
+    /*
+    | SMS for phone OTP (India). "log" writes to Laravel log (free, for dev).
+    | "msg91" uses MSG91 transactional route (trial credits; then paid).
+    | Alternatives: 2Factor.in, AWS SNS, Twilio, Fast2SMS (compare pricing & DLT).
+    */
+    'sms' => [
+        'driver' => env('SMS_DRIVER', 'log'),
+        'msg91' => [
+            'auth_key' => env('MSG91_AUTH_KEY'),
+            'sender_id' => env('MSG91_SENDER_ID'),
+            'route' => env('MSG91_ROUTE', '4'),
+        ],
+    ],
+
 ];

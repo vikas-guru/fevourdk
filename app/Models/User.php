@@ -24,13 +24,43 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'name',
+        'first_name',
+        'last_name',
         'email',
         'password',
         'phone',
         'avatar',
+        'social_cause_points',
         'city_id',
+        'state_id',
+        'district_id',
+        'state_name',
+        'district_name',
+        'city_name',
+        'mandal_name',
+        'postal_code',
+        'address',
+        'latitude',
+        'longitude',
+        'location_permission',
+        'notification_permission',
+        'notification_token',
+        'user_agent',
+        'browser_name',
+        'browser_version',
+        'os_name',
+        'device_type',
+        'ip_address',
+        'registration_meta',
+        'date_of_birth',
+        'gender',
+        'user_type',
+        'ngo_id',
+        'corporate_id',
         'is_active',
         'last_login_at',
+        'email_verified_at',
+        'phone_verified_at',
     ];
 
     /**
@@ -52,9 +82,15 @@ class User extends Authenticatable
     {
         return [
             'email_verified_at' => 'datetime',
+            'phone_verified_at' => 'datetime',
             'password' => 'hashed',
             'is_active' => 'boolean',
             'last_login_at' => 'datetime',
+            'date_of_birth' => 'date',
+            'latitude' => 'decimal:7',
+            'longitude' => 'decimal:7',
+            'registration_meta' => 'array',
+            'social_cause_points' => 'integer',
         ];
     }
 
@@ -85,7 +121,27 @@ class User extends Authenticatable
 
     public function notifications(): HasMany
     {
-        return $this->hasMany(Notification::class);
+        return $this->hasMany(UserNotification::class);
+    }
+
+    public function feedPosts(): HasMany
+    {
+        return $this->hasMany(FeedPost::class);
+    }
+
+    public function feedReactions(): HasMany
+    {
+        return $this->hasMany(FeedReaction::class);
+    }
+
+    public function feedComments(): HasMany
+    {
+        return $this->hasMany(FeedComment::class);
+    }
+
+    public function feedShares(): HasMany
+    {
+        return $this->hasMany(FeedShare::class);
     }
 
     public function auditLogs(): MorphMany

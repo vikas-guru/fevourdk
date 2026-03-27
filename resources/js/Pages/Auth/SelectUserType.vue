@@ -68,7 +68,7 @@
                     </Link>
 
                     <!-- NGO -->
-                    <div class="group relative bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer">
+                    <Link href="/register/ngo-chat" class="group relative bg-white/10 backdrop-blur-md rounded-3xl p-8 border border-white/20 hover:bg-white/15 transition-all duration-500 hover:scale-105 hover:shadow-2xl cursor-pointer">
                         <div class="absolute inset-0 bg-gradient-to-br from-blue-400/20 to-purple-600/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
                         <div class="relative z-10 text-center">
                             <div class="w-24 h-24 bg-gradient-to-br from-blue-400 to-purple-600 rounded-3xl flex items-center justify-center mx-auto mb-6 group-hover:scale-110 transition-transform duration-500 shadow-xl">
@@ -90,24 +90,11 @@
                                     ✓ CSR Partnerships
                                 </span>
                             </div>
-                            
-                            <!-- Registration Options -->
-                            <div class="space-y-3">
-                                <Link 
-                                    href="/register/ngo-chat"
-                                    class="block w-full bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-3 rounded-xl font-medium hover:from-blue-600 hover:to-purple-600 transition-all transform hover:scale-105 shadow-lg"
-                                >
-                                    🤖 Quick Chat Registration (5 mins)
-                                </Link>
-                                <Link 
-                                    href="/register/ngo"
-                                    class="block w-full bg-white/10 backdrop-blur-sm text-white px-4 py-3 rounded-xl font-medium hover:bg-white/20 transition-all border border-white/20"
-                                >
-                                    📋 Traditional Form (10 mins)
-                                </Link>
+                            <div class="inline-flex items-center rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 text-white px-4 py-2 text-sm font-semibold shadow-lg">
+                                🤖 Start Smart Chat Registration
                             </div>
                         </div>
-                    </div>
+                    </Link>
 
                     <!-- Corporate -->
                     <Link 

@@ -15,6 +15,8 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\ProgramController;
 use App\Http\Controllers\CSRController;
+use App\Http\Controllers\FeedController;
+use App\Http\Controllers\NotificationController;
 
 // Static Pages
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
@@ -52,12 +54,17 @@ Route::middleware('guest')->group(function () {
     Route::post('/register/individual', [MultiRoleRegistrationController::class, 'registerIndividual'])->name('register.individual');
     Route::post('/register/ngo', [MultiRoleRegistrationController::class, 'registerNGO'])->name('register.ngo');
     Route::post('/register/ngo-chat', [MultiRoleRegistrationController::class, 'registerNGOChat'])->name('register.ngo-chat');
+    Route::post('/register/ngo-chat/verify-registration', [MultiRoleRegistrationController::class, 'verifyNgoRegistration'])
+        ->middleware('throttle:20,1')
+        ->name('register.ngo-chat.verify-registration');
     Route::post('/register/corporate', [MultiRoleRegistrationController::class, 'registerCorporate'])->name('register.corporate');
     Route::get('/csr', [CSRController::class, 'index'])->name('csr.index');
     Route::get('/csr/register', [CSRController::class, 'create'])->name('csr.create');
     Route::post('/csr/register', [CSRController::class, 'store'])->name('csr.store');
     Route::post('/register/volunteer', [MultiRoleRegistrationController::class, 'registerVolunteer'])->name('register.volunteer');
-    Route::post('/auth/send-otp', [MultiRoleRegistrationController::class, 'sendOTP'])->name('auth.send-otp');
+    Route::post('/auth/send-otp', [MultiRoleRegistrationController::class, 'sendOTP'])
+        ->middleware('throttle:10,1')
+        ->name('auth.send-otp');
     
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
@@ -71,6 +78,12 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
+    Route::get('/feeds', [FeedController::class, 'index'])->name('feeds.index');
+    Route::post('/feeds/{post}/react', [FeedController::class, 'react'])->name('feeds.react');
+    Route::post('/feeds/{post}/comment', [FeedController::class, 'comment'])->name('feeds.comment');
+    Route::post('/feeds/{post}/share', [FeedController::class, 'share'])->name('feeds.share');
+    Route::post('/notifications/{notification}/read', [NotificationController::class, 'markRead'])->name('notifications.read');
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllRead'])->name('notifications.read-all');
     
     Route::get('/dashboard', function () {
         // Redirect admins to admin dashboard

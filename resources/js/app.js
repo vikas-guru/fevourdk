@@ -1,7 +1,7 @@
 import './bootstrap';
 import '../css/app.css';
 
-import { createApp, h } from 'vue';
+import { createApp, h, nextTick } from 'vue';
 import { createInertiaApp, Link } from '@inertiajs/vue3';
 import { Ziggy } from './ziggy';
 
@@ -21,8 +21,19 @@ createInertiaApp({
             .provide('ziggy', Ziggy)
             .component('inertia-link', Link)
             .mount(el);
+        nextTick(() => {
+            document.getElementById('initial-page-loader')?.remove();
+        });
     },
     progress: {
         color: '#3b82f6',
     },
 });
+
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js').catch((error) => {
+            console.warn('Service worker registration failed:', error);
+        });
+    });
+}

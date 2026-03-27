@@ -17,29 +17,35 @@ class AuthenticatedSessionController extends Controller
 
     public function store(Request $request)
     {
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required'],
+        $validated = $request->validate([
+            'login' => ['required', 'string'],
+            'password' => ['required', 'string'],
         ]);
 
-        // Check if user exists
-        $user = \App\Models\User::where('email', $request->email)->first();
+        $login = trim($validated['login']);
+        $isEmail = filter_var($login, FILTER_VALIDATE_EMAIL);
+
+        // Check if user exists by email or phone
+        $user = \App\Models\User::query()
+            ->when($isEmail, fn ($query) => $query->where('email', $login))
+            ->when(!$isEmail, fn ($query) => $query->where('phone', $login))
+            ->first();
         
         if (!$user) {
             return back()->withErrors([
-                'email' => 'No account found with this email address.',
-            ])->withInput($request->only('email'));
+                'login' => 'No account found with this email or phone number.',
+            ])->withInput($request->only('login'));
         }
 
         // Check if password is correct
-        if (!\Illuminate\Support\Facades\Hash::check($request->password, $user->password)) {
+        if (!\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
             return back()->withErrors([
                 'password' => 'The password you entered is incorrect.',
-            ])->withInput($request->only('email'));
+            ])->withInput($request->only('login'));
         }
 
         // Attempt authentication
-        if (Auth::attempt($credentials)) {
+        if (Auth::attempt(['email' => $user->email, 'password' => $validated['password']])) {
             $request->session()->regenerate();
 
             $user = Auth::user();
@@ -59,8 +65,8 @@ class AuthenticatedSessionController extends Controller
 
         // Fallback error (shouldn't reach here with above checks)
         return back()->withErrors([
-            'email' => 'Invalid credentials. Please try again.',
-        ])->withInput($request->only('email'));
+            'login' => 'Invalid credentials. Please try again.',
+        ])->withInput($request->only('login'));
     }
 
     public function destroy(Request $request)
@@ -71,6 +77,6 @@ class AuthenticatedSessionController extends Controller
 
         $request->session()->regenerateToken();
 
-        return redirect('/');
+        return redirect()->route('login');
     }
 }
