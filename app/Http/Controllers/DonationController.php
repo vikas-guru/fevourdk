@@ -7,6 +7,7 @@ use App\Models\Donation;
 use App\Models\NGOLedgerEntry;
 use App\Models\Setting;
 use App\Models\UserNotification;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
@@ -25,6 +26,11 @@ class DonationController extends Controller
         return Inertia::render('Donate', [
             'featuredCampaigns' => $featuredCampaigns,
             'paymentMethods' => self::publicPaymentMethodFlags(),
+            'seo' => Seo::page(
+                'Donate to verified NGOs',
+                'Support verified Karnataka campaigns and NGOs through FEVOURD-K — transparent giving with multiple payment options.',
+                '/donate',
+            ),
         ]);
     }
 

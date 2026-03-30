@@ -1,5 +1,6 @@
 <template>
     <div class="min-h-screen bg-gray-50">
+        <SeoHead />
         <!-- Loader: Teleport to body so it is never covered by nav (also z-50) or page stacking contexts -->
         <Teleport to="body">
             <div
@@ -912,6 +913,7 @@
 </template>
 
 <script setup>
+import SeoHead from '@/Components/SeoHead.vue'
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import lottie from 'lottie-web'

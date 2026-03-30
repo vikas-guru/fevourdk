@@ -99,7 +99,25 @@ class HandleInertiaRequests extends Middleware
             ];
         }
 
+        $baseUrl = rtrim((string) config('app.url'), '/');
+        $logoPath = ltrim((string) config('fevourd.brand.logo_public_path'), '/');
+        $logoFromConfig = config('fevourd.brand.logo_url');
+        $defaultOgImage = $logoFromConfig ? (string) $logoFromConfig : $baseUrl.'/'.$logoPath;
+
         return array_merge(parent::share($request), [
+            'seoDefaults' => [
+                'site_url' => $baseUrl,
+                'title_suffix' => (string) config('fevourd.seo.title_suffix'),
+                'default_title' => (string) config('fevourd.seo.default_title'),
+                'default_description' => (string) config('fevourd.seo.default_description'),
+                'keywords' => (string) config('fevourd.seo.keywords'),
+                'og_image' => $defaultOgImage,
+                'og_site_name' => (string) config('fevourd.seo.site_name'),
+                'og_type' => 'website',
+                'twitter_card' => 'summary_large_image',
+                'locale' => (string) config('fevourd.seo.locale'),
+                'twitter_site' => (string) config('fevourd.seo.twitter_site'),
+            ],
             'flash' => [
                 'success' => $request->session()->get('success'),
                 'error' => $request->session()->get('error'),

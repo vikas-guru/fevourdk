@@ -3,7 +3,29 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title inertia>Fevaourd-K - NGO CSR Citizen Engagement Platform</title>
+    <title inertia>{{ config('fevourd.seo.default_title') }}</title>
+    <meta name="description" content="{{ config('fevourd.seo.default_description') }}">
+    <meta name="keywords" content="{{ config('fevourd.seo.keywords') }}">
+    <link rel="canonical" href="{{ url()->current() }}">
+    <meta property="og:site_name" content="{{ config('fevourd.seo.site_name') }}">
+    <meta property="og:title" content="{{ config('fevourd.seo.default_title') }}">
+    <meta property="og:description" content="{{ config('fevourd.seo.default_description') }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ url()->current() }}">
+    <meta property="og:image" content="{{ config('fevourd.brand.logo_url') ?: rtrim(config('app.url'), '/').'/'.ltrim(config('fevourd.brand.logo_public_path'), '/') }}">
+    <meta name="twitter:card" content="summary_large_image">
+    @php
+        $fevourdOrgLd = [
+            '@context' => 'https://schema.org',
+            '@type' => 'Organization',
+            'name' => config('fevourd.seo.organization_name'),
+            'alternateName' => config('fevourd.seo.site_name'),
+            'url' => rtrim(config('app.url'), '/'),
+            'logo' => config('fevourd.brand.logo_url') ?: rtrim(config('app.url'), '/').'/'.ltrim(config('fevourd.brand.logo_public_path'), '/'),
+            'description' => config('fevourd.seo.default_description'),
+        ];
+    @endphp
+    <script type="application/ld+json">{!! json_encode($fevourdOrgLd, JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) !!}</script>
     
     <!-- Favicon -->
     <!-- <link rel="icon" type="image/svg+xml" href="/favicon.svg"> -->

@@ -60,4 +60,20 @@ EOT
         'logo_public_path' => 'assets/images/fevourd-k/logo.png',
         'logo_url' => env('FEVOURD_LOGO_URL'),
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | SEO defaults (Inertia SeoHead + Blade fallbacks)
+    |--------------------------------------------------------------------------
+    */
+    'seo' => [
+        'site_name' => env('FEVOURD_SEO_SITE_NAME', 'FEVOURD-K'),
+        'organization_name' => env('FEVOURD_ORG_NAME', 'FEVOURD-K — Federation of Voluntary Organisations Karnataka'),
+        'title_suffix' => ' | FEVOURD-K',
+        'default_title' => 'FEVOURD-K — Karnataka voluntary organisations hub',
+        'default_description' => 'FEVOURD-K connects voluntary organisations across Karnataka with donors, verified campaigns, NGO digital tools, and transparent giving — mobile-friendly and installable as an app.',
+        'keywords' => 'FEVOURD-K, Karnataka NGOs, voluntary organisations, donate Karnataka, NGO registration, CSR, social impact, transparent donations',
+        'twitter_site' => env('FEVOURD_TWITTER_SITE', ''),
+        'locale' => 'en_IN',
+    ],
 ];

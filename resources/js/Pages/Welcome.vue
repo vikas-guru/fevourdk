@@ -1,20 +1,5 @@
 <template>
     <AppLayout>
-        <Head title="FEVOURD-K — Karnataka voluntary organisations hub">
-            <meta
-                head-key="description"
-                name="description"
-                content="FEVOURD-K connects 800+ voluntary organisations across Karnataka with donors, verified campaigns, NGO digital tools, and transparent giving."
-            />
-            <meta property="og:title" content="FEVOURD-K — Karnataka voluntary organisations" />
-            <meta
-                property="og:description"
-                content="Donate, register your NGO, and follow impact across Karnataka — mobile-friendly and installable as an app."
-            />
-            <meta property="og:type" content="website" />
-            <meta v-if="siteUrl" property="og:image" :content="`${siteUrl}/assets/images/fevourd-k/logo.png`" />
-            <meta name="twitter:card" content="summary" />
-        </Head>
         <div class="min-h-screen">
             <!-- Hero Section -->
             <section id="hero" class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden transition-all duration-1000" :class="{ 'translate-y-0 opacity-100': visibleSections.hero, 'translate-y-10 opacity-0': !visibleSections.hero }">
@@ -757,7 +742,7 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Head, Link } from '@inertiajs/vue3'
+import { Link } from '@inertiajs/vue3'
 import { ref, onMounted, onUnmounted } from 'vue'
 
 /** Public path — use binding so Vite does not treat `/assets/...` as a module import */
@@ -922,10 +907,6 @@ defineProps({
         type: Array,
         default: () => []
     },
-    siteUrl: {
-        type: String,
-        default: ''
-    }
 })
 </script>
 

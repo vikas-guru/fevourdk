@@ -11,6 +11,7 @@ use App\Models\NGOSocialChannel;
 use App\Models\UserNotification;
 use App\Services\FeedPostSeoService;
 use App\Services\NgoSocialPostDispatcher;
+use App\Support\Seo;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -82,6 +83,11 @@ class FeedController extends Controller
             'posts' => $posts,
             'ngos' => $ngos,
             'feedMeta' => $feedMeta,
+            'seo' => Seo::page(
+                'Live NGO feeds',
+                'Reactions, comments, and shares from Karnataka NGOs on FEVOURD-K — verified organisations and geographic context.',
+                '/feeds',
+            ),
         ]);
     }
 
@@ -99,11 +105,25 @@ class FeedController extends Controller
 
         $user = $request->user();
         $publicUrl = url('/feeds/'.$post->id);
-        $seo = $post->meta['seo'] ?? FeedPostSeoService::forPost($post, $publicUrl);
+        $base = FeedPostSeoService::forPost($post, $publicUrl);
+        if (is_array($post->meta['seo'] ?? null)) {
+            $base = array_merge($base, $post->meta['seo']);
+        }
 
         return Inertia::render('Feeds/Show', [
             'post' => $this->serializeFeedPost($post, $user, 80),
-            'seo' => $seo,
+            'seo' => [
+                'title' => $post->title,
+                'description' => $base['meta_description'],
+                'keywords' => $base['keywords'],
+                'canonicalPath' => '/feeds/'.$post->id,
+                'og_type' => 'article',
+                'og_title' => $base['og_title'],
+                'og_description' => $base['og_description'],
+                'og_image' => $base['og_image'],
+                'twitter_card' => $base['twitter_card'],
+                'no_title_suffix' => true,
+            ],
         ]);
     }
 

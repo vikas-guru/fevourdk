@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\UserLoginGeoEvent;
 use App\Services\IpGeoLookupService;
 use App\Support\NgoLoginGeoEvaluator;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
@@ -15,7 +16,13 @@ class AuthenticatedSessionController extends Controller
 {
     public function create(): Response
     {
-        return Inertia::render('Auth/Login');
+        return Inertia::render('Auth/Login', [
+            'seo' => Seo::page(
+                'Sign in',
+                'Log in to your FEVOURD-K account — donors, NGOs, CSR partners, and field teams.',
+                '/login',
+            ),
+        ]);
     }
 
     public function store(Request $request)
@@ -31,17 +38,17 @@ class AuthenticatedSessionController extends Controller
         // Check if user exists by email or phone
         $user = \App\Models\User::query()
             ->when($isEmail, fn ($query) => $query->where('email', $login))
-            ->when(!$isEmail, fn ($query) => $query->where('phone', $login))
+            ->when(! $isEmail, fn ($query) => $query->where('phone', $login))
             ->first();
-        
-        if (!$user) {
+
+        if (! $user) {
             return back()->withErrors([
                 'login' => 'No account found with this email or phone number.',
             ])->withInput($request->only('login'));
         }
 
         // Check if password is correct
-        if (!\Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
+        if (! \Illuminate\Support\Facades\Hash::check($validated['password'], $user->password)) {
             return back()->withErrors([
                 'password' => 'The password you entered is incorrect.',
             ])->withInput($request->only('login'));
@@ -89,13 +96,14 @@ class AuthenticatedSessionController extends Controller
             $request->session()->regenerate();
 
             $user = Auth::user();
-            
+
             // Debug: Log user roles
-            \Log::info('User roles for ' . $user->email . ': ' . $user->roles->pluck('name')->join(', '));
-            
+            \Log::info('User roles for '.$user->email.': '.$user->roles->pluck('name')->join(', '));
+
             // Redirect based on user role
             if ($user->hasRole('super_admin') || $user->hasRole('state_admin')) {
                 \Log::info('Redirecting to admin dashboard');
+
                 return redirect()->intended('/admin/dashboard');
             }
 
@@ -106,8 +114,9 @@ class AuthenticatedSessionController extends Controller
             ) {
                 return redirect()->intended('/ngo/finance');
             }
-            
+
             \Log::info('Redirecting to user dashboard');
+
             return redirect()->intended('/dashboard');
         }
 

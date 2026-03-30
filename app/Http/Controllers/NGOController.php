@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\NGO;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -42,7 +43,14 @@ class NGOController extends Controller
             ->latest()
             ->paginate(12);
 
-        return Inertia::render('NGOs/Index', ['ngos' => $ngos]);
+        return Inertia::render('NGOs/Index', [
+            'ngos' => $ngos,
+            'seo' => Seo::page(
+                'Verified NGOs',
+                'Browse verified voluntary organisations across Karnataka — mission, focus areas, and contact on FEVOURD-K.',
+                '/ngos',
+            ),
+        ]);
     }
 
     public function create()
@@ -81,6 +89,7 @@ class NGOController extends Controller
     public function destroy(NGO $ngo)
     {
         $ngo->delete();
+
         return redirect()->route('admin.ngos.index')
             ->with('success', 'NGO deleted successfully.');
     }
@@ -104,6 +113,7 @@ class NGOController extends Controller
             'is_active' => true,
             'verified_at' => now(),
         ]);
+
         return redirect()->route('admin.ngos.index')
             ->with('success', 'NGO verified successfully.');
     }

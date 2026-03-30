@@ -47,6 +47,58 @@ Route::get('/ads.txt', function () {
     return response($line."\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
 })->name('ads.txt');
 
+Route::get('/robots.txt', function () {
+    $base = rtrim((string) config('app.url'), '/');
+
+    return response(
+        "User-agent: *\nAllow: /\n\nSitemap: {$base}/sitemap.xml\n",
+        200,
+        ['Content-Type' => 'text/plain; charset=UTF-8']
+    );
+})->name('robots.txt');
+
+Route::get('/sitemap.xml', function () {
+    $base = rtrim((string) config('app.url'), '/');
+    $paths = [
+        '/',
+        '/about',
+        '/programs',
+        '/team',
+        '/events',
+        '/gallery',
+        '/partners',
+        '/contact',
+        '/digitalization',
+        '/legal-status',
+        '/terms',
+        '/privacy',
+        '/accessibility',
+        '/donate',
+        '/campaigns',
+        '/ngos',
+        '/donors',
+        '/feeds',
+        '/login',
+        '/register',
+        '/focus/children',
+        '/focus/environment',
+        '/focus/community',
+        '/focus/disability',
+    ];
+
+    $lines = [
+        '<?xml version="1.0" encoding="UTF-8"?>',
+        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    ];
+    foreach ($paths as $path) {
+        $loc = htmlspecialchars($base.$path, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $lines[] = '<url><loc>'.$loc.'</loc><changefreq>weekly</changefreq><priority>0.8</priority></url>';
+    }
+    $lines[] = '</urlset>';
+
+    return response(implode("\n", $lines), 200, ['Content-Type' => 'application/xml; charset=UTF-8']);
+})->name('sitemap.xml');
+
 // Static Pages
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/about', [WelcomeController::class, 'about'])->name('about');

@@ -1,14 +1,4 @@
 <template>
-    <Head :title="headTitle">
-        <meta head-key="description" name="description" :content="seo.meta_description">
-        <meta head-key="keywords" name="keywords" :content="seo.keywords">
-        <meta head-key="og:title" property="og:title" :content="seo.og_title">
-        <meta head-key="og:description" property="og:description" :content="seo.og_description">
-        <meta v-if="seo.og_image" head-key="og:image" property="og:image" :content="seo.og_image">
-        <meta head-key="og:url" property="og:url" :content="seo.og_url">
-        <meta head-key="twitter:card" name="twitter:card" :content="seo.twitter_card">
-    </Head>
-
     <AppLayout>
         <div class="min-h-screen bg-slate-50 py-4 sm:py-8">
             <div class="mx-auto max-w-3xl space-y-4 px-3 sm:px-6">
@@ -107,18 +97,15 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Head, Link, router, usePage } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { computed, onMounted, ref } from 'vue'
 
 const props = defineProps({
     post: { type: Object, required: true },
-    seo: { type: Object, required: true },
 })
 
 const page = usePage()
 const commentDraft = ref('')
-
-const headTitle = computed(() => `${props.post.title} | FEVOURD-K`)
 const canEngage = computed(() => !!page.props.auth?.user)
 
 function formatTime(iso) {

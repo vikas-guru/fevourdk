@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Campaign;
+use App\Support\Seo;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -36,6 +37,11 @@ class CampaignController extends Controller
 
         return Inertia::render('Campaigns/Index', [
             'campaigns' => $campaigns,
+            'seo' => Seo::page(
+                'Verified campaigns',
+                'Browse active, verified fundraising campaigns from Karnataka NGOs on FEVOURD-K.',
+                '/campaigns',
+            ),
         ]);
     }
 
@@ -75,6 +81,7 @@ class CampaignController extends Controller
     public function destroy(Campaign $campaign)
     {
         $campaign->delete();
+
         return redirect()->route('admin.campaigns.index')
             ->with('success', 'Campaign deleted successfully.');
     }

@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'fevourdk-v3';
+const CACHE_VERSION = 'fevourdk-v4';
 const OFFLINE_URL = '/offline.html';
 
 const APP_SHELL_ASSETS = [
@@ -61,9 +61,13 @@ self.addEventListener('fetch', (event) => {
                 }
 
                 if (event.request.mode === 'navigate') {
-                    const offlinePage = await caches.match(OFFLINE_URL);
-                    if (offlinePage) {
-                        return offlinePage;
+                    // Only show the branded offline page when the device is actually offline.
+                    // Otherwise a failed fetch (server down, TLS, DNS, timeout) was wrongly shown as "You are offline".
+                    if (self.navigator?.onLine === false) {
+                        const offlinePage = await caches.match(OFFLINE_URL);
+                        if (offlinePage) {
+                            return offlinePage;
+                        }
                     }
                 }
 

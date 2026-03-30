@@ -1,5 +1,6 @@
 <template>
     <Teleport to="body">
+        <SeoHead />
         <div
             id="fevourd-login-root"
             class="login-page"
@@ -164,6 +165,7 @@
 </template>
 
 <script setup>
+import SeoHead from '@/Components/SeoHead.vue'
 import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
