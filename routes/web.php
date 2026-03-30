@@ -2,10 +2,10 @@
 
 use App\Http\Controllers\Admin\AnalyticsController;
 use App\Http\Controllers\Admin\DashboardController;
+use App\Http\Controllers\Admin\NgoFieldTaskController;
 use App\Http\Controllers\Admin\PaymentSettingsController;
 use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\SettingsController;
-use App\Http\Controllers\Admin\NgoFieldTaskController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
 use App\Http\Controllers\Auth\MultiRoleRegistrationController;
@@ -15,12 +15,13 @@ use App\Http\Controllers\DonationController;
 use App\Http\Controllers\FeedController;
 use App\Http\Controllers\NGO\FieldOperationsController;
 use App\Http\Controllers\NGO\FinanceClaimsController;
-use App\Http\Controllers\NGO\NgoFinanceController;
 use App\Http\Controllers\NGO\HrOpsController;
 use App\Http\Controllers\NGO\NGOFeedStudioController;
-use App\Http\Controllers\NGO\WorkplaceSecurityController;
+use App\Http\Controllers\NGO\NgoFinanceController;
+use App\Http\Controllers\NGO\NgoInventoryController;
 use App\Http\Controllers\NGO\NGOSocialConnectController;
 use App\Http\Controllers\NGO\NGOWebsiteController;
+use App\Http\Controllers\NGO\WorkplaceSecurityController;
 use App\Http\Controllers\NGOController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\ProgramController;
@@ -158,6 +159,10 @@ Route::middleware('auth')->group(function () {
         Route::get('/campaigns', [\App\Http\Controllers\NGO\NGODashboardController::class, 'campaigns'])->name('campaigns');
         Route::get('/donations', [\App\Http\Controllers\NGO\NGODashboardController::class, 'donations'])->name('donations');
         Route::get('/documents', [\App\Http\Controllers\NGO\NGODashboardController::class, 'documents'])->name('documents');
+        Route::get('/office/inventory', [NgoInventoryController::class, 'index'])->name('office.inventory');
+        Route::post('/office/inventory', [NgoInventoryController::class, 'store'])->name('office.inventory.store');
+        Route::put('/office/inventory/{item}', [NgoInventoryController::class, 'update'])->name('office.inventory.update');
+        Route::delete('/office/inventory/{item}', [NgoInventoryController::class, 'destroy'])->name('office.inventory.destroy');
         Route::get('/banking', [NgoFinanceController::class, 'banking'])->name('banking');
         Route::get('/finance', [NgoFinanceController::class, 'hub'])->name('finance.hub');
         Route::get('/finance/activity', [NgoFinanceController::class, 'activity'])->name('finance.activity');

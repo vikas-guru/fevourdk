@@ -4,18 +4,19 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Notifications\Notifiable;
-use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Schema;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, HasRoles, Notifiable;
 
     /**
      * The attributes that are mass assignable.
@@ -111,7 +112,13 @@ class User extends Authenticatable
 
     public function ngoUser(): HasOne
     {
-        return $this->hasOne(NGOUser::class)->whereColumn('ngo_users.ngo_id', 'users.ngo_id');
+        $relation = $this->hasOne(NGOUser::class, 'user_id');
+
+        if (Schema::hasColumn($this->getTable(), 'ngo_id')) {
+            $relation->whereColumn('ngo_users.ngo_id', $this->getTable().'.ngo_id');
+        }
+
+        return $relation;
     }
 
     public function corporateUser(): HasOne

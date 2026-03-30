@@ -58,7 +58,7 @@
                 <p class="mt-1 text-sm text-slate-600">Your impact at a glance</p>
 
                 <!-- Stats -->
-                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
+                <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                     <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active campaigns</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">{{ stats.campaigns }}</p>
@@ -67,6 +67,7 @@
                     <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total raised</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">₹{{ Number(stats.totalRaised || 0).toLocaleString('en-IN') }}</p>
+                        <p class="mt-1 text-xs text-slate-500">This month: ₹{{ Number(stats.thisMonth || 0).toLocaleString('en-IN') }}</p>
                         <Link href="/ngo/donations" class="mt-3 inline-block text-xs font-semibold text-emerald-600 hover:text-emerald-700">Donations →</Link>
                     </div>
                     <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
@@ -89,6 +90,15 @@
                             <Link href="/ngo/field" class="text-blue-600 hover:text-blue-700">Command map →</Link>
                             <Link href="/ngo/field/app" class="text-emerald-600 hover:text-emerald-700">Field app →</Link>
                         </div>
+                    </div>
+                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm xl:col-span-1">
+                        <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Office & assets</p>
+                        <p class="mt-2 text-3xl font-bold text-slate-900">{{ inventoryTotal }}</p>
+                        <p class="mt-1 text-xs text-slate-500">
+                            {{ inventorySummary.fixed_assets }} assets · {{ inventorySummary.consumables }} consumables
+                            <span v-if="inventorySummary.low_stock > 0" class="font-semibold text-amber-700"> · {{ inventorySummary.low_stock }} low stock</span>
+                        </p>
+                        <Link href="/ngo/office/inventory" class="mt-3 inline-block text-xs font-semibold text-slate-700 hover:text-slate-900">Manage inventory →</Link>
                     </div>
                 </div>
 
@@ -178,6 +188,12 @@
                             Documents
                         </Link>
                         <Link
+                            href="/ngo/office/inventory"
+                            class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
+                        >
+                            Office & assets
+                        </Link>
+                        <Link
                             href="/feeds"
                             class="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 shadow-sm hover:bg-slate-50"
                         >
@@ -207,6 +223,15 @@ const props = defineProps({
         default: () => ({ current_balance: 0, entries_count: 0 }),
     },
     welcomeAfterRegistration: { type: Boolean, default: false },
+    inventorySummary: {
+        type: Object,
+        default: () => ({ fixed_assets: 0, consumables: 0, low_stock: 0 }),
+    },
+})
+
+const inventoryTotal = computed(() => {
+    const s = props.inventorySummary || {}
+    return (s.fixed_assets || 0) + (s.consumables || 0)
 })
 
 const welcomeDismissed = ref(false)
@@ -247,6 +272,11 @@ const advantageCards = [
         icon: '📁',
         title: 'Document centre',
         body: 'Store registration, PAN, and compliance files in one secure place.',
+    },
+    {
+        icon: '📦',
+        title: 'Office & assets',
+        body: 'Register laptops, furniture, vehicles, and consumables — location, custodian, warranty, and reorder alerts.',
     },
     {
         icon: '🚀',

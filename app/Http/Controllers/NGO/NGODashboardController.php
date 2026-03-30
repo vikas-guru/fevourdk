@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\NGO;
 
 use App\Http\Controllers\Controller;
+use App\Models\NgoInventoryItem;
 use App\Models\NGOLedgerEntry;
 use App\Support\NgoWebsiteAnalytics;
 use Illuminate\Http\Request;
@@ -35,6 +36,16 @@ class NGODashboardController extends Controller
                 ->sum('amount'),
         ];
 
+        $inventorySummary = [
+            'fixed_assets' => $ngo->inventoryItems()->where('kind', NgoInventoryItem::KIND_FIXED_ASSET)->count(),
+            'consumables' => $ngo->inventoryItems()->where('kind', NgoInventoryItem::KIND_CONSUMABLE)->count(),
+            'low_stock' => $ngo->inventoryItems()
+                ->where('kind', NgoInventoryItem::KIND_CONSUMABLE)
+                ->whereNotNull('reorder_level')
+                ->whereColumn('quantity', '<=', 'reorder_level')
+                ->count(),
+        ];
+
         // Get recent donations
         $recentDonations = $ngo->donations()
             ->with(['campaign', 'donor'])
@@ -60,6 +71,7 @@ class NGODashboardController extends Controller
                 'current_balance' => (float) ($ngo->ledgerEntries()->latest('id')->value('balance_after') ?? 0),
                 'entries_count' => $ngo->ledgerEntries()->count(),
             ],
+            'inventorySummary' => $inventorySummary,
             'welcomeAfterRegistration' => (bool) $request->session()->pull('ngo_registration_welcome', false),
         ]);
     }

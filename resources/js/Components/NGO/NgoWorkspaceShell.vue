@@ -344,6 +344,18 @@
                     Documents
                 </Link>
                 <Link
+                    href="/ngo/office/inventory"
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    :class="{ 'bg-blue-50 text-blue-800': currentKey === 'office-inventory' }"
+                    @click="mobileNavOpen = false"
+                >
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">📦</span>
+                    <span class="flex min-w-0 flex-col leading-tight">
+                        <span>Office & assets</span>
+                        <span class="truncate text-[10px] font-normal text-slate-500">Inventory · low-stock hints</span>
+                    </span>
+                </Link>
+                <Link
                     href="/ngo/digitalization"
                     class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
                     :class="{ 'bg-blue-50 text-blue-800': currentKey === 'digitalization' }"

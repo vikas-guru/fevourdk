@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Traits\HasLocation;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
@@ -151,6 +150,11 @@ class NGO extends Model
         return $this->hasMany(NgoExpenseClaim::class, 'ngo_id');
     }
 
+    public function inventoryItems(): HasMany
+    {
+        return $this->hasMany(NgoInventoryItem::class, 'ngo_id');
+    }
+
     public function outboundPayments(): HasMany
     {
         return $this->hasMany(NgoOutboundPayment::class, 'ngo_id');
@@ -182,10 +186,10 @@ class NGO extends Model
      */
     public function getYearsActiveAttribute(): int
     {
-        if (!$this->verified_at) {
+        if (! $this->verified_at) {
             return 0;
         }
-        
+
         return $this->verified_at->diffInYears(now());
     }
 
@@ -197,11 +201,11 @@ class NGO extends Model
         if ($this->city && $this->city->name) {
             return "{$this->city->name}, {$this->state->code}";
         }
-        
+
         if ($this->district && $this->district->name) {
             return "{$this->district->name}, {$this->state->code}";
         }
-        
+
         return $this->state ? $this->state->name : 'Unknown';
     }
 
@@ -211,19 +215,19 @@ class NGO extends Model
     public function getFullLocationAttribute(): string
     {
         $parts = [];
-        
+
         if ($this->city && $this->city->name) {
             $parts[] = $this->city->name;
         }
-        
+
         if ($this->district && $this->district->name) {
             $parts[] = $this->district->name;
         }
-        
+
         if ($this->state && $this->state->name) {
             $parts[] = $this->state->name;
         }
-        
+
         return empty($parts) ? 'Unknown Location' : implode(', ', $parts);
     }
 
@@ -289,9 +293,9 @@ class NGO extends Model
     public static function getUniqueFocusAreas(): array
     {
         $focusAreas = static::verified()->active()->pluck('focus_areas')->flatten()->unique()->filter()->values()->toArray();
-        
+
         sort($focusAreas);
-        
+
         return $focusAreas;
     }
 
@@ -308,7 +312,7 @@ class NGO extends Model
             'short_location' => $this->getShortLocationAttribute(),
             'campaigns_count' => $this->getCampaignsCountAttribute(),
             'donors_count' => $this->getDonorsCountAttribute(),
-            'years_active' => $this->getYearsActiveAttribute()
+            'years_active' => $this->getYearsActiveAttribute(),
         ];
     }
 }
