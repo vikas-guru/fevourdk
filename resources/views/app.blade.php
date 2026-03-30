@@ -31,6 +31,14 @@
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    @if (config('services.adsense.enabled') && filled(config('services.adsense.client_id')))
+        <meta name="google-adsense-account" content="{{ config('services.adsense.client_id') }}">
+        <script>
+            window.__FEVOURD_ADSENSE__ = true;
+        </script>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ config('services.adsense.client_id') }}" crossorigin="anonymous"></script>
+    @endif
 </head>
 <body class="font-sans antialiased bg-gray-50">
     {{-- Shown until Vue mounts (no Tailwind: must work before @vite CSS loads) --}}

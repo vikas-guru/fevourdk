@@ -29,6 +29,24 @@ use App\Http\Controllers\WelcomeController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
+// Google AdSense ads.txt (required on production domain for many accounts)
+Route::get('/ads.txt', function () {
+    if (! config('services.adsense.enabled')) {
+        abort(404);
+    }
+    $client = trim((string) config('services.adsense.client_id'));
+    if ($client === '') {
+        abort(404);
+    }
+    $pub = str_starts_with($client, 'ca-') ? substr($client, 3) : $client;
+    if (! str_starts_with($pub, 'pub-')) {
+        abort(404);
+    }
+    $line = 'google.com, '.$pub.', DIRECT, f08c47fec0942fa0';
+
+    return response($line."\n", 200, ['Content-Type' => 'text/plain; charset=UTF-8']);
+})->name('ads.txt');
+
 // Static Pages
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/about', [WelcomeController::class, 'about'])->name('about');

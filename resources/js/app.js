@@ -2,7 +2,7 @@ import './bootstrap';
 import '../css/app.css';
 
 import { createApp, h, nextTick } from 'vue';
-import { createInertiaApp, Link } from '@inertiajs/vue3';
+import { createInertiaApp, Link, router } from '@inertiajs/vue3';
 import { Ziggy } from './ziggy';
 
 createInertiaApp({
@@ -30,6 +30,19 @@ createInertiaApp({
         color: '#3b82f6',
     },
 });
+
+// AdSense: after Inertia client navigations, ask the loader to process any new <ins class="adsbygoogle"> units.
+if (typeof window !== 'undefined' && window.__FEVOURD_ADSENSE__) {
+    router.on('finish', () => {
+        requestAnimationFrame(() => {
+            try {
+                (window.adsbygoogle = window.adsbygoogle || []).push({});
+            } catch {
+                /* no unfilled slots or blocked (e.g. localhost / ad blocker) */
+            }
+        });
+    });
+}
 
 if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {

@@ -107,10 +107,11 @@
                     <h2 class="text-lg font-bold text-slate-900">What you get on FEVOURD-K</h2>
                     <p class="mt-1 text-sm text-slate-600">Built for transparency, fundraising, and digital presence.</p>
                     <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                        <div
+                        <Link
                             v-for="card in advantageCards"
                             :key="card.title"
-                            class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:border-slate-300 hover:shadow-md"
+                            :href="card.href"
+                            class="group block rounded-2xl border border-slate-200/80 bg-white p-5 text-left shadow-sm transition hover:border-slate-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2"
                         >
                             <div
                                 class="mb-3 flex h-10 w-10 items-center justify-center rounded-xl text-white"
@@ -120,7 +121,10 @@
                             </div>
                             <h3 class="font-semibold text-slate-900">{{ card.title }}</h3>
                             <p class="mt-2 text-sm leading-relaxed text-slate-600">{{ card.body }}</p>
-                        </div>
+                            <span class="mt-4 inline-flex text-xs font-semibold text-blue-600 group-hover:text-blue-700">
+                                {{ card.cta }} →
+                            </span>
+                        </Link>
                     </div>
                 </section>
 
@@ -252,43 +256,62 @@ function dismissWelcome() {
     welcomeDismissed.value = true
 }
 
-const advantageCards = [
-    {
-        icon: '🌐',
-        title: 'Free NGO microsite',
-        body: 'A public page for your mission, campaigns, and impact — included so donors can find and trust you.',
-    },
-    {
-        icon: '💳',
-        title: 'Fundraising & campaigns',
-        body: 'Create campaigns, track performance, and receive donations with clear reporting.',
-    },
-    {
-        icon: '📊',
-        title: 'Transparency & ledger',
-        body: 'Structured ledger and donation history to stay accountable to supporters and regulators.',
-    },
-    {
-        icon: '📁',
-        title: 'Document centre',
-        body: 'Store registration, PAN, and compliance files in one secure place.',
-    },
-    {
-        icon: '📦',
-        title: 'Office & assets',
-        body: 'Register laptops, furniture, vehicles, and consumables — location, custodian, warranty, and reorder alerts.',
-    },
-    {
-        icon: '🚀',
-        title: 'Digitalization hub',
-        body: 'Tools and settings to grow your online presence and connect channels.',
-    },
-    {
-        icon: '🤝',
-        title: 'Karnataka voluntary network',
-        body: 'Part of FEVOURD-K — connecting voluntary organisations across the state.',
-    },
-]
+const advantageCards = computed(() => {
+    const slug = props.ngo?.slug
+    const micrositeHref = slug ? `/ngos/${slug}` : '/ngos'
+
+    return [
+        {
+            icon: '🌐',
+            title: 'Free NGO microsite',
+            body: 'A public page for your mission, campaigns, and impact — included so donors can find and trust you.',
+            href: micrositeHref,
+            cta: 'View public page',
+        },
+        {
+            icon: '💳',
+            title: 'Fundraising & campaigns',
+            body: 'Create campaigns, track performance, and receive donations with clear reporting.',
+            href: '/ngo/campaigns',
+            cta: 'Manage campaigns',
+        },
+        {
+            icon: '📊',
+            title: 'Transparency & ledger',
+            body: 'Structured ledger and donation history to stay accountable to supporters and regulators.',
+            href: '/ngo/ledger',
+            cta: 'Open ledger',
+        },
+        {
+            icon: '📁',
+            title: 'Document centre',
+            body: 'Store registration, PAN, and compliance files in one secure place.',
+            href: '/ngo/documents',
+            cta: 'Open documents',
+        },
+        {
+            icon: '📦',
+            title: 'Office & assets',
+            body: 'Register laptops, furniture, vehicles, and consumables — location, custodian, warranty, and reorder alerts.',
+            href: '/ngo/office/inventory',
+            cta: 'Manage inventory',
+        },
+        {
+            icon: '🚀',
+            title: 'Digitalization hub',
+            body: 'Tools and settings to grow your online presence and connect channels.',
+            href: '/ngo/digitalization',
+            cta: 'Digitalization',
+        },
+        {
+            icon: '🤝',
+            title: 'Karnataka voluntary network',
+            body: 'Part of FEVOURD-K — connecting voluntary organisations across the state.',
+            href: '/feeds',
+            cta: 'Community feed',
+        },
+    ]
+})
 
 const formatDate = (dateString) => {
     const date = new Date(dateString)

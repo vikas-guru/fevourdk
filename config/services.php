@@ -59,4 +59,14 @@ return [
         'cache_ttl' => env('IP_GEO_CACHE_TTL', 3600),
     ],
 
+    /*
+    | Google AdSense (optional). Set ADSENSE_ENABLED=true and ADSENSE_CLIENT_ID=ca-pub-xxxxxxxx
+    | Use your real publisher ID from AdSense. ads.txt is served at /ads.txt when configured.
+    | Note: ads usually do not appear on http://127.0.0.1 or localhost; test on your live domain.
+    */
+    'adsense' => [
+        'enabled' => env('ADSENSE_ENABLED', false),
+        'client_id' => env('ADSENSE_CLIENT_ID'),
+    ],
+
 ];
