@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use Inertia\Inertia;
-use Inertia\Response;
-use App\Models\NGO;
 use App\Models\Campaign;
 use App\Models\Donation;
+use App\Models\NGO;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class WelcomeController extends Controller
 {
@@ -62,13 +62,14 @@ class WelcomeController extends Controller
                 'location' => 'Golden Metro Hotel, Sheshadripuram, Bengaluru',
                 'organizers' => 'FEVOURD-K in collaboration with Vishwa Yuvak Kendra (VYK)',
                 'registration_url' => '/events/conclave-2026',
-            ]
+            ],
         ];
 
         return Inertia::render('Welcome', [
             'stats' => $stats,
             'featuredCampaigns' => $featuredCampaigns,
             'upcomingEvents' => $upcomingEvents,
+            'siteUrl' => rtrim((string) config('app.url'), '/'),
         ]);
     }
 
@@ -79,8 +80,8 @@ class WelcomeController extends Controller
                 'ngos' => 800,
                 'districts' => 31,
                 'founded' => 1982,
-                'beneficiaries' => '100,000+'
-            ]
+                'beneficiaries' => '100,000+',
+            ],
         ]);
     }
 

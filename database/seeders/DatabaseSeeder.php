@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
             EnsureDemoNgoAdminSeeder::class,
         ]);
 
+        // Dev/staging only: change password before production. Login at /login → redirects to /admin/dashboard.
         $superAdmin = User::query()->firstOrCreate(
             ['email' => 'admin@favoredk.org'],
             [

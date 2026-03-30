@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'fevourdk-v2';
+const CACHE_VERSION = 'fevourdk-v3';
 const OFFLINE_URL = '/offline.html';
 
 const APP_SHELL_ASSETS = [

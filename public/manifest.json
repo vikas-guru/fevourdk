@@ -1,13 +1,17 @@
 {
-  "name": "FEVOURD-K Social Impact Platform",
+  "id": "/",
+  "name": "FEVOURD-K — Karnataka voluntary organisations",
   "short_name": "FEVOURD-K",
-  "description": "Mobile-first social impact platform connecting donors, NGOs, and communities across Karnataka.",
-  "start_url": "/login",
+  "description": "Donate to verified campaigns, register your NGO, track impact, and use digital tools for transparency — built for Karnataka’s voluntary sector.",
+  "start_url": "/login?source=pwa",
   "display": "standalone",
   "display_override": ["standalone", "window-controls-overlay", "minimal-ui", "browser"],
   "background_color": "#0f172a",
   "theme_color": "#1d4ed8",
-  "orientation": "portrait-primary",
+  "orientation": "any",
+  "launch_handler": {
+    "client_mode": "navigate-existing"
+  },
   "icons": [
     {
       "src": "/assets/images/fevourd-k/logo.png",
@@ -28,6 +32,27 @@
   "scope": "/",
   "prefer_related_applications": false,
   "shortcuts": [
+    {
+      "name": "Sign in",
+      "short_name": "Login",
+      "description": "Open your FEVOURD-K account",
+      "url": "/login?source=pwa_shortcut",
+      "icons": [{ "src": "/assets/images/fevourd-k/logo.png", "sizes": "234x240", "type": "image/png" }]
+    },
+    {
+      "name": "Donate",
+      "short_name": "Donate",
+      "description": "Support campaigns",
+      "url": "/donate?source=pwa_shortcut",
+      "icons": [{ "src": "/assets/images/fevourd-k/logo.png", "sizes": "234x240", "type": "image/png" }]
+    },
+    {
+      "name": "Community feed",
+      "short_name": "Feed",
+      "description": "Updates from NGOs",
+      "url": "/feeds?source=pwa_shortcut",
+      "icons": [{ "src": "/assets/images/fevourd-k/logo.png", "sizes": "234x240", "type": "image/png" }]
+    },
     {
       "name": "Field tracker",
       "short_name": "Field",

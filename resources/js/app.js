@@ -31,6 +31,35 @@ createInertiaApp({
     },
 });
 
+/**
+ * Installed PWA + mobile viewport: marketing home (/) should open login — matches app.blade inline script.
+ * Handles Inertia client-side visits to / (browser mobile is unchanged).
+ */
+function redirectPwaMobileHomeToLogin() {
+    if (typeof window === 'undefined') {
+        return;
+    }
+    const standalone =
+        window.matchMedia('(display-mode: standalone)').matches ||
+        window.navigator.standalone === true;
+    if (!standalone) {
+        return;
+    }
+    if (!window.matchMedia('(max-width: 768px)').matches) {
+        return;
+    }
+    if (window.location.pathname !== '/') {
+        return;
+    }
+    router.replace('/login?source=pwa');
+}
+
+router.on('finish', () => {
+    requestAnimationFrame(() => {
+        redirectPwaMobileHomeToLogin();
+    });
+});
+
 // AdSense: after Inertia client navigations, ask the loader to process any new <ins class="adsbygoogle"> units.
 if (typeof window !== 'undefined' && window.__FEVOURD_ADSENSE__) {
     router.on('finish', () => {

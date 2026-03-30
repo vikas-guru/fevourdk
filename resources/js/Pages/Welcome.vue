@@ -1,5 +1,20 @@
 <template>
     <AppLayout>
+        <Head title="FEVOURD-K — Karnataka voluntary organisations hub">
+            <meta
+                head-key="description"
+                name="description"
+                content="FEVOURD-K connects 800+ voluntary organisations across Karnataka with donors, verified campaigns, NGO digital tools, and transparent giving."
+            />
+            <meta property="og:title" content="FEVOURD-K — Karnataka voluntary organisations" />
+            <meta
+                property="og:description"
+                content="Donate, register your NGO, and follow impact across Karnataka — mobile-friendly and installable as an app."
+            />
+            <meta property="og:type" content="website" />
+            <meta v-if="siteUrl" property="og:image" :content="`${siteUrl}/assets/images/fevourd-k/logo.png`" />
+            <meta name="twitter:card" content="summary" />
+        </Head>
         <div class="min-h-screen">
             <!-- Hero Section -->
             <section id="hero" class="relative bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white overflow-hidden transition-all duration-1000" :class="{ 'translate-y-0 opacity-100': visibleSections.hero, 'translate-y-10 opacity-0': !visibleSections.hero }">
@@ -8,11 +23,17 @@
                 
                 <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24 lg:py-32">
                     <div class="text-center">
-                        <!-- Logo -->
+                        <!-- Logo (real img for LCP, sharing, and install previews) -->
                         <div class="flex justify-center mb-8">
-                            <div class="w-24 h-24 bg-contain bg-center bg-no-repeat" 
-                                 style="background-image: url('/assets/images/fevourd-k/logo.png');">
-                            </div>
+                            <img
+                                :src="brandLogoSrc"
+                                alt="FEVOURD-K — Federation of Voluntary Organisations Karnataka"
+                                width="120"
+                                height="123"
+                                class="h-24 w-auto max-w-[min(280px,85vw)] object-contain drop-shadow-lg"
+                                fetchpriority="high"
+                                decoding="async"
+                            >
                         </div>
                         
                         <h1 class="text-4xl md:text-6xl font-bold mb-4 leading-tight">
@@ -25,12 +46,40 @@
                             FEVOURD-K – Voluntary Action | Karnataka NGO Hub
                         </p>
                         
-                        <p class="text-lg md:text-xl mb-12 max-w-5xl mx-auto text-blue-50 leading-relaxed">
+                        <p class="text-lg md:text-xl mb-8 max-w-5xl mx-auto text-blue-50 leading-relaxed">
                             A federation of over <span class="font-bold text-yellow-400">800 voluntary organisations</span> committed to strengthening the developmental indices in Karnataka through social, economic and cultural empowerment of deprived communities, environmental conservation and the promotion of a vibrant democracy in the state.
                         </p>
+
+                        <!-- Quick access (mobile home-screen friendly) -->
+                        <nav class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-10" aria-label="Quick access">
+                            <Link
+                                href="/login"
+                                class="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+                            >
+                                Sign in
+                            </Link>
+                            <Link
+                                href="/register"
+                                class="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+                            >
+                                Register
+                            </Link>
+                            <Link
+                                href="/donate"
+                                class="inline-flex items-center rounded-full border border-emerald-400/50 bg-emerald-500/20 px-4 py-2 text-sm font-semibold text-emerald-50 backdrop-blur-sm transition hover:bg-emerald-500/30"
+                            >
+                                Donate
+                            </Link>
+                            <Link
+                                href="/feeds"
+                                class="inline-flex items-center rounded-full border border-white/40 bg-white/10 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/20"
+                            >
+                                Community feed
+                            </Link>
+                        </nav>
                         
                         <!-- CTA Buttons -->
-                        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-16">
+                        <div class="flex flex-col sm:flex-row justify-center items-center space-y-4 sm:space-y-0 sm:space-x-6 mb-10">
                             <Link href="/ngos" class="bg-yellow-400 text-blue-900 px-8 py-4 rounded-lg font-bold text-lg hover:bg-yellow-300 transform hover:scale-105 transition-all duration-200 shadow-lg cursor-pointer">
                                 Learn More About Us
                             </Link>
@@ -41,6 +90,11 @@
                                 View Campaigns
                             </Link>
                         </div>
+
+                        <p class="mb-10 max-w-lg mx-auto text-sm leading-relaxed text-blue-100/90">
+                            <span class="font-semibold text-white">Install like an app:</span>
+                            on Chrome or Edge, use the menu → <strong>Install FEVOURD-K</strong> (or the install icon). On iPhone/iPad: Share → <strong>Add to Home Screen</strong>.
+                        </p>
                         
                         <!-- Contact Info -->
                         <div class="flex flex-col sm:flex-row justify-center items-center space-y-2 sm:space-y-0 sm:space-x-8 text-blue-100">
@@ -703,8 +757,11 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Head, Link } from '@inertiajs/vue3'
 import { ref, onMounted, onUnmounted } from 'vue'
+
+/** Public path — use binding so Vite does not treat `/assets/...` as a module import */
+const brandLogoSrc = '/assets/images/fevourd-k/logo.png'
 
 // Sample campaigns data for carousel
 const featuredCampaigns = ref([
@@ -864,6 +921,10 @@ defineProps({
     upcomingEvents: {
         type: Array,
         default: () => []
+    },
+    siteUrl: {
+        type: String,
+        default: ''
     }
 })
 </script>

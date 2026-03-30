@@ -21,11 +21,14 @@
     <!-- Razorpay Script -->
     <script src="https://checkout.razorpay.com/v1/razorpay.js"></script>
     
-    <!-- PWA Meta Tags -->
-    <meta name="theme-color" content="#1d4ed8">
+    <!-- PWA / home-screen (see web.dev/add-to-homescreen) -->
+    <meta name="theme-color" content="#1d4ed8" media="(prefers-color-scheme: light)">
+    <meta name="theme-color" content="#0f172a" media="(prefers-color-scheme: dark)">
     <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
-    <meta name="apple-mobile-web-app-title" content="Fevourd-K">
+    <meta name="application-name" content="FEVOURD-K">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FEVOURD-K">
     <link rel="apple-touch-icon" href="{{ asset(config('fevourd.brand.logo_public_path')) }}">
     <link rel="icon" type="image/png" href="{{ asset(config('fevourd.brand.logo_public_path')) }}">
 
@@ -41,6 +44,20 @@
     @endif
 </head>
 <body class="font-sans antialiased bg-gray-50">
+    {{-- Installed PWA on mobile: land on login instead of marketing home (browser mobile still sees /) --}}
+    <script>
+        (function () {
+            try {
+                var standalone =
+                    window.matchMedia('(display-mode: standalone)').matches ||
+                    window.navigator.standalone === true;
+                var mobile = window.matchMedia('(max-width: 768px)').matches;
+                if (standalone && mobile && location.pathname === '/') {
+                    location.replace('/login?source=pwa');
+                }
+            } catch (e) {}
+        })();
+    </script>
     {{-- Shown until Vue mounts (no Tailwind: must work before @vite CSS loads) --}}
     <div
         id="initial-page-loader"
@@ -68,29 +85,31 @@
         </div>
     @endif
 
-    {{-- PWA install FAB: vanilla JS so it works even when Vite dev server is off (php artisan serve only) --}}
+    {{-- PWA install: only visible when browser fires beforeinstallprompt (avoids dead button + extra layout gap) --}}
     <div
         id="fevourd-pwa-fab-blade"
-        style="display:none;position:fixed;bottom:20px;right:20px;z-index:2147483647;align-items:center;gap:10px;font-family:system-ui,-apple-system,sans-serif;"
+        style="display:none;position:fixed;bottom:max(12px,env(safe-area-inset-bottom,0px));right:max(12px,env(safe-area-inset-right,0px));z-index:2147483647;margin:0;padding:0;font-family:system-ui,-apple-system,sans-serif;line-height:0;"
         role="region"
         aria-label="Install app"
     >
-        <button
-            type="button"
-            id="fevourd-pwa-install-btn"
-            style="display:inline-flex;align-items:center;gap:8px;height:56px;padding:0 20px;border:0;border-radius:9999px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(90deg,#2563eb,#4f46e5);box-shadow:0 10px 25px rgba(37,99,235,0.35);"
-        >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
-            Install app
-        </button>
-        <button
-            type="button"
-            id="fevourd-pwa-install-dismiss"
-            aria-label="Dismiss"
-            style="width:40px;height:40px;border-radius:9999px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);"
-        >
-            ×
-        </button>
+        <div style="display:flex;align-items:center;gap:6px;margin:0;padding:0;box-shadow:0 4px 16px rgba(15,23,42,0.18);border-radius:9999px;">
+            <button
+                type="button"
+                id="fevourd-pwa-install-btn"
+                style="display:inline-flex;align-items:center;justify-content:center;gap:6px;height:44px;min-height:44px;padding:0 14px;border:0;border-radius:9999px;font-size:13px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(90deg,#2563eb,#4f46e5);white-space:nowrap;"
+            >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+                Install app
+            </button>
+            <button
+                type="button"
+                id="fevourd-pwa-install-dismiss"
+                aria-label="Dismiss install prompt"
+                style="display:flex;align-items:center;justify-content:center;width:36px;height:36px;min-width:36px;min-height:36px;padding:0;border-radius:9999px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:18px;line-height:1;cursor:pointer;"
+            >
+                ×
+            </button>
+        </div>
     </div>
     <script>
         (function () {
@@ -116,16 +135,22 @@
             if (isStandalone() || isDismissed()) return;
 
             window.__fevourdDeferredInstallPrompt = window.__fevourdDeferredInstallPrompt || null;
+
             window.addEventListener('beforeinstallprompt', function (e) {
                 e.preventDefault();
                 window.__fevourdDeferredInstallPrompt = e;
+                shell.style.display = 'block';
             });
+
             window.addEventListener('appinstalled', function () {
                 window.__fevourdDeferredInstallPrompt = null;
                 shell.style.display = 'none';
+                try {
+                    if (location.pathname.indexOf('/login') !== 0) {
+                        location.replace('/login?source=pwa');
+                    }
+                } catch (err) {}
             });
-
-            shell.style.display = 'flex';
 
             closeBtn.addEventListener('click', function () {
                 try {
@@ -136,19 +161,17 @@
 
             btn.addEventListener('click', function () {
                 var p = window.__fevourdDeferredInstallPrompt;
-                if (p) {
-                    p.prompt();
-                    p.userChoice.then(function () {
-                        window.__fevourdDeferredInstallPrompt = null;
-                    });
+                if (!p) {
                     return;
                 }
-                var ios = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
-                if (ios) {
-                    window.alert('To install on iPhone/iPad: tap Share, then “Add to Home Screen”, then Add.');
-                } else {
-                    window.alert('To install: in Chrome or Edge use the install icon in the address bar, or the menu (⋮) → Install app / Install FEVOURD-K.');
-                }
+                p.prompt();
+                p.userChoice.then(function (choice) {
+                    if (!choice || choice.outcome !== 'accepted') {
+                        window.__fevourdDeferredInstallPrompt = p;
+                    } else {
+                        window.__fevourdDeferredInstallPrompt = null;
+                    }
+                });
             });
         })();
     </script>
