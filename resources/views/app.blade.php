@@ -26,8 +26,8 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="default">
     <meta name="apple-mobile-web-app-title" content="Fevourd-K">
-    <link rel="apple-touch-icon" href="/icons/icon-192.svg">
-    <link rel="icon" type="image/png" href="/assets/images/fevourd-k/logo.png">
+    <link rel="apple-touch-icon" href="{{ asset(config('fevourd.brand.logo_public_path')) }}">
+    <link rel="icon" type="image/png" href="{{ asset(config('fevourd.brand.logo_public_path')) }}">
 
     <!-- CSRF Token -->
     <meta name="csrf-token" content="{{ csrf_token() }}">

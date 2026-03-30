@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\NGO;
 
 use App\Http\Controllers\Controller;
+use App\Models\NGO;
 use App\Models\NgoInventoryItem;
 use App\Models\NGOLedgerEntry;
 use App\Support\NgoWebsiteAnalytics;
@@ -71,6 +72,7 @@ class NGODashboardController extends Controller
                 'current_balance' => (float) ($ngo->ledgerEntries()->latest('id')->value('balance_after') ?? 0),
                 'entries_count' => $ngo->ledgerEntries()->count(),
             ],
+            'transparency' => $this->ledgerTransparencyForNgo($ngo),
             'inventorySummary' => $inventorySummary,
             'welcomeAfterRegistration' => (bool) $request->session()->pull('ngo_registration_welcome', false),
         ]);
@@ -161,6 +163,9 @@ class NGODashboardController extends Controller
         return Inertia::render('NGO/Donations/Index', [
             'ngo' => $ngo,
             'donations' => $donations,
+            'transparency' => $this->ledgerTransparencyForNgo($ngo),
+            'completedDonationsTotal' => (float) $ngo->donations()->where('status', 'completed')->sum('amount'),
+            'ledgerCurrentBalance' => (float) ($ngo->ledgerEntries()->latest('id')->value('balance_after') ?? 0),
         ]);
     }
 
@@ -331,6 +336,59 @@ class NGODashboardController extends Controller
         ]);
 
         return back()->with('success', 'Ledger entry added.');
+    }
+
+    /**
+     * Ledger-based money in / money out for transparency (credits = in, debits = spent).
+     */
+    private function ledgerTransparencyForNgo(NGO $ngo): array
+    {
+        $now = now();
+
+        $lifetimeIn = (float) $ngo->ledgerEntries()->where('type', 'credit')->sum('amount');
+        $lifetimeOut = (float) $ngo->ledgerEntries()->where('type', 'debit')->sum('amount');
+
+        $thisMonthIn = (float) $ngo->ledgerEntries()
+            ->where('type', 'credit')
+            ->whereYear('entry_date', $now->year)
+            ->whereMonth('entry_date', $now->month)
+            ->sum('amount');
+
+        $thisMonthOut = (float) $ngo->ledgerEntries()
+            ->where('type', 'debit')
+            ->whereYear('entry_date', $now->year)
+            ->whereMonth('entry_date', $now->month)
+            ->sum('amount');
+
+        $donationCredits = (float) $ngo->ledgerEntries()
+            ->where('type', 'credit')
+            ->where('category', 'donation')
+            ->sum('amount');
+
+        $recentSpending = $ngo->ledgerEntries()
+            ->where('type', 'debit')
+            ->latest('entry_date')
+            ->latest('id')
+            ->take(10)
+            ->get()
+            ->map(function (NGOLedgerEntry $e) {
+                return [
+                    'id' => $e->id,
+                    'entry_date' => $e->entry_date?->toDateString(),
+                    'category' => $e->category,
+                    'description' => $e->description,
+                    'amount' => (float) $e->amount,
+                ];
+            });
+
+        return [
+            'lifetime_credited' => $lifetimeIn,
+            'lifetime_spent' => $lifetimeOut,
+            'this_month_credited' => $thisMonthIn,
+            'this_month_spent' => $thisMonthOut,
+            'ledger_donation_credits' => $donationCredits,
+            'recent_spending' => $recentSpending,
+        ];
     }
 
     private function resolveNgoOrRedirect()

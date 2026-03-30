@@ -201,7 +201,7 @@ import { reactive, ref } from 'vue'
 import { Inertia } from '@inertiajs/inertia'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import { Link } from '@inertiajs/vue3'
-import logoImage from '/public/assets/images/fevourd-k/logo.png'
+const logoImage = '/assets/images/fevourd-k/logo.png'
 
 const form = reactive({
     email: '',

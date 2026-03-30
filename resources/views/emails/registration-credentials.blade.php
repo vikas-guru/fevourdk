@@ -15,7 +15,7 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td style="width:56px;vertical-align:middle;">
-                                        <img src="{{ rtrim(config('app.url'), '/') }}/assets/images/fevourd-k/logo.png" alt="FEVOURD-K Logo" width="44" height="44" style="display:block;background:#ffffff;border-radius:8px;padding:4px;" />
+                                        @include('emails.partials.brand-mark', ['width' => 44, 'height' => 44])
                                     </td>
                                     <td style="vertical-align:middle;padding-left:10px;">
                                         <div style="font-size:19px;font-weight:700;letter-spacing:0.3px;color:#ffffff;">FEVOURD-K</div>

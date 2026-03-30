@@ -34,10 +34,10 @@ class WelcomeNgoMail extends Mailable
                 'ngo' => $this->ngo,
                 'user' => $this->user,
                 'loginUrl' => url('/login'),
-                'websiteUrl' => $this->ngo->website_url ?: url('/' . $this->ngo->slug),
+                'websiteUrl' => $this->ngo->website_url ?: url('/'.$this->ngo->slug),
                 'presidentName' => (string) config('fevourd.president.name'),
                 'presidentTitle' => (string) config('fevourd.president.title'),
-                'presidentImageUrl' => asset('/assets/images/President.png'),
+                'presidentImageUrl' => asset('assets/President.png'),
             ]
         );
     }

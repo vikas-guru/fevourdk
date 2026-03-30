@@ -12,8 +12,17 @@
                 <table role="presentation" width="640" cellspacing="0" cellpadding="0" style="max-width:640px;background:#ffffff;border-radius:14px;overflow:hidden;">
                     <tr>
                         <td style="background:#1d4ed8;color:#ffffff;padding:20px 24px;">
-                            <h1 style="margin:0;font-size:20px;">Your NGO registration is saved</h1>
-                            <p style="margin:8px 0 0;font-size:14px;opacity:.9;">FEVOURD-K — continue where you left off</p>
+                            <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                                <tr>
+                                    <td style="width:56px;vertical-align:middle;">
+                                        @include('emails.partials.brand-mark', ['width' => 44, 'height' => 44])
+                                    </td>
+                                    <td style="vertical-align:middle;padding-left:12px;">
+                                        <h1 style="margin:0;font-size:20px;">Your NGO registration is saved</h1>
+                                        <p style="margin:8px 0 0;font-size:14px;opacity:.9;">FEVOURD-K — continue where you left off</p>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                     </tr>
                     <tr>

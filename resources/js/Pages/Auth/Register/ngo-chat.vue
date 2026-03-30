@@ -352,7 +352,7 @@
 import { usePage } from '@inertiajs/vue3'
 import { nextTick, onBeforeUnmount, onMounted, reactive, ref, computed, watch } from 'vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
-import brandLogoUrl from '/public/assets/images/fevourd-k/logo.png'
+const brandLogoUrl = '/assets/images/fevourd-k/logo.png'
 
 const page = usePage()
 const ERROR_SOUND_URL = '/assets/sounds/login-error.wav'

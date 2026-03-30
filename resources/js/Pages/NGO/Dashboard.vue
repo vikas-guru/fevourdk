@@ -102,6 +102,64 @@
                     </div>
                 </div>
 
+                <!-- Money in vs spent (ledger) -->
+                <section class="mt-10">
+                    <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                        <div>
+                            <h2 class="text-lg font-bold text-slate-900">Money in &amp; money spent</h2>
+                            <p class="mt-1 text-sm text-slate-600">
+                                Credits and debits from your <strong>ledger</strong> — donations posted as credits; expenses, payouts, and manual lines as debits.
+                            </p>
+                        </div>
+                        <div class="flex flex-wrap gap-2">
+                            <Link
+                                href="/ngo/finance/activity"
+                                class="inline-flex rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 shadow-sm hover:bg-slate-50"
+                            >
+                                All movements
+                            </Link>
+                            <Link
+                                href="/ngo/ledger"
+                                class="inline-flex rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-violet-700 shadow-sm hover:bg-violet-50"
+                            >
+                                Manual ledger
+                            </Link>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <div class="rounded-2xl border border-emerald-200/80 bg-emerald-50/50 p-4 shadow-sm">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-emerald-800">Credited (all time)</p>
+                            <p class="mt-1 text-2xl font-bold text-emerald-950">₹{{ Number(transparency.lifetime_credited || 0).toLocaleString('en-IN') }}</p>
+                            <p class="mt-1 text-[11px] text-emerald-900/80">This month: ₹{{ Number(transparency.this_month_credited || 0).toLocaleString('en-IN') }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-rose-200/80 bg-rose-50/50 p-4 shadow-sm">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-rose-800">Spent (all time)</p>
+                            <p class="mt-1 text-2xl font-bold text-rose-950">₹{{ Number(transparency.lifetime_spent || 0).toLocaleString('en-IN') }}</p>
+                            <p class="mt-1 text-[11px] text-rose-900/80">This month: ₹{{ Number(transparency.this_month_spent || 0).toLocaleString('en-IN') }}</p>
+                        </div>
+                        <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:col-span-2 lg:col-span-2">
+                            <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Recent spending</p>
+                            <ul v-if="transparency.recent_spending?.length" class="mt-2">
+                                <li
+                                    v-for="row in transparency.recent_spending"
+                                    :key="row.id"
+                                    class="flex flex-wrap items-start justify-between gap-2 border-b border-slate-100 py-2 text-sm last:border-0"
+                                >
+                                    <div class="min-w-0 flex-1">
+                                        <p class="text-[11px] text-slate-400">{{ formatShortDate(row.entry_date) }}</p>
+                                        <p class="text-slate-700">
+                                            <span class="font-medium text-slate-900">{{ row.category }}</span>
+                                            <span v-if="row.description" class="text-slate-500"> — {{ row.description }}</span>
+                                        </p>
+                                    </div>
+                                    <span class="shrink-0 font-semibold text-rose-700">−₹{{ Number(row.amount).toLocaleString('en-IN') }}</span>
+                                </li>
+                            </ul>
+                            <p v-else class="mt-3 text-sm text-slate-500">No spending recorded in the ledger yet. Debits appear from expense claims, outbound payments, or manual ledger entries.</p>
+                        </div>
+                    </div>
+                </section>
+
                 <!-- Platform advantages -->
                 <section class="mt-10">
                     <h2 class="text-lg font-bold text-slate-900">What you get on FEVOURD-K</h2>
@@ -231,6 +289,17 @@ const props = defineProps({
         type: Object,
         default: () => ({ fixed_assets: 0, consumables: 0, low_stock: 0 }),
     },
+    transparency: {
+        type: Object,
+        default: () => ({
+            lifetime_credited: 0,
+            lifetime_spent: 0,
+            this_month_credited: 0,
+            this_month_spent: 0,
+            ledger_donation_credits: 0,
+            recent_spending: [],
+        }),
+    },
 })
 
 const inventoryTotal = computed(() => {
@@ -320,6 +389,13 @@ const formatDate = (dateString) => {
         month: 'short',
         year: 'numeric',
     })
+}
+
+function formatShortDate(d) {
+    if (!d) {
+        return ''
+    }
+    return new Date(d + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 </script>
 

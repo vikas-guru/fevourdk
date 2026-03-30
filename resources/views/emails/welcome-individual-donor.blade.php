@@ -15,7 +15,7 @@
                             <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                                 <tr>
                                     <td style="width:56px;vertical-align:middle;">
-                                        <img src="{{ rtrim(config('app.url'), '/') }}/assets/images/fevourd-k/logo.png" alt="FEVOURD-K Logo" width="44" height="44" style="display:block;background:#ffffff;border-radius:8px;padding:4px;" />
+                                        @include('emails.partials.brand-mark', ['width' => 44, 'height' => 44])
                                     </td>
                                     <td style="vertical-align:middle;padding-left:10px;">
                                         <div style="font-size:19px;font-weight:700;letter-spacing:0.3px;color:#ffffff;">FEVOURD-K</div>
@@ -55,7 +55,7 @@
                                         <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
                                             <tr>
                                                 <td style="width:116px;vertical-align:top;">
-                                                    <img src="{{ rtrim(config('app.url'), '/') }}/assets/President.png" alt="Shri. Mahesh Chandra Guru" width="96" height="120" style="display:block;border-radius:10px;object-fit:cover;border:1px solid #bfdbfe;" />
+                                                    <img src="{{ asset('assets/President.png') }}" alt="Shri. Mahesh Chandra Guru" width="96" height="120" style="display:block;border-radius:10px;object-fit:cover;border:1px solid #bfdbfe;" />
                                                 </td>
                                                 <td style="vertical-align:top;padding-left:14px;">
                                                     <h3 style="margin:0 0 6px;font-size:18px;color:#1e3a8a;">Shri. Mahesh Chandra Guru</h3>

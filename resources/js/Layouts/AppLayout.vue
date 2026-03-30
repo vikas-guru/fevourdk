@@ -915,7 +915,8 @@
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import lottie from 'lottie-web'
-import logoImage from '/public/assets/images/fevourd-k/logo.png'
+/** Served from public/ — avoids Vite path issues for install / standalone */
+const logoImage = '/assets/images/fevourd-k/logo.png'
 
 const showExploreMenu = ref(false)
 const showUserMenu = ref(false)

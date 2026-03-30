@@ -45,9 +45,26 @@ if (typeof window !== 'undefined' && window.__FEVOURD_ADSENSE__) {
 }
 
 if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js').catch((error) => {
-            console.warn('Service worker registration failed:', error);
+    const host = window.location.hostname;
+    const isLocalhost = host === 'localhost' || host === '127.0.0.1' || host === '::1';
+
+    if (isLocalhost) {
+        // Prevent stale/offline-cache behavior during local development.
+        navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => registration.unregister());
+        }).catch(() => {});
+
+        // Also clear all runtime caches in local to avoid stale offline responses.
+        if (window.caches && typeof window.caches.keys === 'function') {
+            window.caches.keys().then((keys) => {
+                keys.forEach((key) => window.caches.delete(key));
+            }).catch(() => {});
+        }
+    } else {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js').catch((error) => {
+                console.warn('Service worker registration failed:', error);
+            });
         });
-    });
+    }
 }

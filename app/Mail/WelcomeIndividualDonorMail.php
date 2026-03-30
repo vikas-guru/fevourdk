@@ -46,7 +46,7 @@ class WelcomeIndividualDonorMail extends Mailable
             Attachment::fromData(function () {
                 return Pdf::loadView('emails.pdf.donor-quick-start', [
                     'displayName' => $this->user->first_name ?: ($this->user->name ?: 'Donor'),
-                    'logoDataUri' => $this->imageDataUri(public_path('assets/images/fevourd-k/logo.png')),
+                    'logoDataUri' => $this->imageDataUri(public_path(config('fevourd.brand.logo_public_path'))),
                     'presidentDataUri' => $this->imageDataUri(public_path('assets/President.png')),
                     'presidentName' => 'Shri. Mahesh Chandra Guru',
                     'galleryOneDataUri' => $this->imageDataUri(public_path('assets/images/fevourd-k/about-image.jpg')),

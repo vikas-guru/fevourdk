@@ -67,7 +67,9 @@ self.addEventListener('fetch', (event) => {
                     }
                 }
 
-                return new Response('Offline', { status: 503, statusText: 'Offline' });
+                // For non-navigation requests, surface a real network failure
+                // instead of returning plain "Offline" text in UI widgets/modals.
+                return Response.error();
             })
     );
 });

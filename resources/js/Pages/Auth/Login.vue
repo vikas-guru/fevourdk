@@ -167,7 +167,7 @@
 import { ExclamationTriangleIcon, XMarkIcon } from '@heroicons/vue/24/outline'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { nextTick, onMounted, onUnmounted, reactive, ref, watch } from 'vue'
-import logoImage from '/public/assets/images/fevourd-k/logo.png'
+const logoImage = '/assets/images/fevourd-k/logo.png'
 
 /** Short synthetic tone bundled in repo (no third-party sample rights). Replace with your own MP3 if you prefer. */
 const ERROR_SOUND_URL = '/assets/sounds/login-error.wav'

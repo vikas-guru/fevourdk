@@ -47,4 +47,17 @@ Your participation strengthens civil society across Karnataka. We look forward t
 With warm regards,
 EOT
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Brand assets (public/ path; use asset() in Blade, optional absolute URL)
+    |--------------------------------------------------------------------------
+    | Emails and some clients need a full URL. asset() uses APP_URL — set it in
+    | production to your public https origin. FEVOURD_LOGO_URL overrides if the
+    | logo is hosted elsewhere (CDN).
+    */
+    'brand' => [
+        'logo_public_path' => 'assets/images/fevourd-k/logo.png',
+        'logo_url' => env('FEVOURD_LOGO_URL'),
+    ],
 ];

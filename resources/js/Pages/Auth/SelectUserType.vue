@@ -248,6 +248,6 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import logoImage from '/public/assets/images/fevourd-k/logo.png'
+const logoImage = '/assets/images/fevourd-k/logo.png'
 import { Link } from '@inertiajs/vue3'
 </script>
