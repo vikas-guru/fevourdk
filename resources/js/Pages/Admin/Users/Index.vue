@@ -1,6 +1,6 @@
 <script setup>
 import AdminLayout from '@/Layouts/AdminLayout.vue'
-import { router } from '@inertiajs/vue3'
+import { Link, router } from '@inertiajs/vue3'
 
 const props = defineProps({
     users: Object,
@@ -43,6 +43,9 @@ const deleteUser = (userId) => {
                                     Roles
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    Status
+                                </th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                                     Joined
                                 </th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -73,10 +76,21 @@ const deleteUser = (userId) => {
                                         {{ role.name }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span
+                                        class="inline-flex rounded-full px-2 py-0.5 text-xs font-semibold"
+                                        :class="user.is_active ? 'bg-emerald-100 text-emerald-800' : 'bg-red-100 text-red-800'"
+                                    >
+                                        {{ user.is_active ? 'Active' : 'Blocked' }}
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                     {{ new Date(user.created_at).toLocaleDateString() }}
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                    <Link :href="`/admin/users/${user.id}`" class="text-blue-600 hover:text-blue-900 mr-3">
+                                        View
+                                    </Link>
                                     <a :href="`/admin/users/${user.id}/edit`" 
                                        class="text-indigo-600 hover:text-indigo-900 mr-3">
                                         Edit

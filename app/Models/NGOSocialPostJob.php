@@ -10,6 +10,8 @@ class NGOSocialPostJob extends Model
 {
     use HasFactory;
 
+    protected $table = 'ngo_social_post_jobs';
+
     protected $fillable = [
         'ngo_id',
         'source_type',

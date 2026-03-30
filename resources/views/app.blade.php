@@ -59,5 +59,90 @@
             {{ session('error') }}
         </div>
     @endif
+
+    {{-- PWA install FAB: vanilla JS so it works even when Vite dev server is off (php artisan serve only) --}}
+    <div
+        id="fevourd-pwa-fab-blade"
+        style="display:none;position:fixed;bottom:20px;right:20px;z-index:2147483647;align-items:center;gap:10px;font-family:system-ui,-apple-system,sans-serif;"
+        role="region"
+        aria-label="Install app"
+    >
+        <button
+            type="button"
+            id="fevourd-pwa-install-btn"
+            style="display:inline-flex;align-items:center;gap:8px;height:56px;padding:0 20px;border:0;border-radius:9999px;font-size:14px;font-weight:600;color:#fff;cursor:pointer;background:linear-gradient(90deg,#2563eb,#4f46e5);box-shadow:0 10px 25px rgba(37,99,235,0.35);"
+        >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+            Install app
+        </button>
+        <button
+            type="button"
+            id="fevourd-pwa-install-dismiss"
+            aria-label="Dismiss"
+            style="width:40px;height:40px;border-radius:9999px;border:1px solid #e2e8f0;background:#fff;color:#64748b;font-size:20px;line-height:1;cursor:pointer;box-shadow:0 4px 12px rgba(0,0,0,0.08);"
+        >
+            ×
+        </button>
+    </div>
+    <script>
+        (function () {
+            var DISMISS = 'fevourd-pwa-install-dismiss-blade-v1';
+            function isStandalone() {
+                if (window.matchMedia('(display-mode: standalone)').matches) return true;
+                if (window.navigator.standalone === true) return true;
+                return false;
+            }
+            function isDismissed() {
+                try {
+                    var until = parseInt(localStorage.getItem(DISMISS) || '0', 10);
+                    return Date.now() < until;
+                } catch (e) {
+                    return false;
+                }
+            }
+            var shell = document.getElementById('fevourd-pwa-fab-blade');
+            var btn = document.getElementById('fevourd-pwa-install-btn');
+            var closeBtn = document.getElementById('fevourd-pwa-install-dismiss');
+            if (!shell || !btn || !closeBtn) return;
+
+            if (isStandalone() || isDismissed()) return;
+
+            window.__fevourdDeferredInstallPrompt = window.__fevourdDeferredInstallPrompt || null;
+            window.addEventListener('beforeinstallprompt', function (e) {
+                e.preventDefault();
+                window.__fevourdDeferredInstallPrompt = e;
+            });
+            window.addEventListener('appinstalled', function () {
+                window.__fevourdDeferredInstallPrompt = null;
+                shell.style.display = 'none';
+            });
+
+            shell.style.display = 'flex';
+
+            closeBtn.addEventListener('click', function () {
+                try {
+                    localStorage.setItem(DISMISS, String(Date.now() + 7 * 24 * 60 * 60 * 1000));
+                } catch (err) {}
+                shell.style.display = 'none';
+            });
+
+            btn.addEventListener('click', function () {
+                var p = window.__fevourdDeferredInstallPrompt;
+                if (p) {
+                    p.prompt();
+                    p.userChoice.then(function () {
+                        window.__fevourdDeferredInstallPrompt = null;
+                    });
+                    return;
+                }
+                var ios = /iphone|ipad|ipod/i.test(navigator.userAgent || '');
+                if (ios) {
+                    window.alert('To install on iPhone/iPad: tap Share, then “Add to Home Screen”, then Add.');
+                } else {
+                    window.alert('To install: in Chrome or Edge use the install icon in the address bar, or the menu (⋮) → Install app / Install FEVOURD-K.');
+                }
+            });
+        })();
+    </script>
 </body>
 </html>

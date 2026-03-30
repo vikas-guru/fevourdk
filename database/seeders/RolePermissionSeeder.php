@@ -84,6 +84,12 @@ class RolePermissionSeeder extends Seeder
                 'campaign.create', 'campaign.view', 'campaign.edit',
                 'donation.view'
             ],
+
+            'ngo_finance' => [
+                'ngo.view',
+                'donation.view',
+                'user.view',
+            ],
             
             'corporate_admin' => [
                 'campaign.view',

@@ -5,8 +5,10 @@ namespace App\Http\Controllers;
 use App\Models\Donation;
 use App\Models\Campaign;
 use App\Models\NGOLedgerEntry;
+use App\Models\Setting;
 use App\Models\UserNotification;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 
 class DonationController extends Controller
@@ -22,7 +24,21 @@ class DonationController extends Controller
 
         return Inertia::render('Donate', [
             'featuredCampaigns' => $featuredCampaigns,
+            'paymentMethods' => self::publicPaymentMethodFlags(),
         ]);
+    }
+
+    /**
+     * @return array<string, bool>
+     */
+    private static function publicPaymentMethodFlags(): array
+    {
+        return [
+            'razorpay' => (bool) Setting::getValue('payment_razorpay_enabled', true),
+            'upi' => (bool) Setting::getValue('payment_upi_enabled', true),
+            'phonepe' => (bool) Setting::getValue('payment_phonepe_enabled', false),
+            'stripe' => (bool) Setting::getValue('payment_stripe_enabled', false),
+        ];
     }
 
     public function index()
@@ -39,10 +55,12 @@ class DonationController extends Controller
 
     public function process(Request $request)
     {
+        $allowed = array_keys(array_filter(self::publicPaymentMethodFlags()));
+
         $validated = $request->validate([
             'campaign_id' => 'required|exists:campaigns,id',
             'amount' => 'required|numeric|min:1',
-            'payment_method' => 'required|string',
+            'payment_method' => ['required', 'string', Rule::in($allowed)],
             'transaction_id' => 'nullable|string',
         ]);
 

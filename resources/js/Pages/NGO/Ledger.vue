@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="NGO Ledger - FEVOURD-K">
-        <div class="min-h-screen bg-slate-50 py-8">
-            <div class="max-w-6xl mx-auto px-4 sm:px-6">
+        <NgoWorkspaceShell :ngo="ngo" current-key="ledger">
+            <div class="max-w-6xl mx-auto">
                 <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6">
                     <h1 class="text-2xl font-bold text-slate-900">NGO Ledger</h1>
                     <p class="text-sm text-slate-600 mt-1">Track every credit/debit entry with running balance.</p>
@@ -64,13 +64,14 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </NgoWorkspaceShell>
     </AppLayout>
 </template>
 
 <script setup>
 import { useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
 
 const props = defineProps({
     ngo: Object,

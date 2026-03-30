@@ -18,30 +18,30 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RolePermissionSeeder::class,
             ProgramSeeder::class,
+            LocationSeeder::class,
+            EnsureDemoNgoAdminSeeder::class,
         ]);
 
-        // Create super admin user
-        $superAdmin = User::factory()->create([
-            'name' => 'Super Admin',
-            'email' => 'admin@favoredk.org',
-            'password' => bcrypt('password'),
-        ]);
-        $superAdmin->assignRole('super_admin');
+        $superAdmin = User::query()->firstOrCreate(
+            ['email' => 'admin@favoredk.org'],
+            [
+                'name' => 'Super Admin',
+                'password' => bcrypt('password'),
+            ]
+        );
+        if (! $superAdmin->hasRole('super_admin')) {
+            $superAdmin->assignRole('super_admin');
+        }
 
-        // Create test NGO admin
-        $ngoAdmin = User::factory()->create([
-            'name' => 'NGO Admin',
-            'email' => 'ngo@favoredk.org',
-            'password' => bcrypt('password'),
-        ]);
-        $ngoAdmin->assignRole('ngo_admin');
-
-        // Create test donor
-        $donor = User::factory()->create([
-            'name' => 'Test Donor',
-            'email' => 'donor@favoredk.org',
-            'password' => bcrypt('password'),
-        ]);
-        $donor->assignRole('donor');
+        $donor = User::query()->firstOrCreate(
+            ['email' => 'donor@favoredk.org'],
+            [
+                'name' => 'Test Donor',
+                'password' => bcrypt('password'),
+            ]
+        );
+        if (! $donor->hasRole('donor')) {
+            $donor->assignRole('donor');
+        }
     }
 }

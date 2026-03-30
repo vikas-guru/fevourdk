@@ -3,17 +3,19 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NgoChatDraftResumeMail;
 use App\Mail\OtpCodeMail;
 use App\Mail\RegistrationCredentialsMail;
-use App\Mail\WelcomeNgoMail;
 use App\Mail\WelcomeIndividualDonorMail;
-use App\Models\Donor;
-use App\Models\User;
-use App\Models\NGO;
+use App\Mail\WelcomeNgoMail;
 use App\Models\Corporate;
+use App\Models\Donor;
+use App\Models\NGO;
 use App\Models\NgoRegistrationDraft;
+use App\Models\User;
 use App\Models\Volunteer;
 use App\Services\OtpService;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -21,7 +23,6 @@ use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
-use Illuminate\Auth\Events\Registered;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -38,11 +39,11 @@ class MultiRoleRegistrationController extends Controller
     /**
      * Show registration form for selected user type
      */
-    public function showRegistrationForm($userType)
+    public function showRegistrationForm(Request $request, $userType)
     {
         $validTypes = ['individual', 'ngo', 'ngo-chat', 'corporate', 'volunteer'];
-        
-        if (!in_array($userType, $validTypes)) {
+
+        if (! in_array($userType, $validTypes)) {
             return redirect()->route('register.select-type')
                 ->with('error', 'Invalid user type selected');
         }
@@ -50,13 +51,20 @@ class MultiRoleRegistrationController extends Controller
         // Get states for location selection
         $states = \App\Models\State::with('districts.cities')->get();
         $cities = \App\Models\City::all();
-        
-        return inertia("Auth/Register/{$userType}", [
+
+        $props = [
             'states' => $states,
             'cities' => $cities,
             'focusAreas' => $this->getFocusAreas(),
-            'skills' => $this->getVolunteerSkills()
-        ]);
+            'skills' => $this->getVolunteerSkills(),
+        ];
+
+        if ($userType === 'ngo-chat') {
+            $props['ngoChatResumeToken'] = $request->query('resume');
+            $props['ngoChatOtpLength'] = app(OtpService::class)->otpCodeLength();
+        }
+
+        return inertia("Auth/Register/{$userType}", $props);
     }
 
     /**
@@ -91,12 +99,12 @@ class MultiRoleRegistrationController extends Controller
 
         if ($validator->fails()) {
             return back()->withErrors($validator)
-                     ->withInput();
+                ->withInput();
         }
 
         if (! app(OtpService::class)->verify($request->phone, $request->otp_code)) {
             return back()->with('error', 'Invalid OTP code')
-                     ->withInput();
+                ->withInput();
         }
 
         $agent = $this->extractUserAgentMeta($request->userAgent() ?? '');
@@ -162,7 +170,7 @@ class MultiRoleRegistrationController extends Controller
         Mail::to($user->email)->send($credentialsMail);
 
         event(new Registered($user));
-        
+
         Auth::login($user);
 
         return redirect()->route('dashboard');
@@ -179,6 +187,15 @@ class MultiRoleRegistrationController extends Controller
         $existingUserByEmail = $request->filled('email')
             ? User::query()->where('email', $request->email)->first()
             : null;
+
+        $existingFounderUserForValidation = null;
+        if ($request->filled('founder_email')) {
+            $founderEmailNorm = Str::lower(trim((string) $request->founder_email));
+            $officialEmailNorm = Str::lower(trim((string) $request->email));
+            if ($founderEmailNorm !== '' && $founderEmailNorm !== $officialEmailNorm) {
+                $existingFounderUserForValidation = User::query()->where('email', $request->founder_email)->first();
+            }
+        }
 
         $uploadError = $this->detectUploadErrorForNgoDocs();
         if ($uploadError) {
@@ -197,11 +214,20 @@ class MultiRoleRegistrationController extends Controller
             }
         }
 
+        $founderEmailRules = ['nullable', 'string', 'email', 'max:255'];
+        if ($request->filled('founder_email')) {
+            $founderEmailNorm = Str::lower(trim((string) $request->founder_email));
+            $officialEmailNorm = Str::lower(trim((string) $request->email));
+            if ($founderEmailNorm !== '' && $founderEmailNorm !== $officialEmailNorm) {
+                $founderEmailRules[] = Rule::unique('users', 'email')->ignore($existingFounderUserForValidation?->id);
+            }
+        }
+
         $validator = Validator::make($request->all(), [
             'ngo_name' => 'required|string|max:255',
             'founder_name' => 'required|string|max:255',
             'founder_phone' => 'required|string|max:20',
-            'founder_email' => 'nullable|string|email|max:255',
+            'founder_email' => $founderEmailRules,
             'cofounder_name' => 'nullable|string|max:255',
             'cofounder_phone' => 'nullable|string|max:20',
             'cofounder_email' => 'nullable|string|email|max:255',
@@ -221,23 +247,23 @@ class MultiRoleRegistrationController extends Controller
             'focus_areas' => 'required|array|min:1',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
             'documents' => 'nullable|array',
-            'documents.registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'documents.pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
-            'pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:2048',
+            'documents.registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'documents.pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'otp_code' => $this->otpCodeValidationRule(),
             'login_pin' => 'required|string|min:5|max:12|confirmed',
-            'accept_terms' => 'required|accepted'
+            'accept_terms' => 'required|accepted',
         ]);
 
         if ($validator->fails()) {
             return response()->json([
                 'success' => false,
-                'errors' => $validator->errors()
+                'errors' => $validator->errors(),
             ], 422);
         }
 
-        if (!($request->hasFile('registration_certificate') || $request->hasFile('documents.registration_certificate'))) {
+        if (! ($request->hasFile('registration_certificate') || $request->hasFile('documents.registration_certificate'))) {
             return response()->json([
                 'success' => false,
                 'errors' => [
@@ -246,7 +272,7 @@ class MultiRoleRegistrationController extends Controller
             ], 422);
         }
 
-        if (!($request->hasFile('pan_card') || $request->hasFile('documents.pan_card'))) {
+        if (! ($request->hasFile('pan_card') || $request->hasFile('documents.pan_card'))) {
             return response()->json([
                 'success' => false,
                 'errors' => [
@@ -256,7 +282,12 @@ class MultiRoleRegistrationController extends Controller
         }
 
         try {
-            if (!$this->verifyOTP($request->phone, $request->otp_code)) {
+            $normalizedPhone = app(OtpService::class)->normalizeIndianPhone((string) $request->phone);
+            $otpOk = $normalizedPhone !== null && $this->verifyOTP($request->phone, $request->otp_code);
+            if (! $otpOk && $normalizedPhone !== null) {
+                $otpOk = $this->ngoChatOtpSessionMatches($normalizedPhone);
+            }
+            if (! $otpOk) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invalid OTP. Please verify your NGO email/phone OTP and try again.',
@@ -270,15 +301,32 @@ class MultiRoleRegistrationController extends Controller
                 ], 422);
             }
 
+            if ($request->filled('founder_email')
+                && strcasecmp(trim((string) $request->founder_email), trim((string) $request->email)) !== 0) {
+                $founderUserEarly = User::query()->where('email', $request->founder_email)->first();
+                if ($founderUserEarly && $founderUserEarly->ngo_id) {
+                    $sameNgoResume = $existingNgoByEmail
+                        && (int) $founderUserEarly->ngo_id === (int) $existingNgoByEmail->id;
+                    if (! $sameNgoResume) {
+                        return response()->json([
+                            'success' => false,
+                            'errors' => [
+                                'founder_email' => ['This founder email is already registered to another NGO.'],
+                            ],
+                        ], 422);
+                    }
+                }
+            }
+
             // Generate slug from NGO name
             $slug = $existingNgoByEmail?->slug;
-            if (!$slug) {
+            if (! $slug) {
                 $slug = Str::slug($request->ngo_name);
                 $originalSlug = $slug;
                 $counter = 1;
 
                 while (NGO::where('slug', $slug)->exists()) {
-                    $slug = $originalSlug . '-' . $counter;
+                    $slug = $originalSlug.'-'.$counter;
                     $counter++;
                 }
             }
@@ -286,7 +334,7 @@ class MultiRoleRegistrationController extends Controller
             $resolvedStateId = $this->getStateIdByName($request->state_name);
             $resolvedCityId = $this->getCityIdByName($request->city, $resolvedStateId);
 
-            if (!$resolvedCityId) {
+            if (! $resolvedCityId) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Unable to map city from location data. Please enter a known city name and try again.',
@@ -318,7 +366,7 @@ class MultiRoleRegistrationController extends Controller
                 'is_active' => false,
             ];
 
-            $ngo = $existingNgoByEmail ?: new NGO();
+            $ngo = $existingNgoByEmail ?: new NGO;
             $ngo->fill($ngoData);
             $ngo->save();
 
@@ -331,14 +379,14 @@ class MultiRoleRegistrationController extends Controller
             // Handle optional document uploads
             $documentTypes = [
                 'registration_certificate' => 'registration_certificate',
-                'pan_card' => 'pan_card'
+                'pan_card' => 'pan_card',
             ];
 
             foreach ($documentTypes as $field => $type) {
                 $document = $request->file($field) ?: $request->file("documents.{$field}");
                 if ($document) {
                     $path = $document->store('ngo_documents', 'public');
-                    
+
                     $ngo->documents()->create([
                         'document_type' => $type,
                         'file_path' => $path,
@@ -367,9 +415,9 @@ class MultiRoleRegistrationController extends Controller
                 ], 422);
             }
 
-            $adminUser = $existingUserByEmail ?: new User();
+            $adminUser = $existingUserByEmail ?: new User;
             $adminUser->fill([
-                'name' => $request->ngo_name . ' Admin',
+                'name' => $request->ngo_name.' Admin',
                 'first_name' => $request->ngo_name,
                 'email' => $request->email,
                 'phone' => $request->phone,
@@ -400,25 +448,75 @@ class MultiRoleRegistrationController extends Controller
                 });
                 Mail::to($adminUser->email)->send($credentialsMail);
 
+                $this->createFounderNgoAdminIfNeeded($request, $ngo, (string) $request->login_pin);
+
                 Auth::login($adminUser);
             }
+
+            session()->forget(['ngo_chat_otp_verified_phone', 'ngo_chat_otp_verified_at']);
+            $request->session()->flash('ngo_registration_welcome', true);
 
             return response()->json([
                 'success' => true,
                 'message' => 'NGO registration submitted successfully!',
                 'ngo_id' => $ngo->id,
                 'website_url' => $ngo->website_url,
-                'dashboard_url' => route('dashboard'),
+                'dashboard_url' => url('/ngo/dashboard'),
                 'verification' => $verification,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Registration failed: ' . $e->getMessage(),
+                'message' => 'Registration failed: '.$e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
         }
+    }
+
+    /**
+     * Verify NGO chat OTP during the wizard (consumes code). Registration accepts either a fresh
+     * verifyOTP() or a recent successful verify here via session.
+     */
+    public function verifyNgoChatOtp(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'phone' => 'required|string|max:20',
+            'otp_code' => $this->otpCodeValidationRule(),
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => $validator->errors()->first(),
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        if (! $this->verifyOTP($request->phone, $request->otp_code)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP. Check the code and try again.',
+            ], 422);
+        }
+
+        $normalized = app(OtpService::class)->normalizeIndianPhone((string) $request->phone);
+        if ($normalized === null) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Enter a valid 10-digit Indian mobile number.',
+            ], 422);
+        }
+
+        session([
+            'ngo_chat_otp_verified_phone' => $normalized,
+            'ngo_chat_otp_verified_at' => now()->timestamp,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Phone verified. You can continue.',
+        ]);
     }
 
     public function verifyNgoRegistration(Request $request)
@@ -453,25 +551,39 @@ class MultiRoleRegistrationController extends Controller
             'selected_focus_areas' => 'nullable|array',
             'step_index' => 'nullable|integer|min:0',
             'messages' => 'nullable|array',
+            'otp_gate' => 'nullable|array',
+            'otp_gate.passed' => 'nullable|boolean',
+            'otp_gate.phone' => 'nullable|string|max:25',
         ]);
 
-        $draftId = $validated['draft_id'] ?: ('NGO-DRAFT-' . strtoupper(Str::random(10)));
+        $draftId = $validated['draft_id'] ?: ('NGO-DRAFT-'.strtoupper(Str::random(10)));
+        $otpGateIn = $validated['otp_gate'] ?? [];
         $payload = [
             'draft' => $validated['draft'] ?? [],
             'selected_focus_areas' => $validated['selected_focus_areas'] ?? [],
             'step_index' => $validated['step_index'] ?? 0,
             'messages' => $validated['messages'] ?? [],
+            'otp_gate' => [
+                'passed' => (bool) ($otpGateIn['passed'] ?? false),
+                'phone' => (string) ($otpGateIn['phone'] ?? ''),
+            ],
         ];
+
+        $existing = NgoRegistrationDraft::query()->where('draft_id', $draftId)->first();
+        $resumeToken = $existing?->resume_token ?: Str::random(64);
 
         $draft = NgoRegistrationDraft::query()->updateOrCreate(
             ['draft_id' => $draftId],
             [
+                'resume_token' => $resumeToken,
                 'payload' => $payload,
                 'ip_address' => (string) $request->ip(),
                 'user_agent' => substr((string) ($request->userAgent() ?? ''), 0, 512),
                 'last_saved_at' => now(),
             ]
         );
+
+        $this->maybeSendNgoChatDraftResumeEmail($draft);
 
         return response()->json([
             'success' => true,
@@ -480,10 +592,31 @@ class MultiRoleRegistrationController extends Controller
         ]);
     }
 
+    /**
+     * Resume link uses secret token (not draft_id) so IDs are not enumerable.
+     */
+    public function getNgoChatDraftByResumeToken(string $token)
+    {
+        $draft = NgoRegistrationDraft::query()->where('resume_token', $token)->first();
+        if (! $draft) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Draft not found or link expired.',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'draft_id' => $draft->draft_id,
+            'payload' => $draft->payload ?? [],
+            'saved_at' => $draft->last_saved_at?->toIso8601String(),
+        ]);
+    }
+
     public function getNgoChatDraft(string $draftId)
     {
         $draft = NgoRegistrationDraft::query()->where('draft_id', $draftId)->first();
-        if (!$draft) {
+        if (! $draft) {
             return response()->json([
                 'success' => false,
                 'message' => 'Draft not found',
@@ -499,11 +632,41 @@ class MultiRoleRegistrationController extends Controller
     }
 
     /**
+     * Send “continue registration” email when we have a valid NGO email (throttled).
+     */
+    private function maybeSendNgoChatDraftResumeEmail(NgoRegistrationDraft $draft): void
+    {
+        $email = trim((string) data_get($draft->payload, 'draft.email', ''));
+        if ($email === '' || ! filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            return;
+        }
+
+        if ($draft->resume_email_sent_at && $draft->resume_email_sent_at->gt(now()->subHours(6))) {
+            return;
+        }
+
+        $token = $draft->resume_token;
+        if ($token === null || $token === '') {
+            return;
+        }
+
+        $ngoName = trim((string) data_get($draft->payload, 'draft.ngo_name', ''));
+        $resumeUrl = url('/register/ngo-chat?resume='.urlencode($token));
+
+        try {
+            Mail::to($email)->send(new NgoChatDraftResumeMail($draft, $resumeUrl, $ngoName));
+            $draft->forceFill(['resume_email_sent_at' => now()])->save();
+        } catch (\Throwable $e) {
+            report($e);
+        }
+    }
+
+    /**
      * Get city ID by name (helper method)
      */
     private function getCityIdByName($cityName, $stateId = null)
     {
-        if (!$cityName) {
+        if (! $cityName) {
             return null;
         }
 
@@ -527,11 +690,12 @@ class MultiRoleRegistrationController extends Controller
 
     private function getStateIdByName($stateName)
     {
-        if (!$stateName) {
+        if (! $stateName) {
             return null;
         }
 
         $state = \App\Models\State::where('name', 'like', "%{$stateName}%")->first();
+
         return $state ? $state->id : null;
     }
 
@@ -677,6 +841,7 @@ class MultiRoleRegistrationController extends Controller
             'note' => 'Free public verification is limited in India; this is a pre-verification assist and does not replace admin approval.',
         ];
     }
+
     public function registerNGO(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -689,52 +854,52 @@ class MultiRoleRegistrationController extends Controller
             'website' => 'nullable|url|max:255',
             'address' => 'required|string|max:500',
             'city_id' => 'required|exists:cities,id',
-            
+
             // Organization Details
             'description' => 'required|string|max:2000',
             'focus_areas' => 'required|array|min:1',
             'focus_areas.*' => 'string',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
-            'year_established' => 'nullable|integer|min:1900|max:' . date('Y'),
+            'year_established' => 'nullable|integer|min:1900|max:'.date('Y'),
             'team_size' => 'nullable|string',
-            
+
             // Bank Account
             'bank_account.account_holder_name' => 'required|string|max:255',
             'bank_account.bank_name' => 'required|string|max:255',
             'bank_account.account_number' => 'required|string|max:50',
             'bank_account.ifsc_code' => 'required|string|max:20',
             'bank_account.branch_name' => 'required|string|max:255',
-            
+
             // Payment Gateways
             'payment_gateways' => 'nullable|array',
             'payment_gateways.*' => 'string|in:razorpay,phonepe,stripe',
-            
+
             // Admin Contact
             'admin_contact.name' => 'required|string|max:255',
             'admin_contact.email' => 'required|email|max:255',
             'admin_contact.phone' => 'required|string|max:20',
-            
+
             // Documents
             'documents.registration_certificate' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'documents.pan_card' => 'required|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'documents.eightyg_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
-            
+
             // Terms
-            'accept_terms' => 'required|accepted'
+            'accept_terms' => 'required|accepted',
         ]);
 
         if ($validator->fails()) {
             return back()->withErrors($validator)
-                     ->withInput();
+                ->withInput();
         }
 
         // Generate slug from NGO name
         $slug = Str::slug($request->name);
         $originalSlug = $slug;
         $counter = 1;
-        
+
         while (NGO::where('slug', $slug)->exists()) {
-            $slug = $originalSlug . '-' . $counter;
+            $slug = $originalSlug.'-'.$counter;
             $counter++;
         }
 
@@ -752,7 +917,7 @@ class MultiRoleRegistrationController extends Controller
             'description' => $request->description,
             'focus_areas' => $request->focus_areas,
             'verification_status' => 'pending',
-            'is_active' => false
+            'is_active' => false,
         ]);
 
         // Handle logo upload
@@ -769,7 +934,7 @@ class MultiRoleRegistrationController extends Controller
                 'account_number' => $request->bank_account['account_number'],
                 'ifsc_code' => $request->bank_account['ifsc_code'],
                 'branch_name' => $request->bank_account['branch_name'],
-                'is_primary' => true
+                'is_primary' => true,
             ]);
         }
 
@@ -779,7 +944,7 @@ class MultiRoleRegistrationController extends Controller
                 $ngo->paymentGateways()->create([
                     'gateway_name' => $gateway,
                     'is_active' => false, // Will be activated after configuration
-                    'credentials' => json_encode([])
+                    'credentials' => json_encode([]),
                 ]);
             }
         }
@@ -788,14 +953,14 @@ class MultiRoleRegistrationController extends Controller
         $documentTypes = [
             'registration_certificate' => 'registration_certificate',
             'pan_card' => 'pan_card',
-            'eightyg_certificate' => '80g_certificate'
+            'eightyg_certificate' => '80g_certificate',
         ];
 
         foreach ($documentTypes as $field => $type) {
             if ($request->hasFile("documents.{$field}")) {
                 $document = $request->file("documents.{$field}");
                 $path = $document->store('ngo_documents', 'public');
-                
+
                 $ngo->documents()->create([
                     'document_type' => $type,
                     'file_path' => $path,
@@ -812,14 +977,14 @@ class MultiRoleRegistrationController extends Controller
             'phone' => $request->admin_contact['phone'],
             'password' => Hash::make(Str::random(10)), // Will be emailed
             'role' => 'ngo_admin',
-            'ngo_id' => $ngo->id
+            'ngo_id' => $ngo->id,
         ]);
 
         // Create NGO user relationship
         $ngo->users()->create([
             'user_id' => $user->id,
             'role' => 'admin',
-            'is_active' => true
+            'is_active' => true,
         ]);
 
         // Generate NGO website
@@ -829,7 +994,7 @@ class MultiRoleRegistrationController extends Controller
         // TODO: Implement email sending
 
         event(new Registered($user));
-        
+
         Auth::login($user);
 
         return redirect()->route('ngo.dashboard')
@@ -872,13 +1037,13 @@ class MultiRoleRegistrationController extends Controller
 
         if ($validator->fails()) {
             return back()->withErrors($validator)
-                     ->withInput();
+                ->withInput();
         }
 
         // Verify OTP
-        if (!$this->verifyOTP($request->phone, $request->otp_code)) {
+        if (! $this->verifyOTP($request->phone, $request->otp_code)) {
             return back()->with('error', 'Invalid OTP code')
-                     ->withInput();
+                ->withInput();
         }
 
         // Create Corporate entity
@@ -901,7 +1066,7 @@ class MultiRoleRegistrationController extends Controller
             'contact_person_phone' => $request->contact_person_phone,
             'contact_person_email' => $request->contact_person_email,
             'gst_number' => $request->gst_number,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         // Handle document uploads
@@ -912,7 +1077,7 @@ class MultiRoleRegistrationController extends Controller
                     'file_path' => $path,
                     'file_name' => $document->getClientOriginalName(),
                     'file_type' => $document->getClientOriginalExtension(),
-                    'file_size' => $document->getSize()
+                    'file_size' => $document->getSize(),
                 ]);
             }
         }
@@ -940,7 +1105,7 @@ class MultiRoleRegistrationController extends Controller
         $user->assignRole('Corporate CSR Manager');
 
         event(new Registered($user));
-        
+
         Auth::login($user);
 
         return redirect()->route('dashboard')->with('success', 'Corporate account created successfully!');
@@ -982,13 +1147,13 @@ class MultiRoleRegistrationController extends Controller
 
         if ($validator->fails()) {
             return back()->withErrors($validator)
-                     ->withInput();
+                ->withInput();
         }
 
         // Verify OTP
-        if (!$this->verifyOTP($request->phone, $request->otp_code)) {
+        if (! $this->verifyOTP($request->phone, $request->otp_code)) {
             return back()->with('error', 'Invalid OTP code')
-                     ->withInput();
+                ->withInput();
         }
 
         // Create user account
@@ -1020,7 +1185,7 @@ class MultiRoleRegistrationController extends Controller
             'emergency_contact_phone' => $request->emergency_contact_phone,
             'emergency_contact_relation' => $request->emergency_contact_relation,
             'motivation' => $request->motivation,
-            'status' => 'active'
+            'status' => 'active',
         ]);
 
         // Attach skills and interests
@@ -1032,7 +1197,7 @@ class MultiRoleRegistrationController extends Controller
         $user->assignRole('volunteer');
 
         event(new Registered($user));
-        
+
         Auth::login($user);
 
         return redirect()->route('dashboard')->with('success', 'Volunteer registration successful!');
@@ -1061,6 +1226,9 @@ class MultiRoleRegistrationController extends Controller
                 ));
                 $emailSent = true;
             }
+
+            // New OTP invalidates a prior wizard verification for this browser session.
+            session()->forget(['ngo_chat_otp_verified_phone', 'ngo_chat_otp_verified_at']);
 
             return response()->json([
                 'success' => true,
@@ -1101,6 +1269,79 @@ class MultiRoleRegistrationController extends Controller
         return app(OtpService::class)->verify($phone, $otp);
     }
 
+    private function ngoChatOtpSessionMatches(string $normalizedPhone): bool
+    {
+        $verifiedPhone = session('ngo_chat_otp_verified_phone');
+        $verifiedAt = (int) session('ngo_chat_otp_verified_at', 0);
+        if (! is_string($verifiedPhone) || $verifiedPhone === '' || $verifiedPhone !== $normalizedPhone) {
+            return false;
+        }
+        if ($verifiedAt <= 0 || (now()->timestamp - $verifiedAt) > 7200) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * When founder email differs from the NGO’s official email, create (or update) a second
+     * ngo_admin user linked to the same NGO so the founder can sign in with the same PIN.
+     */
+    private function createFounderNgoAdminIfNeeded(Request $request, NGO $ngo, string $plainLoginPin): void
+    {
+        if (! $request->filled('founder_email')) {
+            return;
+        }
+
+        if (strcasecmp(trim((string) $request->founder_email), trim((string) $request->email)) === 0) {
+            return;
+        }
+
+        $founderUser = User::query()->firstOrNew(['email' => $request->founder_email]);
+
+        $founderUser->fill([
+            'name' => trim((string) $request->founder_name).' (Founder)',
+            'first_name' => $request->founder_name,
+            'last_name' => null,
+            'email' => $request->founder_email,
+            'phone' => $request->founder_phone,
+            'user_type' => 'ngo',
+            'ngo_id' => $ngo->id,
+            'is_active' => true,
+            'email_verified_at' => now(),
+            'phone_verified_at' => now(),
+        ]);
+        $founderUser->password = Hash::make($plainLoginPin);
+        $founderUser->save();
+
+        try {
+            if (! $founderUser->hasRole('ngo_admin')) {
+                $founderUser->assignRole('ngo_admin');
+            }
+        } catch (\Throwable $e) {
+            // Role seed may be missing in some environments.
+        }
+
+        try {
+            Mail::to($founderUser->email)->send(new WelcomeNgoMail($ngo, $founderUser));
+        } catch (\Throwable $e) {
+            //
+        }
+
+        try {
+            $founderCredentials = new RegistrationCredentialsMail($founderUser, $plainLoginPin);
+            $founderCredentials->withSymfonyMessage(function ($message) {
+                $headers = $message->getHeaders();
+                $headers->addTextHeader('X-Priority', '1 (Highest)');
+                $headers->addTextHeader('X-MSMail-Priority', 'High');
+                $headers->addTextHeader('Importance', 'High');
+            });
+            Mail::to($founderUser->email)->send($founderCredentials);
+        } catch (\Throwable $e) {
+            //
+        }
+    }
+
     private function detectUploadErrorForNgoDocs(): ?array
     {
         $fieldMap = [
@@ -1109,7 +1350,7 @@ class MultiRoleRegistrationController extends Controller
         ];
 
         foreach ($fieldMap as $fileField => $errorField) {
-            if (!isset($_FILES[$fileField])) {
+            if (! isset($_FILES[$fileField])) {
                 continue;
             }
 
@@ -1119,7 +1360,7 @@ class MultiRoleRegistrationController extends Controller
             }
 
             $message = match ($error) {
-                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Upload failed: file exceeds server limit. Please use a file under 2 MB.',
+                UPLOAD_ERR_INI_SIZE, UPLOAD_ERR_FORM_SIZE => 'Upload failed: file exceeds server limit. Please use a file under 5 MB (PDF/JPG/PNG).',
                 UPLOAD_ERR_PARTIAL => 'Upload failed: file upload was interrupted. Please retry.',
                 UPLOAD_ERR_NO_FILE => 'Please select a file to upload.',
                 default => 'Upload failed due to server upload error. Please retry with a smaller file.',
@@ -1203,7 +1444,7 @@ class MultiRoleRegistrationController extends Controller
             'Wildlife Conservation',
             'Arts & Culture',
             'Social Justice',
-            'Technology for Good'
+            'Technology for Good',
         ];
     }
 
@@ -1222,7 +1463,7 @@ class MultiRoleRegistrationController extends Controller
     private function generateNGOHomePage($ngo, $websitePath)
     {
         $content = $this->getNGOWebsiteTemplate($ngo, 'home');
-        file_put_contents($websitePath . '/index.php', $content);
+        file_put_contents($websitePath.'/index.php', $content);
     }
 
     /**
@@ -1231,7 +1472,7 @@ class MultiRoleRegistrationController extends Controller
     private function generateNGOAboutPage($ngo, $websitePath)
     {
         $content = $this->getNGOWebsiteTemplate($ngo, 'about');
-        file_put_contents($websitePath . '/about.php', $content);
+        file_put_contents($websitePath.'/about.php', $content);
     }
 
     /**
@@ -1240,7 +1481,7 @@ class MultiRoleRegistrationController extends Controller
     private function generateNGOContactPage($ngo, $websitePath)
     {
         $content = $this->getNGOWebsiteTemplate($ngo, 'contact');
-        file_put_contents($websitePath . '/contact.php', $content);
+        file_put_contents($websitePath.'/contact.php', $content);
     }
 
     /**
@@ -1248,16 +1489,16 @@ class MultiRoleRegistrationController extends Controller
      */
     private function getNGOWebsiteTemplate($ngo, $page)
     {
-        $logoUrl = $ngo->logo ? asset('storage/' . $ngo->logo) : asset('images/default-ngo-logo.png');
+        $logoUrl = $ngo->logo ? asset('storage/'.$ngo->logo) : asset('images/default-ngo-logo.png');
         $focusAreas = is_array($ngo->focus_areas) ? implode(', ', $ngo->focus_areas) : '';
-        
+
         $header = "
 <!DOCTYPE html>
 <html lang=\"en\">
 <head>
     <meta charset=\"UTF-8\">
     <meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\">
-    <title>{$ngo->name} - " . ($page === 'home' ? 'Home' : ucfirst($page)) . "</title>
+    <title>{$ngo->name} - ".($page === 'home' ? 'Home' : ucfirst($page))."</title>
     <meta name=\"description\" content=\"{$ngo->name} - {$ngo->description}\">
     <link href=\"https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css\" rel=\"stylesheet\">
     <link href=\"https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css\" rel=\"stylesheet\">
@@ -1303,7 +1544,7 @@ class MultiRoleRegistrationController extends Controller
                 </div>
             </div>
             <div class=\"border-t border-gray-700 mt-8 pt-8 text-center\">
-                <p class=\"text-gray-400\">&copy; " . date('Y') . " {$ngo->name}. All rights reserved.</p>
+                <p class=\"text-gray-400\">&copy; ".date('Y')." {$ngo->name}. All rights reserved.</p>
                 <p class=\"text-gray-400 text-sm mt-2\">Powered by <a href=\"https://fevourd-k.org\" class=\"text-blue-400 hover:text-blue-300\">FEVOURD-K</a></p>
             </div>
         </div>
@@ -1380,12 +1621,12 @@ class MultiRoleRegistrationController extends Controller
                         <div class=\"text-center p-4 bg-blue-50 rounded-lg\">
                             <i class=\"fas fa-calendar text-blue-600 text-2xl mb-2\"></i>
                             <p class=\"font-semibold\">Founded</p>
-                            <p class=\"text-gray-600\">" . ($ngo->year_established ?? 'Unknown') . "</p>
+                            <p class=\"text-gray-600\">".($ngo->year_established ?? 'Unknown').'</p>
                         </div>
-                        <div class=\"text-center p-4 bg-green-50 rounded-lg\">
-                            <i class=\"fas fa-users text-green-600 text-2xl mb-2\"></i>
-                            <p class=\"font-semibold\">Team Size</p>
-                            <p class=\"text-gray-600\">" . ($ngo->team_size ?? 'Growing') . "</p>
+                        <div class="text-center p-4 bg-green-50 rounded-lg">
+                            <i class="fas fa-users text-green-600 text-2xl mb-2"></i>
+                            <p class="font-semibold">Team Size</p>
+                            <p class="text-gray-600">'.($ngo->team_size ?? 'Growing')."</p>
                         </div>
                     </div>
                 </div>
@@ -1462,22 +1703,22 @@ class MultiRoleRegistrationController extends Controller
                                 <p class=\"text-gray-600\">{$ngo->address}</p>
                             </div>
                         </div>
-                        " . ($ngo->website ? "
+                        ".($ngo->website ? "
                         <div class=\"flex items-center space-x-4\">
                             <i class=\"fas fa-globe text-blue-600 text-xl\"></i>
                             <div>
                                 <p class=\"font-semibold\">Website</p>
                                 <p class=\"text-gray-600\"><a href=\"{$ngo->website}\" target=\"_blank\" class=\"text-blue-600 hover:underline\">{$ngo->website}</a></p>
                             </div>
-                        </div>" : '') . "
+                        </div>" : '').'
                     </div>
                 </div>
             </div>
         </div>
-    </section>";
+    </section>';
         }
 
-        return $header . $content . $footer;
+        return $header.$content.$footer;
     }
 
     /**
@@ -1485,7 +1726,7 @@ class MultiRoleRegistrationController extends Controller
      */
     private function generateFocusAreaCards($focusAreas)
     {
-        if (!is_array($focusAreas)) {
+        if (! is_array($focusAreas)) {
             return '';
         }
 
@@ -1500,7 +1741,7 @@ class MultiRoleRegistrationController extends Controller
             'Disaster Relief' => 'fa-life-ring',
             'Agriculture' => 'fa-tractor',
             'Skill Development' => 'fa-tools',
-            'Senior Citizens' => 'fa-user-friends'
+            'Senior Citizens' => 'fa-user-friends',
         ];
 
         foreach ($focusAreas as $area) {

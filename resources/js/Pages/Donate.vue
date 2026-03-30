@@ -141,27 +141,64 @@
                             </div>
                         </div>
 
-                        <!-- Payment Method -->
+                        <!-- Payment Method (admin-controlled) -->
                         <div>
                             <label class="block text-sm font-medium mb-3" :class="isStandaloneMode ? 'text-slate-700' : 'text-blue-200'">Payment Method</label>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <button type="button" @click="form.payment_method = 'razorpay'" :class="isStandaloneMode ? (form.payment_method === 'razorpay' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300') : (form.payment_method === 'razorpay' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-transparent' : 'bg-white/10 text-blue-200 border border-white/20')" class="inline-flex items-center justify-center px-4 py-3 rounded-xl border transition-all duration-200">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                            <p
+                                v-if="!hasAnyPaymentMethod"
+                                class="rounded-xl border px-4 py-3 text-sm"
+                                :class="isStandaloneMode ? 'border-amber-200 bg-amber-50 text-amber-900' : 'border-amber-400/40 bg-amber-500/10 text-amber-100'"
+                            >
+                                Online payment options are turned off right now. Please try again later or contact support.
+                            </p>
+                            <div v-else class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <button
+                                    v-if="paymentMethods.razorpay"
+                                    type="button"
+                                    @click="form.payment_method = 'razorpay'"
+                                    :class="paymentBtnClass('razorpay')"
+                                    class="inline-flex items-center justify-center rounded-xl border px-4 py-3 transition-all duration-200"
+                                >
+                                    <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41 1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                     </svg>
                                     Razorpay
                                 </button>
-                                <button type="button" @click="form.payment_method = 'upi'" :class="isStandaloneMode ? (form.payment_method === 'upi' ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-slate-700 border-slate-300') : (form.payment_method === 'upi' ? 'bg-gradient-to-r from-blue-600 to-purple-600 text-white border-transparent' : 'bg-white/10 text-blue-200 border border-white/20')" class="inline-flex items-center justify-center px-4 py-3 rounded-xl border transition-all duration-200">
-                                    <svg class="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                                <button
+                                    v-if="paymentMethods.upi"
+                                    type="button"
+                                    @click="form.payment_method = 'upi'"
+                                    :class="paymentBtnClass('upi')"
+                                    class="inline-flex items-center justify-center rounded-xl border px-4 py-3 transition-all duration-200"
+                                >
+                                    <svg class="mr-2 h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
                                         <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41 1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
                                     </svg>
                                     UPI
+                                </button>
+                                <button
+                                    v-if="paymentMethods.phonepe"
+                                    type="button"
+                                    @click="form.payment_method = 'phonepe'"
+                                    :class="paymentBtnClass('phonepe')"
+                                    class="inline-flex items-center justify-center rounded-xl border px-4 py-3 transition-all duration-200"
+                                >
+                                    PhonePe
+                                </button>
+                                <button
+                                    v-if="paymentMethods.stripe"
+                                    type="button"
+                                    @click="form.payment_method = 'stripe'"
+                                    :class="paymentBtnClass('stripe')"
+                                    class="inline-flex items-center justify-center rounded-xl border px-4 py-3 transition-all duration-200"
+                                >
+                                    Stripe
                                 </button>
                             </div>
                         </div>
 
                         <!-- Submit Button -->
-                        <button type="submit" :disabled="!form.campaign_id || !form.amount || !form.name || !form.email || !form.payment_method || processing" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
+                        <button type="submit" :disabled="!form.campaign_id || !form.amount || !form.name || !form.email || !hasAnyPaymentMethod || !form.payment_method || processing" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-6 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-300 transform hover:scale-105">
                             <span class="flex items-center justify-center">
                                 <svg v-if="!processing" class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -205,12 +242,21 @@
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 
 const props = defineProps({
-    featuredCampaigns: Array
+    featuredCampaigns: Array,
+    paymentMethods: {
+        type: Object,
+        default: () => ({
+            razorpay: true,
+            upi: true,
+            phonepe: false,
+            stripe: false,
+        }),
+    },
 })
 const page = usePage()
 
@@ -219,13 +265,46 @@ const form = ref({
     amount: '',
     name: '',
     email: '',
-    payment_method: ''
+    payment_method: '',
 })
+
+const paymentMethodOrder = ['razorpay', 'upi', 'phonepe', 'stripe']
+
+const hasAnyPaymentMethod = computed(() =>
+    paymentMethodOrder.some((key) => props.paymentMethods?.[key] === true)
+)
+
+function syncDefaultPaymentMethod() {
+    const pm = form.value.payment_method
+    if (pm && props.paymentMethods?.[pm]) {
+        return
+    }
+    const first = paymentMethodOrder.find((key) => props.paymentMethods?.[key])
+    form.value.payment_method = first || ''
+}
+
+watch(
+    () => props.paymentMethods,
+    () => syncDefaultPaymentMethod(),
+    { deep: true }
+)
 
 const processing = ref(false)
 const isStandaloneMode = ref(
     window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true
 )
+
+const paymentBtnClass = (method) => {
+    const active = form.value.payment_method === method
+    if (isStandaloneMode.value) {
+        return active
+            ? 'bg-blue-600 text-white border-blue-600'
+            : 'bg-white text-slate-700 border-slate-300'
+    }
+    return active
+        ? 'border-transparent bg-gradient-to-r from-blue-600 to-purple-600 text-white'
+        : 'border border-white/20 bg-white/10 text-blue-200'
+}
 const campaignSearch = ref('')
 
 const filteredFeaturedCampaigns = computed(() => {
@@ -241,6 +320,7 @@ const filteredFeaturedCampaigns = computed(() => {
 })
 
 onMounted(() => {
+    syncDefaultPaymentMethod()
     const user = page.props.auth?.user
     if (user) {
         form.value.name = user.name || ''
@@ -257,7 +337,6 @@ const processDonation = async () => {
         if (form.value.payment_method === 'razorpay') {
             await initiateRazorpayPayment()
         } else {
-            // Handle other payment methods
             await router.post('/donations/process', form.value)
         }
     } catch (error) {

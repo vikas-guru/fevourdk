@@ -111,7 +111,7 @@ class User extends Authenticatable
 
     public function ngoUser(): HasOne
     {
-        return $this->hasOne(NGOUser::class);
+        return $this->hasOne(NGOUser::class)->whereColumn('ngo_users.ngo_id', 'users.ngo_id');
     }
 
     public function corporateUser(): HasOne

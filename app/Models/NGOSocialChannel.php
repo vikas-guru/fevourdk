@@ -10,6 +10,8 @@ class NGOSocialChannel extends Model
 {
     use HasFactory;
 
+    protected $table = 'ngo_social_channels';
+
     protected $fillable = [
         'ngo_id',
         'platform',
@@ -25,6 +27,11 @@ class NGOSocialChannel extends Model
         'token_expires_at' => 'datetime',
         'auto_post_enabled' => 'boolean',
         'meta' => 'array',
+    ];
+
+    protected $hidden = [
+        'access_token',
+        'refresh_token',
     ];
 
     public function ngo(): BelongsTo

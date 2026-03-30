@@ -214,9 +214,11 @@
                     </Link>
                 </div>
 
-                <!-- Notifications -->
-                <div v-if="currentUser" class="relative">
+                <!-- Notifications + account menu (desktop; was v-if/v-else-if bug — profile never showed) -->
+                <div v-if="currentUser && !isInstalledPwa" class="hidden lg:flex items-center gap-1 shrink-0">
+                <div class="relative">
                     <button
+                        type="button"
                         @click="toggleNotifications"
                         class="p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-colors relative"
                         aria-label="Open notifications"
@@ -276,15 +278,26 @@
                     </transition>
                 </div>
 
-                <!-- Logged User (Desktop Only) -->
-                <div v-else-if="currentUser && !isInstalledPwa" class="hidden lg:relative">
+                <div class="relative profile-menu-root">
                     <button
+                        type="button"
+                        class="flex items-center gap-1.5 rounded-full pl-1 pr-2 py-1 bg-white/10 backdrop-blur-sm border border-white/25 hover:bg-white/20 transition-all ring-offset-2 ring-offset-blue-700 focus:outline-none focus:ring-2 focus:ring-white/50"
+                        aria-label="Account menu"
+                        :aria-expanded="showUserMenu"
                         @click="toggleUser"
-                        class="user-button-modern"
                     >
-                        <div class="w-10 h-10 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center shadow-lg">
-                            <span class="text-white font-bold text-lg">{{ $page.props.auth.user.name.charAt(0).toUpperCase() }}</span>
-                        </div>
+                        <span class="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-amber-400 to-orange-500 shadow-md ring-2 ring-white/30">
+                            <img
+                                v-if="headerAvatarUrl"
+                                :src="headerAvatarUrl"
+                                alt=""
+                                class="h-full w-full object-cover"
+                            >
+                            <span v-else class="text-sm font-bold text-white">{{ userInitial }}</span>
+                        </span>
+                        <svg class="hidden h-4 w-4 text-white/90 sm:block" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        </svg>
                     </button>
 
                     <transition
@@ -297,62 +310,198 @@
                     >
                         <div
                             v-if="showUserMenu"
-                            class="absolute right-0 mt-3 w-80 bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl ring-2 ring-blue-500/20 z-[999] border border-white/50"
+                            class="absolute right-0 mt-2 w-[min(100vw-1.5rem,22rem)] bg-white rounded-2xl shadow-2xl ring-2 ring-blue-500/20 z-[999] border border-slate-100 overflow-hidden flex flex-col max-h-[min(92vh,36rem)]"
                         >
-                            <div class="p-6 border-b border-gray-100">
-                                <div class="flex items-center space-x-4">
-                                    <div class="w-12 h-12 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-full flex items-center justify-center">
-                                        <span class="text-white font-bold text-xl">{{ $page.props.auth.user.name.charAt(0).toUpperCase() }}</span>
+                            <div class="shrink-0 bg-gradient-to-br from-blue-600 to-indigo-700 px-4 py-3.5 text-white">
+                                <div class="flex items-center gap-3">
+                                    <span class="flex h-11 w-11 shrink-0 items-center justify-center overflow-hidden rounded-full bg-white/20 ring-2 ring-white/40">
+                                        <img
+                                            v-if="headerAvatarUrl"
+                                            :src="headerAvatarUrl"
+                                            alt=""
+                                            class="h-full w-full object-cover"
+                                        >
+                                        <span v-else class="text-base font-bold leading-none">{{ userInitial }}</span>
+                                    </span>
+                                    <div class="min-w-0 flex-1 space-y-1">
+                                        <p class="truncate text-sm font-semibold leading-tight tracking-tight text-white">
+                                            {{ currentUser.name }}
+                                        </p>
+                                        <p class="truncate text-xs leading-snug text-blue-100/95">
+                                            {{ currentUser.email }}
+                                        </p>
+                                        <span class="inline-flex w-fit rounded-full bg-white/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-white/95">
+                                            {{ primaryRoleLabel }}
+                                        </span>
                                     </div>
-                                    <div>
-                                        <p class="font-semibold text-gray-900 text-lg">{{ $page.props.auth.user.name }}</p>
-                                        <p class="text-sm text-gray-500">{{ $page.props.auth.user.email }}</p>
+                                </div>
+                                <div
+                                    v-if="profileMeta"
+                                    class="mt-3 flex items-center justify-between gap-3 border-t border-white/15 pt-3 text-[11px] leading-none text-blue-100"
+                                >
+                                    <div class="min-w-0">
+                                        <span class="text-white/65">Profile</span>
+                                        <span class="ml-1 font-semibold tabular-nums text-white">{{ profileMeta.completion_percent ?? 0 }}%</span>
+                                    </div>
+                                    <div class="h-3 w-px shrink-0 bg-white/25" aria-hidden="true" />
+                                    <div class="min-w-0 text-right">
+                                        <span class="text-white/65">Cause points</span>
+                                        <span class="ml-1 font-semibold tabular-nums text-white">{{ profileMeta.social_cause_points ?? 0 }}</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <div class="p-2">
-                                <Link :href="getDashboardUrl()" class="dropdown-item-modern">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mr-4">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <div class="account-dropdown-scroll min-h-0 flex-1 overflow-y-auto overscroll-contain p-1.5">
+                                <p class="px-2.5 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">Go to</p>
+                                <Link :href="getDashboardUrl()" :class="accountMenuItemClass(getDashboardUrl())" @click="showUserMenu = false">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7 7 7-7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div class="font-semibold text-gray-900">Dashboard</div>
-                                        <div class="text-xs text-gray-500">Your control panel</div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-semibold leading-snug text-slate-900">Dashboard</div>
+                                        <div class="mt-0.5 text-xs leading-snug text-slate-500">Your workspace home</div>
+                                    </div>
+                                </Link>
+                                <Link href="/feeds" :class="accountMenuItemClass('/feeds')" @click="showUserMenu = false">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-sky-100 text-sky-700">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 8h10M7 12h8m-8 4h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-semibold leading-snug text-slate-900">Live NGO feeds</div>
+                                        <div class="mt-0.5 text-xs leading-snug text-slate-500">Community updates &amp; map</div>
                                     </div>
                                 </Link>
 
-                                <Link href="/profile" class="dropdown-item-modern">
-                                    <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mr-4">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <template v-if="isRole(['ngo_admin', 'ngo_staff'])">
+                                    <div class="my-2 border-t border-slate-100" />
+                                    <p class="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">NGO</p>
+                                    <Link href="/ngo/post-update" :class="accountMenuItemClass('/ngo/post-update')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">Post an update</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Publish to the live feed</div>
+                                        </div>
+                                    </Link>
+                                    <Link href="/ngo/feed-studio" :class="accountMenuItemClass('/ngo/feed-studio')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-violet-100 text-violet-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">Feed studio</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Views, likes &amp; SEO</div>
+                                        </div>
+                                    </Link>
+                                    <Link href="/ngo/dashboard" :class="accountMenuItemClass('/ngo/dashboard')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7 7 7-7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">NGO workspace</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Campaigns, donations &amp; more</div>
+                                        </div>
+                                    </Link>
+                                </template>
+
+                                <template v-if="isRole(['donor'])">
+                                    <div class="my-2 border-t border-slate-100" />
+                                    <Link href="/donor/dashboard" :class="accountMenuItemClass('/donor/dashboard')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">Donor dashboard</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Giving history</div>
+                                        </div>
+                                    </Link>
+                                </template>
+
+                                <template v-if="isRole(['corporate_csr_manager'])">
+                                    <div class="my-2 border-t border-slate-100" />
+                                    <Link href="/csr/dashboard" :class="accountMenuItemClass('/csr/dashboard')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-teal-100 text-teal-700">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">CSR dashboard</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Corporate programmes</div>
+                                        </div>
+                                    </Link>
+                                </template>
+
+                                <template v-if="isRole(['super_admin', 'state_admin'])">
+                                    <div class="my-2 border-t border-slate-100" />
+                                    <Link href="/admin/dashboard" :class="accountMenuItemClass('/admin/dashboard')" @click="showUserMenu = false">
+                                        <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-200 text-slate-800">
+                                            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                        </div>
+                                        <div class="min-w-0 flex-1">
+                                            <div class="text-sm font-semibold leading-snug text-slate-900">Admin</div>
+                                            <div class="mt-0.5 text-xs leading-snug text-slate-500">Platform management</div>
+                                        </div>
+                                    </Link>
+                                </template>
+
+                                <div class="my-2 border-t border-slate-100" />
+                                <p class="px-2.5 pb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Account</p>
+                                <Link href="/profile" :class="accountMenuItemClass('/profile')" @click="showUserMenu = false">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-purple-100 text-purple-700">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                         </svg>
                                     </div>
-                                    <div>
-                                        <div class="font-semibold text-gray-900">Profile</div>
-                                        <div class="text-xs text-gray-500">Manage your info</div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-semibold leading-snug text-slate-900">Profile</div>
+                                        <div class="mt-0.5 text-xs leading-snug text-slate-500">Name, photo &amp; details</div>
+                                    </div>
+                                </Link>
+                                <Link href="/settings" :class="accountMenuItemClass('/settings')" @click="showUserMenu = false">
+                                    <div class="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-700">
+                                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                        </svg>
+                                    </div>
+                                    <div class="min-w-0 flex-1">
+                                        <div class="text-sm font-semibold leading-snug text-slate-900">Settings</div>
+                                        <div class="mt-0.5 text-xs leading-snug text-slate-500">Preferences &amp; security</div>
                                     </div>
                                 </Link>
 
-                                <button
-                                    @click="logout"
-                                    class="dropdown-item-modern w-full text-left"
-                                >
-                                    <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center mr-4">
-                                        <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4 4m4-4H3m6 4h18a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2-2v12a2 2 0 002 2z" />
+                                <div class="mt-2 border-t border-slate-100 p-1.5">
+                                    <button
+                                        type="button"
+                                        class="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-red-600 transition hover:bg-red-50"
+                                        @click="logoutFromMenu"
+                                    >
+                                        <svg class="h-5 w-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                                         </svg>
-                                    </div>
-                                    <div>
-                                        <div class="font-semibold text-red-600">Logout</div>
-                                        <div class="text-xs text-gray-500">Sign out of account</div>
-                                    </div>
-                                </button>
+                                        Log out
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </transition>
+                </div>
                 </div>
 
             </div>
@@ -812,6 +961,47 @@ const profileAvatarShellClass = computed(() => {
 
 const isRole = (roleNames = []) => roleNames.some((roleName) => currentRoles.value.includes(roleName))
 
+const headerAvatarUrl = computed(() => {
+    const a = currentUser.value?.avatar
+    if (!a) {
+        return null
+    }
+    const s = String(a)
+    if (s.startsWith('http://') || s.startsWith('https://')) {
+        return s
+    }
+    if (s.startsWith('/')) {
+        return s
+    }
+
+    return `/storage/${s}`
+})
+
+const userInitial = computed(() => {
+    const n = currentUser.value?.name?.trim() || '?'
+
+    return n.charAt(0).toUpperCase()
+})
+
+const primaryRoleLabel = computed(() => {
+    const roles = currentRoles.value
+    const map = {
+        super_admin: 'Admin',
+        state_admin: 'State admin',
+        ngo_admin: 'NGO admin',
+        ngo_staff: 'NGO member',
+        donor: 'Donor',
+        corporate_csr_manager: 'CSR',
+    }
+    for (const r of roles) {
+        if (map[r]) {
+            return map[r]
+        }
+    }
+
+    return roles[0] ? String(roles[0]).replace(/_/g, ' ') : 'Member'
+})
+
 const roleBasedMobileTabs = computed(() => {
     const tabs = [
         { label: 'Home', href: getDashboardUrl(), key: 'dashboard' },
@@ -1016,6 +1206,11 @@ const logout = () => {
     router.post('/logout')
 }
 
+const logoutFromMenu = () => {
+    showUserMenu.value = false
+    logout()
+}
+
 const toggleNotifications = () => {
     showNotificationMenu.value = !showNotificationMenu.value
     showUserMenu.value = false
@@ -1056,6 +1251,7 @@ const getDashboardUrl = () => {
 
 const handleClickOutside = (event) => {
     if (!event.target.closest('.mobile-menu-container') &&
+        !event.target.closest('.profile-menu-root') &&
         !event.target.closest('a') &&
         !event.target.closest('button')) {
         showUserMenu.value = false
@@ -1072,6 +1268,12 @@ const isActiveLink = (href) => {
         return currentPath.value === '/dashboard'
     }
     return currentPath.value === href || currentPath.value.startsWith(`${href}/`)
+}
+
+const accountMenuItemClass = (href) => {
+    const base = 'account-menu-item'
+
+    return isActiveLink(href) ? `${base} account-menu-item--active` : base
 }
 
 const updateViewportFlags = () => {
@@ -1135,6 +1337,36 @@ watch(profileAvatarLottiePath, () => {
 
 .dropdown-item-modern {
     @apply flex items-center p-4 hover:bg-gray-50 rounded-xl transition-all duration-200 cursor-pointer;
+}
+
+.account-menu-item {
+    @apply flex items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-all duration-200;
+}
+
+.account-menu-item > :first-child {
+    @apply mt-0.5 shrink-0;
+}
+
+.account-menu-item:hover {
+    @apply bg-slate-50;
+}
+
+.account-menu-item--active {
+    @apply bg-blue-50/90 ring-1 ring-blue-100/90;
+}
+
+.account-dropdown-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: rgb(203 213 225) transparent;
+}
+
+.account-dropdown-scroll::-webkit-scrollbar {
+    width: 5px;
+}
+
+.account-dropdown-scroll::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background-color: rgb(203 213 225);
 }
 
 .btn-primary {

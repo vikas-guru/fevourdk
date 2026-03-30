@@ -70,46 +70,65 @@ class DashboardController extends Controller
             ->take(5)
             ->get(['id', 'title', 'ngo_id', 'target_amount', 'raised_amount']);
 
-        $userRoleDistribution = DB::table('model_has_roles')
-            ->join('roles', 'model_has_roles.role_id', '=', 'roles.id')
-            ->selectRaw('roles.name as role, COUNT(*) as count')
-            ->groupBy('roles.name')
-            ->get();
-
-        $pageVisits = DB::table('analytics_page_views')
+        $totalPageViews = (int) DB::table('analytics_page_views')
             ->where('viewed_at', '>=', now()->subDays(30))
-            ->selectRaw('DATE(viewed_at) as date, COUNT(*) as visits')
-            ->groupBy('date')
-            ->orderBy('date', 'desc')
-            ->take(30)
-            ->get();
+            ->count();
 
-        $totalPageViews = $pageVisits->sum('visits');
-        $avgDailyPageViews = $pageVisits->count() > 0 ? round($totalPageViews / $pageVisits->count()) : 0;
-
-        $userRegistrationTrends = User::selectRaw('
-                DATE_FORMAT(created_at, "%Y-%m") as month,
-                COUNT(*) as count
-            ')
-            ->where('created_at', '>=', now()->subMonths(6))
-            ->groupBy('month')
-            ->orderBy('month')
-            ->get();
-
-        $topPaths = DB::table('analytics_page_views')
-            ->selectRaw('path, COUNT(*) as visits')
+        $daysWithViews = (int) DB::table('analytics_page_views')
             ->where('viewed_at', '>=', now()->subDays(30))
-            ->groupBy('path')
-            ->orderByDesc('visits')
-            ->limit(10)
-            ->get();
+            ->selectRaw('COUNT(DISTINCT DATE(viewed_at)) as aggregate')
+            ->value('aggregate');
 
-        $deviceDistribution = DB::table('analytics_page_views')
-            ->selectRaw('COALESCE(device_type, "unknown") as device_type, COUNT(*) as count')
-            ->where('viewed_at', '>=', now()->subDays(30))
-            ->groupBy('device_type')
-            ->orderByDesc('count')
-            ->get();
+        $avgDailyPageViews = $daysWithViews > 0 ? (int) round($totalPageViews / $daysWithViews) : 0;
+
+        $mapUsers = User::query()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->where('longitude', '!=', 0)
+            ->with('roles')
+            ->orderByDesc('updated_at')
+            ->limit(5000)
+            ->get([
+                'id', 'name', 'email', 'user_type', 'is_active', 'latitude', 'longitude',
+                'district_name', 'state_name', 'email_verified_at', 'last_login_at',
+            ])
+            ->map(static function (User $u) {
+                return [
+                    'id' => $u->id,
+                    'name' => $u->name,
+                    'email' => $u->email,
+                    'user_type' => $u->user_type,
+                    'is_active' => (bool) $u->is_active,
+                    'latitude' => (float) $u->latitude,
+                    'longitude' => (float) $u->longitude,
+                    'district_name' => $u->district_name,
+                    'state_name' => $u->state_name,
+                    'email_verified' => $u->email_verified_at !== null,
+                    'roles' => $u->roles->pluck('name')->values()->all(),
+                    'last_login_at' => $u->last_login_at?->toIso8601String(),
+                ];
+            });
+
+        $mapNgos = NGO::query()
+            ->whereNotNull('latitude')
+            ->whereNotNull('longitude')
+            ->where('latitude', '!=', 0)
+            ->where('longitude', '!=', 0)
+            ->orderByDesc('updated_at')
+            ->limit(2000)
+            ->get(['id', 'name', 'email', 'verification_status', 'latitude', 'longitude', 'is_active'])
+            ->map(static function (NGO $n) {
+                return [
+                    'id' => $n->id,
+                    'name' => $n->name,
+                    'email' => $n->email,
+                    'verification_status' => $n->verification_status,
+                    'is_active' => (bool) $n->is_active,
+                    'latitude' => (float) $n->latitude,
+                    'longitude' => (float) $n->longitude,
+                ];
+            });
 
         return Inertia::render('Admin/DashboardSimple', [
             'stats' => $stats,
@@ -121,13 +140,10 @@ class DashboardController extends Controller
             'monthlyDonations' => $monthlyDonations,
             'ngoStatusDistribution' => $ngoStatusDistribution,
             'topCampaigns' => $topCampaigns,
-            'userRoleDistribution' => $userRoleDistribution,
-            'pageVisits' => $pageVisits,
             'totalPageViews' => $totalPageViews,
             'avgDailyPageViews' => $avgDailyPageViews,
-            'userRegistrationTrends' => $userRegistrationTrends,
-            'topPaths' => $topPaths,
-            'deviceDistribution' => $deviceDistribution,
+            'mapUsers' => $mapUsers,
+            'mapNgos' => $mapNgos,
         ]);
     }
 }

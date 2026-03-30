@@ -49,4 +49,14 @@ return [
         ],
     ],
 
+    /*
+    | IP geolocation for NGO login audit / policy (uses ip-api.com HTTP API; cache + timeout).
+    | Disable with IP_GEO_ENABLED=false if outbound HTTP is blocked.
+    */
+    'ip_geo' => [
+        'enabled' => env('IP_GEO_ENABLED', true),
+        'timeout' => env('IP_GEO_TIMEOUT', 2),
+        'cache_ttl' => env('IP_GEO_CACHE_TTL', 3600),
+    ],
+
 ];

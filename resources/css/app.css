@@ -2,6 +2,13 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Inertia mount: full-width shell (some themes mistakenly constrain #app) */
+#app {
+    width: 100%;
+    max-width: none;
+    min-height: 100dvh;
+}
+
 @layer components {
     .btn-primary {
         @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors;

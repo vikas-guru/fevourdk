@@ -10,7 +10,10 @@ import {
     ArrowRightOnRectangleIcon,
     ClipboardDocumentListIcon,
     BanknotesIcon,
-    DocumentTextIcon
+    DocumentTextIcon,
+    ChartBarSquareIcon,
+    CreditCardIcon,
+    MapPinIcon,
 } from '@heroicons/vue/24/outline'
 
 const page = usePage()
@@ -18,12 +21,15 @@ const user = computed(() => page.props.auth?.user || {})
 
 const navigation = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: HomeIcon },
+    { name: 'Analytics', href: '/admin/analytics', icon: ChartBarSquareIcon },
     { name: 'Programs & Activities', href: '/admin/programs', icon: DocumentTextIcon },
     { name: 'Users', href: '/admin/users', icon: UsersIcon },
     { name: 'Individuals', href: '/admin/individuals', icon: ClipboardDocumentListIcon },
     { name: 'NGOs', href: '/admin/ngos', icon: BuildingOfficeIcon },
+    { name: 'Field tasks', href: '/admin/field-tasks', icon: MapPinIcon },
     { name: 'Campaigns', href: '/admin/campaigns', icon: GiftIcon },
     { name: 'Donations', href: '/admin/donations', icon: BanknotesIcon },
+    { name: 'Payments', href: '/admin/payments', icon: CreditCardIcon },
     { name: 'Settings', href: '/admin/settings', icon: Cog6ToothIcon },
 ]
 

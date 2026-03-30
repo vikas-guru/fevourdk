@@ -4,22 +4,23 @@ namespace App\Http\Controllers\NGO;
 
 use App\Http\Controllers\Controller;
 use App\Models\NGOLedgerEntry;
+use App\Support\NgoWebsiteAnalytics;
 use Illuminate\Http\Request;
-use Inertia\Inertia;
 use Illuminate\Support\Facades\Auth;
+use Inertia\Inertia;
 
 class NGODashboardController extends Controller
 {
     /**
      * Display NGO dashboard
      */
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
         $ngo = $user->ngo;
 
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -31,7 +32,7 @@ class NGODashboardController extends Controller
             'thisMonth' => $ngo->donations()
                 ->where('status', 'completed')
                 ->whereMonth('created_at', now()->month)
-                ->sum('amount')
+                ->sum('amount'),
         ];
 
         // Get recent donations
@@ -47,7 +48,7 @@ class NGODashboardController extends Controller
                     'amount' => $donation->amount,
                     'donor_name' => $donation->donor ? $donation->donor->name : 'Anonymous',
                     'campaign_title' => $donation->campaign ? $donation->campaign->title : 'General Donation',
-                    'created_at' => $donation->created_at->toISOString()
+                    'created_at' => $donation->created_at->toISOString(),
                 ];
             });
 
@@ -59,6 +60,7 @@ class NGODashboardController extends Controller
                 'current_balance' => (float) ($ngo->ledgerEntries()->latest('id')->value('balance_after') ?? 0),
                 'entries_count' => $ngo->ledgerEntries()->count(),
             ],
+            'welcomeAfterRegistration' => (bool) $request->session()->pull('ngo_registration_welcome', false),
         ]);
     }
 
@@ -70,13 +72,30 @@ class NGODashboardController extends Controller
         $user = Auth::user();
         $ngo = $user->ngo;
 
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
+        $ngo->load(['city', 'documents', 'bankAccounts', 'paymentGateways']);
+
         return Inertia::render('NGO/Profile', [
-            'ngo' => $ngo->load(['city', 'documents', 'bankAccounts', 'paymentGateways'])
+            'ngo' => $ngo,
+            'websiteAnalytics' => NgoWebsiteAnalytics::summary($ngo),
+        ]);
+    }
+
+    public function analytics()
+    {
+        $ngo = $this->resolveNgoOrRedirect();
+        if (! $ngo) {
+            return redirect()->route('welcome')
+                ->with('error', 'NGO not found or access denied.');
+        }
+
+        return Inertia::render('NGO/Analytics', [
+            'ngo' => $ngo,
+            'analytics' => NgoWebsiteAnalytics::dashboard($ngo),
         ]);
     }
 
@@ -88,8 +107,8 @@ class NGODashboardController extends Controller
         $user = Auth::user();
         $ngo = $user->ngo;
 
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -104,7 +123,8 @@ class NGODashboardController extends Controller
             ->paginate(10);
 
         return Inertia::render('NGO/Campaigns/Index', [
-            'campaigns' => $campaigns
+            'ngo' => $ngo,
+            'campaigns' => $campaigns,
         ]);
     }
 
@@ -116,18 +136,19 @@ class NGODashboardController extends Controller
         $user = Auth::user();
         $ngo = $user->ngo;
 
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
         $donations = $ngo->donations()
-            ->with(['campaign', 'donor'])
+            ->with(['campaign', 'donor.user'])
             ->latest()
             ->paginate(20);
 
         return Inertia::render('NGO/Donations/Index', [
-            'donations' => $donations
+            'ngo' => $ngo,
+            'donations' => $donations,
         ]);
     }
 
@@ -139,8 +160,8 @@ class NGODashboardController extends Controller
         $user = Auth::user();
         $ngo = $user->ngo;
 
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -149,33 +170,19 @@ class NGODashboardController extends Controller
             ->get();
 
         return Inertia::render('NGO/Documents/Index', [
-            'documents' => $documents
+            'ngo' => $ngo,
+            'documents' => $documents,
         ]);
     }
 
     /**
      * Show banking settings
      */
-    public function banking()
-    {
-        $user = Auth::user();
-        $ngo = $user->ngo;
-
-        if (!$ngo) {
-            return redirect()->route('dashboard')
-                ->with('error', 'NGO not found or access denied.');
-        }
-
-        return Inertia::render('NGO/Banking/Index', [
-            'ngo' => $ngo->load(['bankAccounts', 'paymentGateways'])
-        ]);
-    }
-
     public function digitalization()
     {
         $ngo = $this->resolveNgoOrRedirect();
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -188,8 +195,8 @@ class NGODashboardController extends Controller
     public function updateDigitalization(Request $request)
     {
         $ngo = $this->resolveNgoOrRedirect();
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -204,14 +211,27 @@ class NGODashboardController extends Controller
             'google_business_location_id' => 'nullable|string|max:255',
             'google_business_auto_post' => 'nullable|boolean',
             'digitalization_settings' => 'nullable|array',
+            'microsite_json' => 'nullable|string|max:50000',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
+
+        if (! empty($validated['microsite_json'])) {
+            $decoded = json_decode($validated['microsite_json'], true);
+            if (json_last_error() === JSON_ERROR_NONE && is_array($decoded)) {
+                $dig = is_array($ngo->digitalization_settings) ? $ngo->digitalization_settings : [];
+                $dig['microsite'] = array_replace_recursive($dig['microsite'] ?? [], $decoded);
+                $validated['digitalization_settings'] = $dig;
+            }
+            unset($validated['microsite_json']);
+        } else {
+            unset($validated['microsite_json']);
+        }
 
         $validated['google_business_auto_post'] = (bool) ($validated['google_business_auto_post'] ?? false);
         if ($request->hasFile('logo')) {
             $validated['logo'] = $request->file('logo')->store('ngo_logos', 'public');
         }
-        if (!empty($validated['custom_domain'])) {
+        if (! empty($validated['custom_domain'])) {
             $validated['custom_domain_status'] = 'pending';
         }
 
@@ -220,11 +240,24 @@ class NGODashboardController extends Controller
         return back()->with('success', 'Digitalization settings updated.');
     }
 
+    public function postUpdate()
+    {
+        $ngo = $this->resolveNgoOrRedirect();
+        if (! $ngo) {
+            return redirect()->route('welcome')
+                ->with('error', 'NGO not found or access denied.');
+        }
+
+        return Inertia::render('NGO/PostUpdate', [
+            'ngo' => $ngo,
+        ]);
+    }
+
     public function ledger()
     {
         $ngo = $this->resolveNgoOrRedirect();
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -257,8 +290,8 @@ class NGODashboardController extends Controller
     public function storeLedgerEntry(Request $request)
     {
         $ngo = $this->resolveNgoOrRedirect();
-        if (!$ngo) {
-            return redirect()->route('dashboard')
+        if (! $ngo) {
+            return redirect()->route('welcome')
                 ->with('error', 'NGO not found or access denied.');
         }
 
@@ -291,6 +324,7 @@ class NGODashboardController extends Controller
     private function resolveNgoOrRedirect()
     {
         $user = Auth::user();
+
         return $user?->ngo;
     }
 }

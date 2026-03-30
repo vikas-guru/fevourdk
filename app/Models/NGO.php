@@ -52,6 +52,13 @@ class NGO extends Model
         'google_business_location_id',
         'google_business_auto_post',
         'digitalization_settings',
+        'login_geo_policy',
+        'login_geo_country_code',
+        'office_geo_lat',
+        'office_geo_lng',
+        'office_geo_radius_km',
+        'login_geo_fail_closed',
+        'finance_show_full_bank_numbers',
     ];
 
     protected $casts = [
@@ -62,6 +69,11 @@ class NGO extends Model
         'verified_at' => 'datetime',
         'google_business_auto_post' => 'boolean',
         'digitalization_settings' => 'array',
+        'office_geo_lat' => 'decimal:7',
+        'office_geo_lng' => 'decimal:7',
+        'office_geo_radius_km' => 'decimal:2',
+        'login_geo_fail_closed' => 'boolean',
+        'finance_show_full_bank_numbers' => 'boolean',
     ];
 
     public function campaigns(): HasMany
@@ -107,6 +119,41 @@ class NGO extends Model
     public function ledgerEntries(): HasMany
     {
         return $this->hasMany(NGOLedgerEntry::class, 'ngo_id');
+    }
+
+    public function fieldTasks(): HasMany
+    {
+        return $this->hasMany(NgoFieldTask::class, 'ngo_id');
+    }
+
+    public function fieldSessions(): HasMany
+    {
+        return $this->hasMany(NgoFieldSession::class, 'ngo_id');
+    }
+
+    public function trustedLoginIps(): HasMany
+    {
+        return $this->hasMany(NgoTrustedLoginIp::class, 'ngo_id');
+    }
+
+    public function leaveTypes(): HasMany
+    {
+        return $this->hasMany(NgoLeaveType::class, 'ngo_id');
+    }
+
+    public function leaveRequests(): HasMany
+    {
+        return $this->hasMany(NgoLeaveRequest::class, 'ngo_id');
+    }
+
+    public function expenseClaims(): HasMany
+    {
+        return $this->hasMany(NgoExpenseClaim::class, 'ngo_id');
+    }
+
+    public function outboundPayments(): HasMany
+    {
+        return $this->hasMany(NgoOutboundPayment::class, 'ngo_id');
     }
 
     public function auditLogs(): MorphMany

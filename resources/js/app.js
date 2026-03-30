@@ -21,6 +21,7 @@ createInertiaApp({
             .provide('ziggy', Ziggy)
             .component('inertia-link', Link)
             .mount(el);
+
         nextTick(() => {
             document.getElementById('initial-page-loader')?.remove();
         });
