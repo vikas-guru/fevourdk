@@ -1,88 +1,104 @@
 <template>
-    <AppLayout>
+    <AppLayout hide-chrome-mobile>
         <div class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50">
             <!-- Hero Section -->
-            <section class="relative bg-gradient-to-br from-blue-900 via-purple-900 to-indigo-900 text-white overflow-hidden">
+            <section class="relative bg-gradient-to-br from-[#0b2c33] via-[#103a52] to-[#0c1e3a] text-white overflow-hidden">
                 <!-- Background Pattern -->
                 <div class="absolute inset-0 opacity-10">
                     <div class="absolute inset-0 bg-pattern-dots"></div>
                 </div>
-                
+
                 <!-- Floating Elements -->
-                <div class="absolute top-20 left-10 w-72 h-72 bg-blue-500/20 rounded-full blur-3xl animate-pulse"></div>
-                <div class="absolute bottom-20 right-10 w-96 h-96 bg-purple-500/20 rounded-full blur-3xl animate-pulse delay-1000"></div>
-                
-                <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-24">
+                <div class="absolute top-10 -left-10 w-60 h-60 sm:w-72 sm:h-72 bg-teal-500/20 rounded-full blur-3xl animate-pulse"></div>
+                <div class="absolute bottom-10 -right-10 w-72 h-72 sm:w-96 sm:h-96 bg-amber-500/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
+
+                <div class="relative max-w-7xl mx-auto px-5 sm:px-6 lg:px-8 pt-12 pb-16 sm:py-20 lg:py-24">
                     <div class="text-center">
-                        <div class="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-400 to-purple-500 rounded-3xl shadow-2xl mb-8 backdrop-blur-sm border border-white/20 transform hover:scale-110 transition-all duration-300">
-                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5-10v4a1 1 0 011-1h2a1 1 0 011 1v4m-6 0a1 1 0 00-1 1h2a1 1 0 011 1v4m0 0V8a2 2 0 002 2h2a2 2 0 002-2V6a2 2 0 00-2-2H2a2 2 0 00-2-2v2z" />
-                            </svg>
-                        </div>
-                        <h1 class="text-5xl lg:text-6xl font-bold mb-6 bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
+                        <span class="inline-flex items-center gap-2 px-4 py-1.5 mb-5 sm:mb-7 rounded-full bg-white/10 border border-white/20 backdrop-blur-sm text-amber-300 text-[11px] sm:text-xs font-semibold uppercase tracking-[0.14em]">
+                            <svg class="w-3.5 h-3.5" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd" /></svg>
+                            FEVOURD-K Verified Directory
+                        </span>
+                        <h1 class="ngo-hero__title text-[2rem] leading-tight sm:text-5xl lg:text-6xl font-semibold mb-4 sm:mb-6">
                             Verified NGOs
                         </h1>
-                        <p class="text-xl lg:text-2xl text-blue-200 max-w-4xl mx-auto leading-relaxed mb-8">
-                            Discover and connect with verified NGOs across Karnataka. 
-                            These organizations are making a real difference in their communities.
+                        <p class="text-base sm:text-xl lg:text-2xl text-blue-100/90 max-w-2xl lg:max-w-4xl mx-auto leading-relaxed mb-8 sm:mb-12">
+                            Discover and connect with verified NGOs across Karnataka — organisations
+                            making a real difference in their communities.
                         </p>
-                        
+
                         <!-- NGO Stats -->
-                        <div class="flex justify-center space-x-12 mb-12">
+                        <div class="grid grid-cols-3 gap-3 sm:gap-12 max-w-md sm:max-w-none mx-auto sm:flex sm:justify-center">
                             <div class="text-center">
-                                <div class="text-4xl font-bold text-yellow-400">{{ ngos.total }}+</div>
-                                <div class="text-blue-200 text-sm">Verified NGOs</div>
+                                <div class="ngo-hero__stat text-3xl sm:text-4xl font-semibold text-amber-400">{{ stats.total }}<span class="text-amber-400/70">+</span></div>
+                                <div class="text-blue-200/80 text-[11px] sm:text-sm mt-1">Verified NGOs</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-4xl font-bold text-green-400">{{ ngos.per_page }}</div>
-                                <div class="text-blue-200 text-sm">Showing Now</div>
+                                <div class="ngo-hero__stat text-3xl sm:text-4xl font-semibold text-teal-300">{{ stats.districts }}</div>
+                                <div class="text-blue-200/80 text-[11px] sm:text-sm mt-1">Districts</div>
                             </div>
                             <div class="text-center">
-                                <div class="text-4xl font-bold text-purple-400">{{ ngos.states_count }}</div>
-                                <div class="text-blue-200 text-sm">States Covered</div>
+                                <div class="ngo-hero__stat text-3xl sm:text-4xl font-semibold text-sky-300">{{ stats.focusAreas }}</div>
+                                <div class="text-blue-200/80 text-[11px] sm:text-sm mt-1">Focus Areas</div>
                             </div>
                         </div>
                     </div>
                 </div>
-                
+
                 <!-- Wave Bottom -->
-                <div class="absolute bottom-0 left-0 right-0">
-                    <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <div class="absolute bottom-0 left-0 right-0 leading-[0]">
+                    <svg viewBox="0 0 1440 120" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-full">
                         <path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0V120Z" fill="#F9FAFB"/>
                     </svg>
                 </div>
             </section>
 
             <!-- Filters Section -->
-            <section class="py-12 bg-white/80 backdrop-blur-sm sticky top-0 z-40 border-b border-gray-200">
+            <section class="py-4 sm:py-8 lg:py-12 bg-white/90 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200 shadow-sm">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                    <div class="flex flex-col lg:flex-row justify-between items-center space-y-4 lg:space-y-0">
-                        <!-- Search -->
-                        <div class="relative w-full lg:w-96">
-                            <input 
-                                v-model="searchQuery"
-                                type="text" 
-                                placeholder="Search NGOs..." 
-                                class="w-full pl-12 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm"
+                    <div class="flex flex-col lg:flex-row lg:justify-between lg:items-center gap-3 lg:gap-0">
+                        <!-- Search + mobile filter toggle -->
+                        <div class="flex items-center gap-2.5 w-full lg:w-96">
+                            <div class="relative flex-1">
+                                <input
+                                    v-model="searchQuery"
+                                    type="text"
+                                    placeholder="Search NGOs..."
+                                    class="w-full pl-11 pr-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition-all duration-300 shadow-sm"
+                                >
+                                <svg class="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <!-- Mobile-only filter toggle -->
+                            <button
+                                type="button"
+                                @click="showFilters = !showFilters"
+                                class="lg:hidden relative inline-flex items-center justify-center gap-1.5 px-4 h-[50px] rounded-xl border border-gray-300 bg-white text-gray-700 font-semibold text-sm shadow-sm active:scale-95 transition"
+                                :class="{ 'ring-2 ring-teal-500 border-transparent': showFilters }"
+                                :aria-expanded="showFilters"
                             >
-                            <svg class="absolute left-4 top-3.5 h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4h18M6 12h12M10 20h4" /></svg>
+                                <span>Filters</span>
+                                <span v-if="activeFilterCount" class="absolute -top-1.5 -right-1.5 min-w-[20px] h-5 px-1 grid place-items-center rounded-full bg-amber-500 text-white text-[11px] font-bold">{{ activeFilterCount }}</span>
+                            </button>
                         </div>
-                        
-                        <!-- Filter Options -->
-                        <div class="flex space-x-4">
-                            <select v-model="selectedState" @change="onStateChange" class="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm">
+
+                        <!-- Filter Options: stacked grid on mobile (toggle), inline row on desktop -->
+                        <div
+                            :class="showFilters ? 'grid' : 'hidden'"
+                            class="grid-cols-1 sm:grid-cols-2 gap-2.5 lg:!flex lg:gap-3 lg:items-center"
+                        >
+                            <select v-model="selectedState" @change="onStateChange" class="ngo-filter w-full lg:w-auto">
                                 <option value="">All States</option>
                                 <option v-for="state in states" :key="state.id" :value="state.id">{{ state.name }}</option>
                             </select>
-                            
-                            <select v-model="selectedDistrict" @change="onDistrictChange" class="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm">
+
+                            <select v-model="selectedDistrict" @change="onDistrictChange" class="ngo-filter w-full lg:w-auto">
                                 <option value="">All Districts</option>
                                 <option v-for="district in districts" :key="district.id" :value="district.id">{{ district.name }}</option>
                             </select>
-                            
-                            <select v-model="selectedFocusArea" class="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm">
+
+                            <select v-model="selectedFocusArea" class="ngo-filter w-full lg:w-auto">
                                 <option value="">All Focus Areas</option>
                                 <option value="education">Education</option>
                                 <option value="healthcare">Healthcare</option>
@@ -92,31 +108,42 @@
                                 <option value="disability">Disability</option>
                                 <option value="community">Community Development</option>
                             </select>
-                            
-                            <select v-model="sortBy" class="px-4 py-3 bg-white border border-gray-300 rounded-xl text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-300 shadow-sm">
+
+                            <select v-model="sortBy" class="ngo-filter w-full lg:w-auto">
                                 <option value="newest">Newest First</option>
                                 <option value="name">Alphabetical</option>
-                                <option value="campaigns">Most Campaigns</option>
-                                <option value="verified">Recently Verified</option>
+                                <option value="supporters">Most Supported</option>
+                                <option value="followers">Most Followed</option>
                             </select>
+
+                            <!-- Clear (mobile only, when filters active) -->
+                            <button
+                                v-if="activeFilterCount"
+                                type="button"
+                                @click="clearFilters"
+                                class="lg:hidden col-span-full inline-flex items-center justify-center gap-1.5 py-2.5 rounded-xl border border-gray-200 bg-gray-50 text-gray-600 font-semibold text-sm active:scale-95 transition"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                                Clear filters
+                            </button>
                         </div>
                     </div>
                 </div>
             </section>
 
             <!-- NGOs Grid -->
-            <section class="py-16">
+            <section class="py-8 sm:py-12 lg:py-16">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                     <!-- Results Count -->
-                    <div class="mb-8">
-                        <p class="text-gray-600">
-                            Showing <span class="font-semibold text-gray-900">{{ filteredNGOs.length }}</span> of 
+                    <div class="mb-5 sm:mb-8">
+                        <p class="text-sm sm:text-base text-gray-600">
+                            Showing <span class="font-semibold text-gray-900">{{ filteredNGOs.data.length }}</span> of
                             <span class="font-semibold text-gray-900">{{ ngos.total }}</span> verified NGOs
                         </p>
                     </div>
-                    
+
                     <!-- NGOs Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-7">
                         <article v-for="(ngo, i) in filteredNGOs.data" :key="ngo.id"
                                  class="ngo-card group"
                                  :style="cardStyle(ngo, i)">
@@ -195,32 +222,32 @@
                     </div>
                     
                     <!-- Pagination -->
-                    <div v-if="filteredNGOs.last_page > 1" class="mt-8">
-                        <div class="flex justify-center">
-                            <Link 
-                                :href="filteredNGOs.prev_page_url" 
-                                class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                :class="{ 'opacity-50 cursor-not-allowed': !filteredNGOs.prev_page_url }"
+                    <div v-if="filteredNGOs.last_page > 1" class="mt-10">
+                        <div class="flex justify-center items-center gap-2 sm:gap-3">
+                            <Link
+                                :href="filteredNGOs.prev_page_url || ''"
+                                class="px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                                :class="{ 'opacity-40 pointer-events-none': !filteredNGOs.prev_page_url }"
                             >
-                                Previous
+                                Prev
                             </Link>
-                            
-                            <span class="px-4 py-2 text-gray-700">
+
+                            <span class="px-3 sm:px-4 py-2.5 text-gray-600 text-sm whitespace-nowrap">
                                 Page {{ filteredNGOs.current_page }} of {{ filteredNGOs.last_page }}
                             </span>
-                            
-                            <Link 
-                                :href="filteredNGOs.next_page_url" 
-                                class="px-4 py-2 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
-                                :class="{ 'opacity-50 cursor-not-allowed': !filteredNGOs.next_page_url }"
+
+                            <Link
+                                :href="filteredNGOs.next_page_url || ''"
+                                class="px-4 py-2.5 bg-white border border-gray-300 rounded-xl text-gray-700 text-sm font-semibold hover:bg-gray-50 transition-colors"
+                                :class="{ 'opacity-40 pointer-events-none': !filteredNGOs.next_page_url }"
                             >
                                 Next
                             </Link>
                         </div>
                     </div>
-                    
+
                     <!-- No Results -->
-                    <div v-if="filteredNGOs.length === 0" class="text-center py-16">
+                    <div v-if="filteredNGOs.data.length === 0" class="text-center py-16">
                         <div class="inline-flex items-center justify-center w-20 h-20 bg-gray-100 rounded-full mb-6">
                             <svg class="w-10 h-10 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -233,10 +260,10 @@
             </section>
 
             <!-- Call to Action -->
-            <section class="py-20 bg-gradient-to-r from-blue-900 via-purple-900 to-indigo-900 text-white">
-                <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-                    <h2 class="text-4xl font-bold mb-6">Join Our NGO Network</h2>
-                    <p class="text-xl mb-12 text-blue-100 leading-relaxed">
+            <section class="py-14 sm:py-20 bg-gradient-to-r from-[#0b2c33] via-[#103a52] to-[#0c1e3a] text-white">
+                <div class="max-w-4xl mx-auto px-5 sm:px-6 lg:px-8 text-center">
+                    <h2 class="ngo-hero__title text-3xl sm:text-4xl font-semibold mb-4 sm:mb-6">Join Our NGO Network</h2>
+                    <p class="text-base sm:text-xl mb-8 sm:mb-12 text-blue-100 leading-relaxed">
                         Are you an NGO looking to make a bigger impact? Join FEVOURD-K and connect with donors, 
                         volunteers, and partners across Karnataka.
                     </p>
@@ -271,6 +298,10 @@ const props = defineProps({
     ngos: {
         type: Object,
         required: true
+    },
+    stats: {
+        type: Object,
+        default: () => ({ total: 0, districts: 0, focusAreas: 0 })
     },
     followState: {
         type: Object,
@@ -331,6 +362,20 @@ const sortBy = ref('newest')
 const states = ref([])
 const districts = ref([])
 
+// Mobile filter drawer + active-filter awareness
+const showFilters = ref(false)
+const activeFilterCount = computed(() =>
+    [selectedState.value, selectedDistrict.value, selectedFocusArea.value].filter(Boolean).length
+    + (sortBy.value !== 'newest' ? 1 : 0)
+)
+const clearFilters = () => {
+    selectedState.value = ''
+    selectedDistrict.value = ''
+    selectedFocusArea.value = ''
+    sortBy.value = 'newest'
+    districts.value = []
+}
+
 // Computed properties
 const filteredNGOs = computed(() => {
     let filtered = props.ngos.data
@@ -366,11 +411,11 @@ const filteredNGOs = computed(() => {
         case 'name':
             filtered.sort((a, b) => a.name.localeCompare(b.name))
             break
-        case 'campaigns':
-            filtered.sort((a, b) => (b.campaigns_count || 0) - (a.campaigns_count || 0))
+        case 'supporters':
+            filtered.sort((a, b) => (b.supporters_count || 0) - (a.supporters_count || 0))
             break
-        case 'verified':
-            filtered.sort((a, b) => new Date(b.verified_at) - new Date(a.verified_at))
+        case 'followers':
+            filtered.sort((a, b) => (b.followers_count || 0) - (a.followers_count || 0))
             break
         case 'newest':
         default:
@@ -432,6 +477,38 @@ onMounted(() => {
 <style scoped>
 .bg-pattern-dots {
     background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Fraunces display type for the hero (matches the Impact Dossier cards) */
+.ngo-hero__title {
+    font-family: 'Fraunces', Georgia, serif;
+    letter-spacing: -0.02em;
+}
+.ngo-hero__stat {
+    font-family: 'Fraunces', Georgia, serif;
+    line-height: 1;
+}
+
+/* Filter selects — shared look across the mobile drawer + desktop row */
+.ngo-filter {
+    appearance: none;
+    -webkit-appearance: none;
+    padding: 0.7rem 2.25rem 0.7rem 0.9rem;
+    background-color: #fff;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='none' stroke='%236b7280' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    border: 1px solid #d1d5db;
+    border-radius: 0.75rem;
+    color: #111827;
+    font-size: 0.875rem;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+    transition: box-shadow .2s ease, border-color .2s ease;
+}
+.ngo-filter:focus {
+    outline: none;
+    border-color: transparent;
+    box-shadow: 0 0 0 2px hsl(174 62% 45%);
 }
 
 .line-clamp-3 {

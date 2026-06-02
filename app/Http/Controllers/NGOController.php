@@ -47,6 +47,15 @@ class NGOController extends Controller
             ->latest()
             ->paginate(12);
 
+        // Whole-dataset stats for the hero (real data — not page-scoped).
+        $statsBase = NGO::where('verification_status', 'verified')->where('is_active', true);
+        $districtsCovered = (clone $statsBase)->whereNotNull('district_id')->distinct()->count('district_id');
+        $focusAreaCount = (clone $statsBase)->pluck('focus_areas')
+            ->flatMap(fn ($fa) => is_array($fa) ? $fa : [])
+            ->filter()
+            ->unique()
+            ->count();
+
         // Social graph: which of these NGOs the current user already follows/supports.
         $followState = [];
         if ($user = $request->user()) {
@@ -60,6 +69,11 @@ class NGOController extends Controller
 
         return Inertia::render('NGOs/Index', [
             'ngos' => $ngos,
+            'stats' => [
+                'total' => $ngos->total(),
+                'districts' => $districtsCovered,
+                'focusAreas' => $focusAreaCount,
+            ],
             'followState' => $followState,
             'authed' => (bool) $request->user(),
             'seo' => Seo::page(
