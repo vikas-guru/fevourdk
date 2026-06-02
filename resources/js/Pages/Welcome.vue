@@ -175,7 +175,49 @@
                             </div>
                             <div class="fk-org__cta">
                                 <Link :href="`/${o.slug}`" class="fk-org__visit">Visit website →</Link>
-                                <Link href="/ngos" class="fk-org__follow">＋ Follow</Link>
+                                <button type="button" class="fk-org__follow" @click="followOrg(o)">＋ Follow</button>
+                            </div>
+                        </article>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ============================ COMMUNITY FEED ============================ -->
+            <section v-if="posts.length" class="fk-feed">
+                <div class="fk-wrap">
+                    <header class="fk-section-head fk-section-head--row" data-reveal>
+                        <div>
+                            <p class="fk-kicker fk-kicker--gold">Live from the community</p>
+                            <h2 class="fk-display fk-h2">Latest from the federation</h2>
+                        </div>
+                        <Link href="/feeds" class="fk-btn fk-btn--ghost-light">Open the feed</Link>
+                    </header>
+
+                    <div class="fk-feed__grid">
+                        <article v-for="(p, i) in posts" :key="p.id" class="fk-feedcard" data-reveal :style="{ '--i': i }">
+                            <Link v-if="p.image_url" :href="p.public_url" class="fk-feedcard__media">
+                                <img :src="p.image_url" :alt="p.title || p.author" loading="lazy" decoding="async">
+                            </Link>
+                            <div class="fk-feedcard__body">
+                                <div class="fk-feedcard__head">
+                                    <span class="fk-feedcard__avatar">
+                                        <img v-if="p.logo" :src="p.logo" :alt="p.author">
+                                        <span v-else>{{ (p.author || '?').slice(0, 1) }}</span>
+                                    </span>
+                                    <span class="fk-feedcard__meta">
+                                        <span class="fk-feedcard__author">{{ p.author }}</span>
+                                        <span class="fk-feedcard__time">{{ timeAgo(p.created_at) }}</span>
+                                    </span>
+                                </div>
+                                <Link v-if="p.title" :href="p.public_url" class="fk-feedcard__title">{{ p.title }}</Link>
+                                <p class="fk-feedcard__text">{{ p.excerpt }}</p>
+                                <div class="fk-feedcard__foot">
+                                    <button type="button" class="fk-feedcard__act" @click="reactToPost(p)" aria-label="React">
+                                        <span class="fk-feedcard__heart">♥</span> {{ p.reactions_count }}
+                                    </button>
+                                    <Link :href="p.public_url" class="fk-feedcard__act">💬 {{ p.comments_count }}</Link>
+                                    <Link :href="p.public_url" class="fk-feedcard__more">Read →</Link>
+                                </div>
                             </div>
                         </article>
                     </div>
@@ -244,13 +286,33 @@
                     </div>
                 </div>
             </section>
+
+            <!-- ============================ LOGIN PROMPT (guest actions) ============================ -->
+            <transition name="fk-modal">
+                <div v-if="authPrompt.open" class="fk-authwrap" @click.self="closeAuthPrompt">
+                    <div class="fk-auth" role="dialog" aria-modal="true" aria-labelledby="fk-auth-title">
+                        <button class="fk-auth__x" @click="closeAuthPrompt" aria-label="Close">✕</button>
+                        <div class="fk-auth__emblem"><img :src="brandLogoSrc" alt="" width="52" height="52"></div>
+                        <h3 id="fk-auth-title" class="fk-display fk-auth__title">Join the federation</h3>
+                        <p class="fk-auth__text">
+                            Sign in to <strong>{{ authPrompt.action }}</strong> and stand with
+                            800+ voluntary organisations across Karnataka.
+                        </p>
+                        <div class="fk-auth__btns">
+                            <Link href="/login" class="fk-btn fk-btn--gold">Log in</Link>
+                            <Link href="/register" class="fk-btn fk-btn--ghost-light">Create account</Link>
+                        </div>
+                        <button class="fk-auth__later" @click="closeAuthPrompt">Maybe later</button>
+                    </div>
+                </div>
+            </transition>
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
-import { Link } from '@inertiajs/vue3'
+import { Link, router, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 
 const brandLogoSrc = '/assets/images/fevourd-k/logo.png'
@@ -259,11 +321,39 @@ const props = defineProps({
     stats: { type: Object, default: () => ({}) },
     featuredCampaigns: { type: Array, default: () => [] },
     featuredNgos: { type: Array, default: () => [] },
+    latestPosts: { type: Array, default: () => [] },
     upcomingEvents: { type: Array, default: () => [] },
 })
 
 const orgs = computed(() => props.featuredNgos ?? [])
+const posts = computed(() => props.latestPosts ?? [])
 const fmtCount = (n) => (n >= 1000 ? (n / 1000).toFixed(1).replace('.0', '') + 'k' : String(n ?? 0))
+
+/* ---- guest gating: prompt sign-in before any member action ---- */
+const page = usePage()
+const isGuest = computed(() => !page.props.auth?.user)
+const authPrompt = ref({ open: false, action: '' })
+const openAuthPrompt = (action) => { authPrompt.value = { open: true, action } }
+const closeAuthPrompt = () => { authPrompt.value.open = false }
+// Run `fn` if signed in; otherwise show the friendly login prompt.
+const requireAuth = (action, fn) => {
+    if (isGuest.value) { openAuthPrompt(action); return }
+    fn?.()
+}
+const followOrg = (o) => requireAuth(`follow ${o.name}`, () => {
+    router.post(`/ngos/${o.id}/follow`, {}, { preserveScroll: true, preserveState: false })
+})
+const reactToPost = (post) => requireAuth('react to this post', () => {
+    router.visit(post.public_url)
+})
+const timeAgo = (iso) => {
+    if (!iso) return ''
+    const d = (Date.now() - new Date(iso).getTime()) / 1000
+    if (d < 3600) return Math.max(1, Math.round(d / 60)) + 'm ago'
+    if (d < 86400) return Math.round(d / 3600) + 'h ago'
+    if (d < 604800) return Math.round(d / 86400) + 'd ago'
+    return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })
+}
 
 /* ---- words from the emblem ---- */
 const pillarWords = ['Independence', 'Government', 'Voluntary Organisations', 'Equality', 'Development', 'People']
@@ -556,18 +646,64 @@ onUnmounted(() => {
 .fk-org__follow { font-weight: 700; font-size: .9rem; color: #fff; background: var(--ink); padding: .5em 1.1em; border-radius: 999px; text-decoration: none; transition: transform .2s ease, background .2s ease; }
 .fk-org__follow:hover { transform: translateY(-2px); background: var(--accent, var(--emerald)); }
 
+.fk-org__follow { font-family: inherit; border: none; cursor: pointer; }
+
+/* ============ COMMUNITY FEED ============ */
+.fk-feed { padding: clamp(56px, 8vw, 104px) 0; background: linear-gradient(var(--paper), var(--paper-2)); }
+.fk-feed__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(18px, 2.4vw, 28px); }
+.fk-feedcard { display: flex; flex-direction: column; background: #fffdf6; border-radius: 20px; border: 1px solid rgba(13,31,92,.1); overflow: hidden; transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s ease; }
+.fk-feedcard:hover { transform: translateY(-6px); box-shadow: 0 28px 56px -30px rgba(13,31,92,.42); }
+.fk-feedcard__media { display: block; aspect-ratio: 16/10; overflow: hidden; }
+.fk-feedcard__media img { width: 100%; height: 100%; object-fit: cover; transition: transform .6s ease; }
+.fk-feedcard:hover .fk-feedcard__media img { transform: scale(1.05); }
+.fk-feedcard__body { display: flex; flex-direction: column; gap: .65rem; padding: clamp(18px, 2.2vw, 24px); flex: 1; }
+.fk-feedcard__head { display: flex; align-items: center; gap: .6rem; }
+.fk-feedcard__avatar { width: 38px; height: 38px; border-radius: 50%; overflow: hidden; flex: none; display: grid; place-items: center; background: rgba(13,31,92,.08); font-family: var(--font-display); font-weight: 700; color: var(--ink); }
+.fk-feedcard__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.fk-feedcard__meta { display: flex; flex-direction: column; line-height: 1.2; min-width: 0; }
+.fk-feedcard__author { font-weight: 700; color: var(--ink); font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.fk-feedcard__time { font-size: .76rem; color: #8a8e9a; }
+.fk-feedcard__title { font-family: var(--font-display); font-size: 1.16rem; font-weight: 600; line-height: 1.22; color: var(--ink); text-decoration: none; }
+.fk-feedcard__title:hover { color: var(--magenta); }
+.fk-feedcard__text { margin: 0; color: #565a66; font-size: .92rem; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.fk-feedcard__foot { display: flex; align-items: center; gap: 1rem; margin-top: auto; padding-top: .7rem; border-top: 1px solid rgba(13,31,92,.08); font-size: .86rem; }
+.fk-feedcard__act { display: inline-flex; align-items: center; gap: .35rem; background: none; border: none; padding: 0; cursor: pointer; font: inherit; font-size: .86rem; color: #6a6e7a; text-decoration: none; transition: color .2s ease; }
+.fk-feedcard__act:hover { color: var(--magenta); }
+.fk-feedcard__heart { color: var(--magenta); font-size: 1rem; }
+.fk-feedcard__more { margin-left: auto; font-weight: 700; color: var(--magenta); text-decoration: none; }
+.fk-feedcard__more:hover { color: var(--ink); }
+
+/* ============ LOGIN PROMPT MODAL ============ */
+.fk-authwrap { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(8,22,64,.55); backdrop-filter: blur(6px); }
+.fk-auth { position: relative; width: 100%; max-width: 380px; text-align: center; background: var(--paper); border-radius: 24px; padding: clamp(28px, 5vw, 40px) clamp(22px, 4vw, 34px) clamp(20px, 4vw, 28px); box-shadow: 0 40px 80px -30px rgba(0,0,0,.6); border: 1px solid rgba(242,180,12,.3); }
+.fk-auth__x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.05rem; color: #8a8e9a; cursor: pointer; line-height: 1; }
+.fk-auth__x:hover { color: var(--ink); }
+.fk-auth__emblem { width: 72px; height: 72px; margin: 0 auto 1rem; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 50% 38%, rgba(242,180,12,.18), rgba(242,180,12,.04) 70%); box-shadow: inset 0 0 0 1px rgba(242,180,12,.35); }
+.fk-auth__emblem img { width: 52px; height: auto; }
+.fk-auth__title { font-size: 1.6rem; font-weight: 600; color: var(--ink); margin: 0 0 .5rem; }
+.fk-auth__text { margin: 0 0 1.4rem; color: #565a66; font-size: .96rem; line-height: 1.55; }
+.fk-auth__text strong { color: var(--ink); }
+.fk-auth__btns { display: flex; flex-direction: column; gap: .65rem; }
+.fk-auth__btns .fk-btn { width: 100%; justify-content: center; }
+.fk-auth__later { margin-top: .9rem; background: none; border: none; cursor: pointer; font: inherit; font-size: .86rem; color: #8a8e9a; }
+.fk-auth__later:hover { color: var(--ink); }
+.fk-modal-enter-active, .fk-modal-leave-active { transition: opacity .25s ease; }
+.fk-modal-enter-active .fk-auth, .fk-modal-leave-active .fk-auth { transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+.fk-modal-enter-from, .fk-modal-leave-to { opacity: 0; }
+.fk-modal-enter-from .fk-auth, .fk-modal-leave-to .fk-auth { transform: translateY(16px) scale(.96); opacity: 0; }
+
 /* ============ RESPONSIVE ============ */
 @media (max-width: 980px) {
     .fk-orgs__grid { grid-template-columns: 1fr 1fr; }
     .fk-hero__inner { grid-template-columns: 1fr; }
     .fk-hero__emblem { order: -1; }
     .fk-focus__inner { grid-template-columns: 1fr; }
-    .fk-pillars__grid, .fk-camp__grid { grid-template-columns: repeat(2, 1fr); }
+    .fk-pillars__grid, .fk-camp__grid, .fk-feed__grid { grid-template-columns: repeat(2, 1fr); }
     .fk-stats__grid { grid-template-columns: repeat(2, 1fr); }
 }
 @media (max-width: 620px) {
     .fk-section-head--row { flex-direction: column; align-items: flex-start; }
-    .fk-pillars__grid, .fk-camp__grid, .fk-orgs__grid { grid-template-columns: 1fr; }
+    .fk-pillars__grid, .fk-camp__grid, .fk-orgs__grid, .fk-feed__grid { grid-template-columns: 1fr; }
     .fk-org__cta { flex-direction: column; align-items: stretch; }
     .fk-org__follow { text-align: center; }
     .fk-event { grid-template-columns: 1fr; text-align: left; }

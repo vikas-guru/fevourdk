@@ -4,8 +4,10 @@ namespace App\Http\Controllers;
 
 use App\Models\Campaign;
 use App\Models\Donation;
+use App\Models\FeedPost;
 use App\Models\NGO;
 use App\Support\Seo;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -80,6 +82,26 @@ class WelcomeController extends Controller
                 'supporters_count' => $n->supporters_count,
             ]);
 
+        // Latest community feed — a live teaser of what organisations are posting.
+        $latestPosts = FeedPost::with(['ngo:id,name,logo', 'user:id,name'])
+            ->withCount(['reactions', 'comments'])
+            ->where('is_published', true)
+            ->latest()
+            ->take(3)
+            ->get()
+            ->map(fn (FeedPost $post) => [
+                'id' => $post->id,
+                'title' => $post->title,
+                'excerpt' => Str::limit(strip_tags((string) $post->body), 140),
+                'image_url' => $post->image_url,
+                'created_at' => $post->created_at?->toIso8601String(),
+                'public_url' => url('/feeds/'.$post->id),
+                'reactions_count' => (int) $post->reactions_count,
+                'comments_count' => (int) $post->comments_count,
+                'author' => $post->ngo?->name ?? $post->user?->name ?? 'FEVOURD-K',
+                'logo' => $post->ngo?->logo,
+            ]);
+
         // Get upcoming events
         $upcomingEvents = [
             [
@@ -96,6 +118,7 @@ class WelcomeController extends Controller
             'stats' => $stats,
             'featuredCampaigns' => $featuredCampaigns,
             'featuredNgos' => $featuredNgos,
+            'latestPosts' => $latestPosts,
             'upcomingEvents' => $upcomingEvents,
             'seo' => array_merge(Seo::page(
                 'FEVOURD-K — Karnataka voluntary organisations hub',
