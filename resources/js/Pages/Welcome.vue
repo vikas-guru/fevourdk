@@ -16,16 +16,27 @@
                     <div class="fk-hero__copy">
                         <p class="fk-eyebrow fk-rise" style="--d:.05s">
                             <span class="fk-eyebrow__dot"></span>
-                            Est. 1982 · Karnataka · An apex body
+                            {{ t('Est. 1982 · Karnataka · An apex body', 'ಸ್ಥಾಪನೆ 1982 · ಕರ್ನಾಟಕ · ಒಂದು ಶೃಂಗ ಸಂಸ್ಥೆ') }}
                         </p>
 
-                        <h1 class="fk-display fk-hero__title">
+                        <LangToggle class="fk-hero__lang" />
+
+                        <h1 v-if="lang === 'kn'" class="fk-display fk-hero__title">
+                            <span class="fk-rise" style="--d:.12s">ಸ್ವಯಂಪ್ರೇರಿತ ಕ್ರಿಯೆ,</span>
+                            <span class="fk-rise fk-hero__accent" style="--d:.2s">ಬಲಿಷ್ಠ</span>
+                            <span class="fk-rise" style="--d:.28s">ಕರ್ನಾಟಕಕ್ಕಾಗಿ.</span>
+                        </h1>
+                        <h1 v-else class="fk-display fk-hero__title">
                             <span class="fk-rise" style="--d:.12s">Voluntary action,</span>
                             <span class="fk-rise fk-hero__accent" style="--d:.2s">for a stronger</span>
                             <span class="fk-rise" style="--d:.28s">Karnataka.</span>
                         </h1>
 
-                        <p class="fk-hero__lede fk-rise" style="--d:.36s">
+                        <p v-if="lang === 'kn'" class="fk-hero__lede fk-rise" style="--d:.36s">
+                            <strong>{{ displayStats.organisations }}+ ಸ್ವಯಂಸೇವಾ ಸಂಸ್ಥೆಗಳ</strong>
+                            ಒಕ್ಕೂಟ — ಪಾರದರ್ಶಕ ದೇಣಿಗೆ, ಪರಿಶೀಲಿತ ಅಭಿಯಾನಗಳು ಮತ್ತು ಜೀವಂತ ಪ್ರಜಾಪ್ರಭುತ್ವದ ಹಂಚಿಕೆಯ ಬದ್ಧತೆಯ ಮೂಲಕ ವಂಚಿತ ಸಮುದಾಯಗಳ ಸಾಮಾಜಿಕ, ಆರ್ಥಿಕ ಮತ್ತು ಸಾಂಸ್ಕೃತಿಕ ಸಬಲೀಕರಣವನ್ನು ಮುನ್ನಡೆಸುತ್ತಿದೆ.
+                        </p>
+                        <p v-else class="fk-hero__lede fk-rise" style="--d:.36s">
                             A federation of over
                             <strong>{{ displayStats.organisations }}+ voluntary organisations</strong>
                             advancing social, economic and cultural empowerment of deprived
@@ -35,11 +46,11 @@
 
                         <div class="fk-hero__cta fk-rise" style="--d:.44s">
                             <Link href="/donate" class="fk-btn fk-btn--gold">
-                                Donate now
+                                {{ t('Donate now', 'ಈಗ ದೇಣಿಗೆ ನೀಡಿ') }}
                                 <svg viewBox="0 0 24 24" class="fk-btn__arrow"><path d="M5 12h14M13 6l6 6-6 6" /></svg>
                             </Link>
-                            <Link href="/ngos" class="fk-btn fk-btn--ghost">Explore organisations</Link>
-                            <Link href="/register" class="fk-btn fk-btn--link">Join the federation →</Link>
+                            <Link href="/ngos" class="fk-btn fk-btn--ghost">{{ t('Explore organisations', 'ಸಂಸ್ಥೆಗಳನ್ನು ಅನ್ವೇಷಿಸಿ') }}</Link>
+                            <Link href="/register" class="fk-btn fk-btn--link">{{ t('Join the federation', 'ಒಕ್ಕೂಟಕ್ಕೆ ಸೇರಿ') }} →</Link>
                         </div>
 
                         <dl class="fk-hero__mini fk-rise" style="--d:.52s">
@@ -93,7 +104,7 @@
                 <div class="fk-wrap">
                     <header class="fk-section-head" data-reveal>
                         <p class="fk-kicker">The emblem, the mandate</p>
-                        <h2 class="fk-display fk-h2">Six pillars cast into our seal</h2>
+                        <h2 class="fk-display fk-h2">{{ t('Six pillars cast into our seal', 'ನಮ್ಮ ಮುದ್ರೆಯಲ್ಲಿ ಬಿಂಬಿತ ಆರು ಆಧಾರಸ್ತಂಭಗಳು') }}</h2>
                         <p class="fk-section-head__sub">
                             Every value on the FEVOURD-K crest is a promise we organise around —
                             binding government, voluntary organisations and people into one circle.
@@ -116,7 +127,7 @@
                     <header class="fk-section-head fk-section-head--row" data-reveal>
                         <div>
                             <p class="fk-kicker fk-kicker--gold">On the ground, right now</p>
-                            <h2 class="fk-display fk-h2 fk-h2--light">Campaigns seeking support</h2>
+                            <h2 class="fk-display fk-h2 fk-h2--light">{{ t('Campaigns seeking support', 'ಬೆಂಬಲ ಬಯಸುವ ಅಭಿಯಾನಗಳು') }}</h2>
                         </div>
                         <Link href="/campaigns" class="fk-btn fk-btn--ghost-light">View all campaigns</Link>
                     </header>
@@ -150,7 +161,7 @@
                     <header class="fk-section-head fk-section-head--row" data-reveal>
                         <div>
                             <p class="fk-kicker">Verified on the federation</p>
-                            <h2 class="fk-display fk-h2">Organisations to follow</h2>
+                            <h2 class="fk-display fk-h2">{{ t('Organisations to follow', 'ಅನುಸರಿಸಬೇಕಾದ ಸಂಸ್ಥೆಗಳು') }}</h2>
                         </div>
                         <Link href="/ngos" class="fk-btn fk-btn--ghost-light">Explore all organisations</Link>
                     </header>
@@ -188,7 +199,7 @@
                     <header class="fk-section-head fk-section-head--row" data-reveal>
                         <div>
                             <p class="fk-kicker fk-kicker--gold">Live from the community</p>
-                            <h2 class="fk-display fk-h2">Latest from the federation</h2>
+                            <h2 class="fk-display fk-h2">{{ t('Latest from the federation', 'ಒಕ್ಕೂಟದಿಂದ ಇತ್ತೀಚಿನವು') }}</h2>
                         </div>
                         <Link href="/feeds" class="fk-btn fk-btn--ghost-light">Open the feed</Link>
                     </header>
@@ -230,7 +241,8 @@
                 <div class="fk-wrap fk-focus__inner">
                     <div class="fk-focus__lead" data-reveal>
                         <p class="fk-kicker fk-kicker--gold">Where we work</p>
-                        <h2 class="fk-display fk-h2 fk-h2--light">Fifteen fronts of<br>development.</h2>
+                        <h2 v-if="lang === 'kn'" class="fk-display fk-h2 fk-h2--light">ಅಭಿವೃದ್ಧಿಯ ಹದಿನೈದು<br>ಆಯಾಮಗಳು.</h2>
+                        <h2 v-else class="fk-display fk-h2 fk-h2--light">Fifteen fronts of<br>development.</h2>
                         <p class="fk-focus__text">
                             From a child's first classroom to a farmer's fair price, our members
                             carry change into every corner of Karnataka — and we keep it accountable.
@@ -248,7 +260,7 @@
                 <div class="fk-wrap">
                     <header class="fk-section-head" data-reveal>
                         <p class="fk-kicker">Convening the sector</p>
-                        <h2 class="fk-display fk-h2">Upcoming events</h2>
+                        <h2 class="fk-display fk-h2">{{ t('Upcoming events', 'ಮುಂಬರುವ ಕಾರ್ಯಕ್ರಮಗಳು') }}</h2>
                     </header>
                     <article v-for="(e, i) in events" :key="i" class="fk-event" data-reveal>
                         <div class="fk-event__date">
@@ -293,7 +305,7 @@
                     <div class="fk-auth" role="dialog" aria-modal="true" aria-labelledby="fk-auth-title">
                         <button class="fk-auth__x" @click="closeAuthPrompt" aria-label="Close">✕</button>
                         <div class="fk-auth__emblem"><img :src="brandLogoSrc" alt="" width="52" height="52"></div>
-                        <h3 id="fk-auth-title" class="fk-display fk-auth__title">Join the federation</h3>
+                        <h3 id="fk-auth-title" class="fk-display fk-auth__title">{{ t('Join the federation', 'ಒಕ್ಕೂಟಕ್ಕೆ ಸೇರಿ') }}</h3>
                         <p class="fk-auth__text">
                             Sign in to <strong>{{ authPrompt.action }}</strong> and stand with
                             800+ voluntary organisations across Karnataka.
@@ -312,6 +324,8 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
+import LangToggle from '@/Components/LangToggle.vue'
+import { t, lang } from '@/i18n'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 

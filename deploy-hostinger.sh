@@ -227,7 +227,10 @@ if (($_GET['migrate'] ?? '0') === '1') {
 }
 
 if (($_GET['seed'] ?? '0') === '1') {
-    $commands[] = ['db:seed', ['--force' => true]];
+    // Targeted: only the Vikasana showcase seeder (idempotent; rewrites just that
+    // demo NGO's own content — never touches real users, donations or other NGOs).
+    $seederClass = (string) ($_GET['seeder'] ?? 'Database\\Seeders\\VikasanaShowcaseSeeder');
+    $commands[] = ['db:seed', ['--force' => true, '--class' => $seederClass]];
 }
 
 $output = [];

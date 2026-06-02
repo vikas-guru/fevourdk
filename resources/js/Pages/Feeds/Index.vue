@@ -13,15 +13,19 @@
                 <div class="ff-hero__inner">
                     <p class="ff-eyebrow">
                         <span class="ff-eyebrow__dot" />
-                        Public · Live community
+                        {{ t('Public · Live community', 'ಸಾರ್ವಜನಿಕ · ನೇರ ಸಮುದಾಯ') }}
                     </p>
-                    <h1 class="ff-display ff-hero__title">
+                    <LangToggle class="ff-hero__lang" style="margin-bottom:0.75rem" />
+                    <h1 v-if="lang === 'kn'" class="ff-display ff-hero__title">
+                        ಕ್ಷೇತ್ರದಿಂದ
+                        <span class="ff-hero__accent">ಕಥೆಗಳು.</span>
+                    </h1>
+                    <h1 v-else class="ff-display ff-hero__title">
                         Stories from
                         <span class="ff-hero__accent">the field.</span>
                     </h1>
                     <p class="ff-hero__lede">
-                        Real updates, reactions and conversations from verified Karnataka
-                        organisations — watch impact unfold, then join in.
+                        {{ t('Real updates, reactions and conversations from verified Karnataka organisations — watch impact unfold, then join in.', 'ಪರಿಶೀಲಿತ ಕರ್ನಾಟಕ ಸಂಸ್ಥೆಗಳಿಂದ ನೈಜ ನವೀಕರಣಗಳು, ಪ್ರತಿಕ್ರಿಯೆಗಳು ಮತ್ತು ಸಂಭಾಷಣೆಗಳು — ಪರಿಣಾಮವನ್ನು ನೋಡಿ, ನಂತರ ಸೇರಿಕೊಳ್ಳಿ.') }}
                     </p>
                     <button
                         type="button"
@@ -29,21 +33,21 @@
                         style="margin-top:0.75rem;cursor:pointer;background:none;border:none;text-decoration:underline;text-underline-offset:3px"
                         @click="startTour"
                     >
-                        ✦ Take a tour
+                        ✦ {{ t('Take a tour', 'ಪ್ರವಾಸ ಕೈಗೊಳ್ಳಿ') }}
                     </button>
 
                     <div class="ff-hero__stats">
                         <div class="ff-chip">
                             <span class="ff-chip__num ff-display">{{ postCount }}</span>
-                            <span class="ff-chip__lbl">Posts live</span>
+                            <span class="ff-chip__lbl">{{ t('Posts live', 'ನೇರ ಪೋಸ್ಟ್‌ಗಳು') }}</span>
                         </div>
                         <div class="ff-chip">
                             <span class="ff-chip__num ff-display ff-chip__num--gold">{{ ngoCount }}</span>
-                            <span class="ff-chip__lbl">Verified NGOs</span>
+                            <span class="ff-chip__lbl">{{ t('Verified NGOs', 'ಪರಿಶೀಲಿತ ಎನ್‌ಜಿಒಗಳು') }}</span>
                         </div>
                         <div class="ff-chip">
                             <span class="ff-chip__num ff-display ff-chip__num--emerald">{{ filteredNgos.length }}</span>
-                            <span class="ff-chip__lbl">On the map</span>
+                            <span class="ff-chip__lbl">{{ t('On the map', 'ನಕ್ಷೆಯಲ್ಲಿ') }}</span>
                         </div>
                     </div>
                 </div>
@@ -65,7 +69,7 @@
                 <div v-if="feedMeta.can_post_as_ngo" class="ff-composer">
                     <div class="ff-composer__top">
                         <div>
-                            <h2 class="ff-composer__title">Post as {{ feedMeta.ngo_name || 'your NGO' }}</h2>
+                            <h2 class="ff-composer__title">{{ t('Post as', 'ಪೋಸ್ಟ್ ಮಾಡಿ') }} {{ feedMeta.ngo_name || t('your NGO', 'ನಿಮ್ಮ ಎನ್‌ಜಿಒ') }}</h2>
                             <p class="ff-composer__hint">Same form lives in your workspace under <strong>Post an update</strong>.</p>
                         </div>
                         <div class="ff-composer__links">
@@ -83,7 +87,7 @@
                             type="text"
                             maxlength="200"
                             required
-                            placeholder="Headline"
+                            :placeholder="t('Headline', 'ಶೀರ್ಷಿಕೆ')"
                             class="ff-field"
                         >
                         <textarea
@@ -91,7 +95,7 @@
                             required
                             rows="4"
                             maxlength="8000"
-                            placeholder="Update your supporters…"
+                            :placeholder="t('Update your supporters…', 'ನಿಮ್ಮ ಬೆಂಬಲಿಗರಿಗೆ ತಿಳಿಸಿ…')"
                             class="ff-field"
                         />
                         <div>
@@ -131,7 +135,7 @@
                             v-model="searchText"
                             type="search"
                             autocomplete="off"
-                            placeholder="Search posts, NGOs, locations…"
+                            :placeholder="t('Search posts, NGOs, locations…', 'ಪೋಸ್ಟ್‌ಗಳು, ಎನ್‌ಜಿಒಗಳು, ಸ್ಥಳಗಳನ್ನು ಹುಡುಕಿ…')"
                         >
                     </div>
                     <div class="ff-modes">
@@ -276,7 +280,7 @@
                                     v-model="commentDrafts[post.id]"
                                     type="text"
                                     maxlength="500"
-                                    placeholder="Write a comment…"
+                                    :placeholder="t('Write a comment…', 'ಕಾಮೆಂಟ್ ಬರೆಯಿರಿ…')"
                                     @focus="isGuest && openAuthPrompt('comment on this post')"
                                 >
                                 <button type="submit" class="ff-commentform__send" aria-label="Post comment">
@@ -291,7 +295,7 @@
                 <section v-else class="ff-mapwrap" aria-labelledby="feeds-map-heading">
                     <div class="ff-maphead">
                         <p class="ff-kicker">Geography</p>
-                        <h2 id="feeds-map-heading" class="ff-display ff-h2">Verified NGOs on the map</h2>
+                        <h2 id="feeds-map-heading" class="ff-display ff-h2">{{ t('Verified NGOs on the map', 'ನಕ್ಷೆಯಲ್ಲಿ ಪರಿಶೀಲಿತ ಎನ್‌ಜಿಒಗಳು') }}</h2>
                         <p class="ff-maphead__sub">District boundaries from Karnataka GeoJSON; markers show NGO locations. Use your position to sort by distance.</p>
                     </div>
 
@@ -370,7 +374,7 @@
                   <div class="ff-side__card">
                       <div class="ff-side__head">
                           <p class="ff-side__kicker">The federation</p>
-                          <h2 class="ff-display ff-side__title">Browse verified NGOs</h2>
+                          <h2 class="ff-display ff-side__title">{{ t('Browse verified NGOs', 'ಪರಿಶೀಲಿತ ಎನ್‌ಜಿಒಗಳನ್ನು ವೀಕ್ಷಿಸಿ') }}</h2>
                           <p class="ff-side__sub">{{ ngoCount }} organisations mapped across Karnataka. Open any profile for live impact.</p>
                       </div>
                       <ul class="ff-side__list">
@@ -419,7 +423,7 @@
                     <div class="ff-auth" role="dialog" aria-modal="true" aria-labelledby="ff-auth-title">
                         <button class="ff-auth__x" @click="closeAuthPrompt" aria-label="Close">✕</button>
                         <div class="ff-auth__emblem"><img :src="brandLogoSrc" alt="" width="52" height="52"></div>
-                        <h3 id="ff-auth-title" class="ff-display ff-auth__title">Join the federation</h3>
+                        <h3 id="ff-auth-title" class="ff-display ff-auth__title">{{ t('Join the federation', 'ಒಕ್ಕೂಟಕ್ಕೆ ಸೇರಿ') }}</h3>
                         <p class="ff-auth__text">
                             Sign in to <strong>{{ authPrompt.action }}</strong> and stand with
                             800+ voluntary organisations across Karnataka.
@@ -439,6 +443,8 @@
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
+import LangToggle from '@/Components/LangToggle.vue'
+import { t, lang } from '@/i18n'
 import DashboardTour from '@/Components/NGO/DashboardTour.vue'
 import { useNgoTour } from '@/ngo/useNgoTour'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'

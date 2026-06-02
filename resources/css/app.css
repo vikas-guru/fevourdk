@@ -9,6 +9,26 @@
     min-height: 100dvh;
 }
 
+/* Kannada (ಕನ್ನಡ) mode — per-glyph fallback: Latin stays Inter, Kannada -> Noto.
+   Noto Sans Kannada is loaded in app.blade.php. Toggled via html.lang-kn by i18n.js. */
+html.lang-kn body,
+html.lang-kn button,
+html.lang-kn input,
+html.lang-kn textarea,
+html.lang-kn select,
+html.lang-kn a,
+html.lang-kn p,
+html.lang-kn span,
+html.lang-kn li,
+html.lang-kn h1,
+html.lang-kn h2,
+html.lang-kn h3,
+html.lang-kn h4,
+html.lang-kn h5,
+html.lang-kn h6 {
+    font-family: 'Inter', 'Noto Sans Kannada', system-ui, sans-serif;
+}
+
 @layer components {
     .btn-primary {
         @apply bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors;

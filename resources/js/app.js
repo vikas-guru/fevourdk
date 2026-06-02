@@ -1,5 +1,6 @@
 import './bootstrap';
 import '../css/app.css';
+import './i18n'; // apply Kannada/English locale (html.lang-kn) before first paint
 
 import { createApp, h, nextTick } from 'vue';
 import { createInertiaApp, Link, router } from '@inertiajs/vue3';
