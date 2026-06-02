@@ -1031,8 +1031,10 @@ const primaryRoleLabel = computed(() => {
 })
 
 const roleBasedMobileTabs = computed(() => {
+    // Home goes to the public welcome page for guests (it must never require
+    // login); signed-in users get their role dashboard.
     const tabs = [
-        { label: 'Home', href: getDashboardUrl(), key: 'dashboard' },
+        { label: 'Home', href: currentUser.value ? getDashboardUrl() : '/', key: 'dashboard' },
         { label: 'Feeds', href: '/feeds', key: 'feeds' },
         { label: 'NGO', href: '/feeds?view=ngo', key: 'ngo_nearby' },
     ]
@@ -1047,7 +1049,10 @@ const roleBasedMobileTabs = computed(() => {
         tabs.push({ label: 'Explore', href: '/ngos', key: 'explore' })
     }
 
-    tabs.push({ label: 'Profile', href: '/profile', key: 'profile' })
+    // Guests see Login; signed-in users see Profile.
+    tabs.push(currentUser.value
+        ? { label: 'Profile', href: '/profile', key: 'profile' }
+        : { label: 'Login', href: '/login', key: 'login' })
     return tabs
 })
 
