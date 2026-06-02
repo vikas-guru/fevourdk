@@ -1,101 +1,81 @@
 <template>
-    <AppLayout>
-        <div class="min-h-screen bg-slate-50">
-            <!-- Hero: aligned with public Welcome / About enterprise bands -->
-            <section class="relative overflow-hidden bg-gradient-to-br from-blue-900 via-blue-800 to-indigo-900 text-white">
-                <div class="absolute inset-0 opacity-10 bg-pattern-dots" aria-hidden="true" />
-                <div class="absolute -right-24 top-0 h-72 w-72 rounded-full bg-blue-500/20 blur-3xl" aria-hidden="true" />
-                <div class="absolute -left-20 bottom-0 h-64 w-64 rounded-full bg-indigo-500/15 blur-3xl" aria-hidden="true" />
+    <AppLayout hide-chrome-mobile>
+        <div class="ff">
+            <!-- ============================ HERO ============================ -->
+            <section class="ff-hero">
+                <div class="ff-hero__glow" aria-hidden="true" />
+                <div class="ff-grain" aria-hidden="true" />
+                <div class="ff-hero__rings" aria-hidden="true">
+                    <span class="ff-ring ff-ring--1" />
+                    <span class="ff-ring ff-ring--2" />
+                </div>
 
-                <div class="relative z-10 mx-auto max-w-7xl px-4 py-12 sm:px-6 sm:py-14 lg:px-8 lg:py-16">
-                    <p class="mb-3 text-center text-[10px] font-bold uppercase tracking-[0.2em] text-blue-200/90">
+                <div class="ff-hero__inner">
+                    <p class="ff-eyebrow">
+                        <span class="ff-eyebrow__dot" />
                         Public · Live community
                     </p>
-                    <h1 class="text-center text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-                        Live NGO feeds
+                    <h1 class="ff-display ff-hero__title">
+                        Stories from
+                        <span class="ff-hero__accent">the field.</span>
                     </h1>
-                    <p class="mx-auto mt-4 max-w-3xl text-center text-base text-blue-100 sm:text-lg">
-                        Reactions, comments, and shares on the feed — plus a verified NGO map with Karnataka district boundaries for geographic context.
+                    <p class="ff-hero__lede">
+                        Real updates, reactions and conversations from verified Karnataka
+                        organisations — watch impact unfold, then join in.
                     </p>
 
-                    <div class="mx-auto mt-10 grid max-w-4xl grid-cols-1 gap-4 sm:grid-cols-3">
-                        <div class="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-center backdrop-blur-sm">
-                            <p class="text-3xl font-bold tabular-nums text-white">{{ postCount }}</p>
-                            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-blue-100/90">Posts in view</p>
+                    <div class="ff-hero__stats">
+                        <div class="ff-chip">
+                            <span class="ff-chip__num ff-display">{{ postCount }}</span>
+                            <span class="ff-chip__lbl">Posts live</span>
                         </div>
-                        <div class="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-center backdrop-blur-sm">
-                            <p class="text-3xl font-bold tabular-nums text-amber-300">{{ ngoCount }}</p>
-                            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-blue-100/90">Verified NGOs</p>
+                        <div class="ff-chip">
+                            <span class="ff-chip__num ff-display ff-chip__num--gold">{{ ngoCount }}</span>
+                            <span class="ff-chip__lbl">Verified NGOs</span>
                         </div>
-                        <div class="rounded-2xl border border-white/15 bg-white/10 px-5 py-4 text-center backdrop-blur-sm">
-                            <p class="text-3xl font-bold tabular-nums text-emerald-300">{{ filteredNgos.length }}</p>
-                            <p class="mt-1 text-xs font-medium uppercase tracking-wide text-blue-100/90">Map matches</p>
+                        <div class="ff-chip">
+                            <span class="ff-chip__num ff-display ff-chip__num--emerald">{{ filteredNgos.length }}</span>
+                            <span class="ff-chip__lbl">On the map</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="relative z-10 text-slate-50">
-                    <svg class="block w-full translate-y-px" viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <path d="M0 48V24C240 8 480 0 720 0s480 8 720 24v24H0Z" fill="#f8fafc" />
+                <div class="ff-hero__wave" aria-hidden="true">
+                    <svg viewBox="0 0 1440 48" fill="none" xmlns="http://www.w3.org/2000/svg" class="block w-full">
+                        <path d="M0 48V24C240 8 480 0 720 0s480 8 720 24v24H0Z" fill="var(--paper)" />
                     </svg>
                 </div>
             </section>
 
-            <div class="relative z-20 mx-auto max-w-7xl -mt-1 space-y-6 px-4 pb-12 sm:px-6 lg:px-8">
-                <div
-                    v-if="flashSuccess"
-                    class="mx-auto max-w-3xl rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900 shadow-sm"
-                >
-                    {{ flashSuccess }}
-                </div>
-                <div
-                    v-if="flashError"
-                    class="mx-auto max-w-3xl rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-900 shadow-sm"
-                >
-                    {{ flashError }}
-                </div>
+            <div class="ff-body">
+                <!-- flash -->
+                <div v-if="flashSuccess" class="ff-flash ff-flash--ok">{{ flashSuccess }}</div>
+                <div v-if="flashError" class="ff-flash ff-flash--err">{{ flashError }}</div>
 
-                <div
-                    v-if="feedMeta.can_post_as_ngo"
-                    class="mx-auto max-w-3xl rounded-2xl border border-blue-200 bg-white p-4 shadow-md shadow-slate-200/40 space-y-3"
-                >
-                    <div class="flex flex-wrap items-center justify-between gap-2">
+                <!-- NGO composer (admins only) -->
+                <div v-if="feedMeta.can_post_as_ngo" class="ff-composer">
+                    <div class="ff-composer__top">
                         <div>
-                            <h2 class="text-sm font-bold text-slate-900">Quick post as {{ feedMeta.ngo_name || 'your NGO' }}</h2>
-                            <p class="text-xs text-slate-500 mt-0.5">Same form lives in your workspace menu under <strong>Post an update</strong> — use whichever you prefer.</p>
+                            <h2 class="ff-composer__title">Post as {{ feedMeta.ngo_name || 'your NGO' }}</h2>
+                            <p class="ff-composer__hint">Same form lives in your workspace under <strong>Post an update</strong>.</p>
                         </div>
-                        <div class="flex flex-wrap gap-2">
-                            <Link
-                                href="/ngo/post-update"
-                                class="shrink-0 rounded-xl bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition"
-                            >
-                                Open simple post page
-                            </Link>
-                            <Link
-                                :href="feedMeta.social_connect_url"
-                                class="shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 hover:bg-blue-100 transition"
-                            >
-                                Auto-share setup
-                            </Link>
+                        <div class="ff-composer__links">
+                            <Link href="/ngo/post-update" class="ff-btn ff-btn--gold ff-btn--sm">Simple post page</Link>
+                            <Link :href="feedMeta.social_connect_url" class="ff-btn ff-btn--ghost ff-btn--sm">Auto-share setup</Link>
                         </div>
                     </div>
-                    <p v-if="feedMeta.social_connected_platforms?.length" class="text-[11px] text-slate-600">
+                    <p v-if="feedMeta.social_connected_platforms?.length" class="ff-composer__note">
                         Auto-share after each post:
-                        <span class="font-semibold text-slate-800">{{ formatPlatforms(feedMeta.social_connected_platforms) }}</span>
+                        <strong>{{ formatPlatforms(feedMeta.social_connected_platforms) }}</strong>
                     </p>
-                    <p v-else class="text-[11px] text-slate-600 bg-slate-50 rounded-lg px-3 py-2 border border-slate-100">
-                        Optional: copy posts to Facebook / Instagram / LinkedIn from
-                        <Link :href="feedMeta.social_connect_url" class="font-semibold text-blue-700 hover:underline">Auto-share (optional)</Link>
-                        in the NGO menu — only if someone on your team can complete the technical step once.
-                    </p>
-                    <form class="space-y-3" @submit.prevent="submitNgoPost">
+                    <form class="ff-composer__form" @submit.prevent="submitNgoPost">
                         <input
                             v-model="feedForm.title"
                             type="text"
                             maxlength="200"
                             required
                             placeholder="Headline"
-                            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="ff-field"
                         >
                         <textarea
                             v-model="feedForm.body"
@@ -103,11 +83,11 @@
                             rows="4"
                             maxlength="8000"
                             placeholder="Update your supporters…"
-                            class="w-full rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="ff-field"
                         />
                         <div>
-                            <p class="mb-1 text-xs font-medium text-slate-600">Photos &amp; videos (optional, up to 12)</p>
-                            <label class="flex cursor-pointer items-center justify-center rounded-xl border border-dashed border-slate-300 bg-slate-50 px-3 py-4 text-xs font-semibold text-blue-700 hover:bg-blue-50/50">
+                            <p class="ff-composer__sublabel">Photos &amp; videos (optional, up to 12)</p>
+                            <label class="ff-upload">
                                 Choose files
                                 <input
                                     type="file"
@@ -117,272 +97,249 @@
                                     @change="onFeedMediaPick"
                                 >
                             </label>
-                            <div v-if="feedSlots.length" class="mt-2 grid grid-cols-3 gap-2 sm:grid-cols-4">
-                                <div v-for="(s, i) in feedSlots" :key="s.id" class="relative aspect-square overflow-hidden rounded-lg border border-slate-200 bg-slate-100">
-                                    <img v-if="s.kind === 'image'" :src="s.url" alt="" class="h-full w-full object-cover">
-                                    <video v-else :src="s.url" class="h-full w-full object-cover" muted playsinline />
-                                    <button type="button" class="absolute right-0.5 top-0.5 rounded bg-black/60 px-1 text-[10px] text-white" @click="removeFeedSlot(i)">x</button>
+                            <div v-if="feedSlots.length" class="ff-upload__grid">
+                                <div v-for="(s, i) in feedSlots" :key="s.id" class="ff-upload__cell">
+                                    <img v-if="s.kind === 'image'" :src="s.url" alt="">
+                                    <video v-else :src="s.url" muted playsinline />
+                                    <button type="button" class="ff-upload__x" @click="removeFeedSlot(i)">×</button>
                                 </div>
                             </div>
                         </div>
-                        <p v-if="feedForm.errors.media_files" class="text-xs text-red-600">{{ feedForm.errors.media_files }}</p>
-                        <p v-if="feedForm.errors.title" class="text-xs text-red-600">{{ feedForm.errors.title }}</p>
-                        <p v-if="feedForm.errors.body" class="text-xs text-red-600">{{ feedForm.errors.body }}</p>
-                        <button
-                            type="submit"
-                            class="w-full rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:opacity-60 sm:w-auto"
-                            :disabled="feedForm.processing"
-                        >
+                        <p v-if="feedForm.errors.media_files" class="ff-err">{{ feedForm.errors.media_files }}</p>
+                        <p v-if="feedForm.errors.title" class="ff-err">{{ feedForm.errors.title }}</p>
+                        <p v-if="feedForm.errors.body" class="ff-err">{{ feedForm.errors.body }}</p>
+                        <button type="submit" class="ff-btn ff-btn--gold" :disabled="feedForm.processing">
                             {{ feedForm.processing ? 'Publishing…' : 'Publish to live feed' }}
                         </button>
                     </form>
                 </div>
 
-                <section aria-labelledby="feeds-discover-heading">
-                    <div class="mb-3 flex flex-wrap items-end justify-between gap-2">
-                        <div>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Discover</p>
-                            <h2 id="feeds-discover-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
-                                Search &amp; view mode
-                            </h2>
-                            <p class="mt-0.5 max-w-2xl text-sm text-slate-600">
-                                Switch between the social feed and the NGO locator. Map loads official Karnataka boundaries (GeoJSON) for a clear regional frame.
-                            </p>
-                        </div>
-                    </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-md shadow-slate-200/50 space-y-3">
+                <!-- Search + mode toggle (sticky) -->
+                <div class="ff-controls">
+                    <div class="ff-search">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                         <input
                             v-model="searchText"
                             type="search"
                             autocomplete="off"
                             placeholder="Search posts, NGOs, locations…"
-                            class="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30"
                         >
-                        <div class="grid grid-cols-2 gap-2 sm:gap-3">
-                            <button
-                                type="button"
-                                class="mode-btn"
-                                :class="{ 'mode-btn-active': activeMode === 'feed' }"
-                                @click="activeMode = 'feed'"
-                            >
-                                Feed
-                            </button>
-                            <button
-                                type="button"
-                                class="mode-btn"
-                                :class="{ 'mode-btn-active': activeMode === 'ngo' }"
-                                @click="activateNgoMode"
-                            >
-                                Nearby NGOs
-                            </button>
-                        </div>
                     </div>
-                </section>
-
-                <section v-if="activeMode === 'feed'" aria-labelledby="feeds-stream-heading">
-                    <div class="mb-4">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Community</p>
-                        <h2 id="feeds-stream-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
-                            Live stream
-                        </h2>
+                    <div class="ff-modes">
+                        <button type="button" class="ff-mode" :class="{ 'ff-mode--on': activeMode === 'feed' }" @click="activeMode = 'feed'">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 8h10M7 12h8m-8 4h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" /></svg>
+                            Feed
+                        </button>
+                        <button type="button" class="ff-mode" :class="{ 'ff-mode--on': activeMode === 'ngo' }" @click="activateNgoMode">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0L6.343 16.657a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="2.5" /></svg>
+                            Map
+                        </button>
                     </div>
+                </div>
 
-                    <div class="mx-auto max-w-3xl">
+                <!-- ============================ FEED STREAM ============================ -->
+                <section v-if="activeMode === 'feed'" class="ff-stream" aria-labelledby="feeds-stream-heading">
                     <div
                         v-if="filteredPosts.length === 0"
-                        class="rounded-2xl border border-dashed border-slate-300 bg-white px-6 py-16 text-center shadow-sm"
+                        class="ff-empty"
                     >
-                        <div class="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
-                            <svg class="h-7 w-7" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                            </svg>
+                        <div class="ff-empty__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2M7 16h6M7 8h6v4H7V8z" /></svg>
                         </div>
-                        <p class="text-base font-semibold text-slate-800">No posts match your search</p>
-                        <p class="mt-2 text-sm text-slate-500">Try clearing the search box or check back as NGOs publish updates.</p>
+                        <p class="ff-empty__title">No posts match your search</p>
+                        <p class="ff-empty__text">Clear the search box, or check back as organisations publish updates.</p>
                     </div>
 
                     <article
                         v-for="post in filteredPosts"
                         :key="post.id"
                         :data-feed-post="String(post.id)"
-                        class="mb-4 last:mb-0 rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden"
+                        class="ff-post"
                     >
-                        <div class="px-4 pt-4 pb-3">
-                            <div class="flex items-start justify-between gap-2 mb-2">
-                                <div class="flex items-center gap-2">
-                                    <div class="w-9 h-9 rounded-full bg-blue-100 text-blue-700 font-bold text-xs flex items-center justify-center">
-                                        {{ (post.ngo?.name || post.author?.name || 'F').charAt(0).toUpperCase() }}
-                                    </div>
-                                    <div>
-                                        <p class="text-sm font-semibold text-slate-900">{{ post.ngo?.name || post.author?.name }}</p>
-                                        <p class="text-xs text-slate-500">{{ formatTime(post.created_at) }}</p>
+                        <header class="ff-post__head">
+                            <span class="ff-post__avatar">
+                                <img v-if="post.ngo?.logo" :src="post.ngo.logo" :alt="post.ngo?.name" @error="handleImageError">
+                                <span v-else>{{ (post.ngo?.name || post.author?.name || 'F').charAt(0).toUpperCase() }}</span>
+                            </span>
+                            <span class="ff-post__id">
+                                <span class="ff-post__author">{{ post.ngo?.name || post.author?.name }}</span>
+                                <span class="ff-post__time">{{ timeAgo(post.created_at) }}</span>
+                            </span>
+                            <span v-if="post.ngo" class="ff-post__badge" title="Verified organisation">
+                                <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd" /></svg>
+                            </span>
+                        </header>
+
+                        <Link :href="post.public_url || `/feeds/${post.id}`" class="ff-post__titlelink">
+                            <h2 class="ff-display ff-post__title">{{ post.title }}</h2>
+                        </Link>
+                        <p class="ff-post__text">{{ post.body }}</p>
+
+                        <div v-if="post.media?.length" class="ff-post__media" :class="post.media.length > 1 ? 'ff-post__media--grid' : ''">
+                            <template v-for="(item, idx) in post.media" :key="idx">
+                                <img
+                                    v-if="item.type === 'image'"
+                                    :src="resolveMedia(item.path)"
+                                    :alt="`${post.title} ${idx + 1}`"
+                                    loading="lazy"
+                                    @error="handleImageError"
+                                >
+                                <video v-else :src="resolveMedia(item.path)" controls playsinline preload="metadata" />
+                            </template>
+                        </div>
+                        <div v-else-if="post.image_url" class="ff-post__media">
+                            <img :src="resolveImage(post.image_url)" :alt="post.title" loading="lazy" @error="handleImageError">
+                        </div>
+
+                        <div class="ff-post__metrics">
+                            <span class="ff-post__react-sum">
+                                <span>👍 {{ post.reactions.totals.like }}</span>
+                                <span>❤️ {{ post.reactions.totals.love }}</span>
+                                <span>🤝 {{ post.reactions.totals.support }}</span>
+                            </span>
+                            <span class="ff-post__counts">{{ post.views_count ?? 0 }} views · {{ post.comments.length }} comments · {{ post.shares_count }} shares</span>
+                        </div>
+
+                        <div class="ff-post__actions">
+                            <button type="button" class="ff-react" :class="{ 'ff-react--on ff-react--like': post.reactions.my_reaction === 'like' }" @click="react(post.id, 'like')">
+                                <span class="ff-react__emoji">👍</span> Like
+                            </button>
+                            <button type="button" class="ff-react" :class="{ 'ff-react--on ff-react--love': post.reactions.my_reaction === 'love' }" @click="react(post.id, 'love')">
+                                <span class="ff-react__emoji">❤️</span> Love
+                            </button>
+                            <button type="button" class="ff-react" :class="{ 'ff-react--on ff-react--support': post.reactions.my_reaction === 'support' }" @click="react(post.id, 'support')">
+                                <span class="ff-react__emoji">🤝</span> Support
+                            </button>
+                            <button type="button" class="ff-react ff-react--share" :class="{ 'ff-react--open': shareFor === post.id }" @click="toggleShare(post.id)">
+                                <span class="ff-react__emoji">↗</span> Share
+                            </button>
+                        </div>
+
+                        <transition name="ff-fade">
+                            <div v-if="shareFor === post.id" class="ff-share">
+                                <button type="button" class="ff-share__chip" @click="shareVia(post, 'link')">Copy link</button>
+                                <button type="button" class="ff-share__chip" @click="shareVia(post, 'whatsapp')">WhatsApp</button>
+                                <button type="button" class="ff-share__chip" @click="shareVia(post, 'facebook')">Facebook</button>
+                                <button type="button" class="ff-share__chip" @click="shareVia(post, 'linkedin')">LinkedIn</button>
+                                <button type="button" class="ff-share__chip" @click="shareVia(post, 'instagram')">Instagram caption</button>
+                            </div>
+                        </transition>
+
+                        <div class="ff-post__comments">
+                            <div v-if="post.comments.length" class="ff-comments">
+                                <div v-for="comment in post.comments" :key="comment.id" class="ff-comment">
+                                    <span class="ff-comment__avatar">{{ (comment.user_name || 'M').charAt(0).toUpperCase() }}</span>
+                                    <div class="ff-comment__bubble">
+                                        <p class="ff-comment__name">{{ comment.user_name }}</p>
+                                        <p class="ff-comment__text">{{ comment.comment }}</p>
                                     </div>
                                 </div>
                             </div>
-                            <Link :href="post.public_url || `/feeds/${post.id}`" class="block">
-                                <h2 class="text-lg font-semibold text-slate-900 hover:text-blue-800">{{ post.title }}</h2>
-                            </Link>
-                            <p class="text-sm text-slate-700 mt-1 leading-6">{{ post.body }}</p>
-                        </div>
-
-                        <div v-if="post.media?.length" class="border-t border-slate-100 bg-slate-200">
-                            <div class="grid grid-cols-1 gap-px sm:grid-cols-2">
-                                <template v-for="(item, idx) in post.media" :key="idx">
-                                    <img
-                                        v-if="item.type === 'image'"
-                                        :src="resolveMedia(item.path)"
-                                        :alt="`${post.title} ${idx + 1}`"
-                                        class="max-h-[360px] w-full bg-slate-100 object-cover"
-                                        loading="lazy"
-                                        @error="handleImageError"
-                                    >
-                                    <video
-                                        v-else
-                                        :src="resolveMedia(item.path)"
-                                        class="max-h-[360px] w-full bg-black"
-                                        controls
-                                        playsinline
-                                        preload="metadata"
-                                    />
-                                </template>
-                            </div>
-                        </div>
-                        <img
-                            v-else-if="post.image_url"
-                            :src="resolveImage(post.image_url)"
-                            :alt="post.title"
-                            class="w-full max-h-[420px] object-cover bg-slate-100"
-                            @error="handleImageError"
-                        >
-
-                        <div class="px-4 py-2 border-t border-slate-100">
-                            <div class="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-slate-500 mb-2">
-                                <span>
-                                    👍 {{ post.reactions.totals.like }} · ❤️ {{ post.reactions.totals.love }} · 🤝 {{ post.reactions.totals.support }}
-                                </span>
-                                <span>{{ post.views_count ?? 0 }} views · {{ post.comments.length }} comments · {{ post.shares_count }} shares</span>
-                            </div>
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                                <button class="action-btn" :class="{ 'active-action': post.reactions.my_reaction === 'like' }" @click="react(post.id, 'like')">👍 Like</button>
-                                <button class="action-btn" :class="{ 'active-action': post.reactions.my_reaction === 'love' }" @click="react(post.id, 'love')">❤️ Love</button>
-                                <button class="action-btn" :class="{ 'active-action': post.reactions.my_reaction === 'support' }" @click="react(post.id, 'support')">🤝 Support</button>
-                                <button class="action-btn" :class="{ 'ring-2 ring-blue-200': shareFor === post.id }" @click="toggleShare(post.id)">↗ Share</button>
-                            </div>
-                            <div v-if="shareFor === post.id" class="mt-2 flex flex-wrap gap-2">
-                                <button type="button" class="share-chip" @click="shareVia(post, 'link')">Copy link</button>
-                                <button type="button" class="share-chip" @click="shareVia(post, 'whatsapp')">WhatsApp</button>
-                                <button type="button" class="share-chip" @click="shareVia(post, 'facebook')">Facebook</button>
-                                <button type="button" class="share-chip" @click="shareVia(post, 'linkedin')">LinkedIn</button>
-                                <button type="button" class="share-chip" @click="shareVia(post, 'instagram')">Instagram caption</button>
-                            </div>
-                        </div>
-
-                        <div class="px-4 pb-4">
-                            <div class="space-y-2 mb-3 max-h-44 overflow-auto">
-                                <div v-for="comment in post.comments" :key="comment.id" class="rounded-xl bg-slate-50 px-3 py-2">
-                                    <p class="text-xs font-semibold text-slate-700">{{ comment.user_name }}</p>
-                                    <p class="text-sm text-slate-700">{{ comment.comment }}</p>
-                                </div>
-                            </div>
-                            <form class="flex gap-2" @submit.prevent="submitComment(post.id)">
+                            <form class="ff-commentform" @submit.prevent="submitComment(post.id)">
                                 <input
                                     v-model="commentDrafts[post.id]"
                                     type="text"
                                     maxlength="500"
-                                    placeholder="Write a comment..."
-                                    class="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="Write a comment…"
+                                    @focus="isGuest && openAuthPrompt('comment on this post')"
                                 >
-                                <button type="submit" class="rounded-xl bg-blue-600 text-white text-sm px-3 py-2 hover:bg-blue-700 transition">
-                                    Post
+                                <button type="submit" class="ff-commentform__send" aria-label="Post comment">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6l6 6-6 6" /></svg>
                                 </button>
                             </form>
                         </div>
                     </article>
-                    </div>
                 </section>
 
-                <section v-else aria-labelledby="feeds-map-heading">
-                    <div class="mb-4">
-                        <p class="text-[10px] font-bold uppercase tracking-widest text-blue-600">Geography</p>
-                        <h2 id="feeds-map-heading" class="text-lg font-bold text-slate-900 sm:text-xl">
-                            Verified NGOs on the map
-                        </h2>
-                        <p class="mt-0.5 max-w-2xl text-sm text-slate-600">
-                            District boundaries from Karnataka GeoJSON; markers show NGO locations. Use your position to sort by distance.
-                        </p>
+                <!-- ============================ MAP ============================ -->
+                <section v-else class="ff-mapwrap" aria-labelledby="feeds-map-heading">
+                    <div class="ff-maphead">
+                        <p class="ff-kicker">Geography</p>
+                        <h2 id="feeds-map-heading" class="ff-display ff-h2">Verified NGOs on the map</h2>
+                        <p class="ff-maphead__sub">District boundaries from Karnataka GeoJSON; markers show NGO locations. Use your position to sort by distance.</p>
                     </div>
 
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-md shadow-slate-200/50 space-y-3">
-                        <div class="flex flex-wrap gap-2">
-                            <button
-                                type="button"
-                                class="rounded-xl border border-blue-200 bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-800 transition hover:bg-blue-100"
-                                @click="useMyLocation"
-                            >
-                                Use my location
-                            </button>
-                            <select v-model.number="distanceKm" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-800">
-                                <option :value="10">Within 10 km</option>
-                                <option :value="25">Within 25 km</option>
-                                <option :value="50">Within 50 km</option>
-                                <option :value="100">Within 100 km</option>
-                                <option :value="1000">All Karnataka</option>
-                            </select>
-                            <select v-model="selectedFocus" class="rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-800">
-                                <option value="">All focus areas</option>
-                                <option v-for="focus in focusOptions" :key="focus" :value="focus">{{ focus }}</option>
-                            </select>
-                        </div>
-                        <p class="text-xs text-slate-600">
-                            Showing <span class="font-semibold text-slate-900">{{ filteredNgos.length }}</span> NGOs for your filters
-                            <span v-if="mapLocationDistrictName" class="text-blue-800">
-                                · Map highlight: <strong>{{ mapLocationDistrictName }}</strong>
-                                <span v-if="userLocation" class="text-slate-500"> (your location)</span>
-                                <span v-else-if="filteredNgos.length" class="text-slate-500"> (first listed NGO)</span>
-                            </span>
-                            <span v-if="mapGeoError" class="text-amber-700"> · Boundary layer unavailable (map still works)</span>
-                        </p>
+                    <div class="ff-mapfilters">
+                        <button type="button" class="ff-btn ff-btn--ghost ff-btn--sm" @click="useMyLocation">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1em;height:1em"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0L6.343 16.657a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="2.5" /></svg>
+                            Use my location
+                        </button>
+                        <select v-model.number="distanceKm" class="ff-select">
+                            <option :value="10">Within 10 km</option>
+                            <option :value="25">Within 25 km</option>
+                            <option :value="50">Within 50 km</option>
+                            <option :value="100">Within 100 km</option>
+                            <option :value="1000">All Karnataka</option>
+                        </select>
+                        <select v-model="selectedFocus" class="ff-select">
+                            <option value="">All focus areas</option>
+                            <option v-for="focus in focusOptions" :key="focus" :value="focus">{{ focus }}</option>
+                        </select>
                     </div>
+                    <p class="ff-mapcount">
+                        Showing <strong>{{ filteredNgos.length }}</strong> NGOs for your filters
+                        <span v-if="mapLocationDistrictName" class="ff-mapcount__hi">
+                            · Highlight: <strong>{{ mapLocationDistrictName }}</strong>
+                            <span v-if="userLocation"> (your location)</span>
+                            <span v-else-if="filteredNgos.length"> (first listed)</span>
+                        </span>
+                        <span v-if="mapGeoError" class="ff-mapcount__warn"> · Boundary layer unavailable (map still works)</span>
+                    </p>
 
-                    <div class="feeds-map-shell relative isolate overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-md shadow-slate-200/50 ring-1 ring-slate-100">
+                    <div class="feeds-map-shell relative isolate overflow-hidden">
                         <div id="ngo-map" class="feeds-map-canvas h-[min(52vh,440px)] min-h-[320px] sm:min-h-[380px]" />
                         <div
                             v-show="mapGeoLoading"
-                            class="feeds-map-loader pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3 bg-slate-50/95 backdrop-blur-sm"
+                            class="feeds-map-loader pointer-events-none absolute inset-0 flex flex-col items-center justify-center gap-3"
                             role="status"
                             aria-live="polite"
                             :aria-busy="mapGeoLoading"
                         >
-                            <div class="feeds-map-spinner h-10 w-10 rounded-full border-[3px] border-slate-200 border-t-blue-600" />
-                            <p class="text-sm font-semibold text-slate-800">Loading map layers</p>
-                            <p class="max-w-xs px-4 text-center text-xs text-slate-500">Karnataka district boundaries (GeoJSON)…</p>
+                            <div class="feeds-map-spinner h-10 w-10 rounded-full" />
+                            <p class="text-sm font-semibold" style="color:var(--ink)">Loading map layers</p>
+                            <p class="max-w-xs px-4 text-center text-xs" style="color:#6a6e7a">Karnataka district boundaries (GeoJSON)…</p>
                         </div>
                     </div>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <article
-                            v-for="ngo in filteredNgos"
-                            :key="ngo.id"
-                            class="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm"
-                        >
-                            <div class="flex items-center gap-3">
-                                <img :src="ngo.logo || '/assets/images/fevourd-k/logo.png'" class="w-10 h-10 rounded-lg object-cover bg-slate-100" @error="handleImageError">
+
+                    <div class="ff-ngogrid">
+                        <article v-for="ngo in filteredNgos" :key="ngo.id" class="ff-ngocard">
+                            <div class="ff-ngocard__top">
+                                <img :src="ngo.logo || '/assets/images/fevourd-k/logo.png'" :alt="ngo.name" @error="handleImageError">
                                 <div>
-                                    <p class="text-sm font-semibold text-slate-900">{{ ngo.name }}</p>
-                                    <p class="text-xs text-slate-500">
-                                        {{ ngo.distance_km !== null ? `${ngo.distance_km.toFixed(1)} km away` : `Lat: ${ngo.latitude.toFixed(3)}, Lng: ${ngo.longitude.toFixed(3)}` }}
+                                    <p class="ff-ngocard__name">{{ ngo.name }}</p>
+                                    <p class="ff-ngocard__dist">
+                                        {{ ngo.distance_km !== null ? `${ngo.distance_km.toFixed(1)} km away` : `Lat ${ngo.latitude.toFixed(3)}, Lng ${ngo.longitude.toFixed(3)}` }}
                                     </p>
                                 </div>
                             </div>
-                            <p class="text-sm text-slate-600 mt-2 line-clamp-2">{{ ngo.description || 'Verified NGO impact profile.' }}</p>
-                            <div class="mt-2 flex flex-wrap gap-1">
-                                <span v-for="focus in (ngo.focus_areas || []).slice(0, 3)" :key="focus" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-100">
-                                    {{ focus }}
-                                </span>
+                            <p class="ff-ngocard__desc">{{ ngo.description || 'Verified NGO impact profile.' }}</p>
+                            <div class="ff-ngocard__tags">
+                                <span v-for="focus in (ngo.focus_areas || []).slice(0, 3)" :key="focus">{{ focus }}</span>
                             </div>
                         </article>
                     </div>
                 </section>
             </div>
+
+            <!-- ============================ LOGIN PROMPT (guest actions) ============================ -->
+            <transition name="ff-modal">
+                <div v-if="authPrompt.open" class="ff-authwrap" @click.self="closeAuthPrompt">
+                    <div class="ff-auth" role="dialog" aria-modal="true" aria-labelledby="ff-auth-title">
+                        <button class="ff-auth__x" @click="closeAuthPrompt" aria-label="Close">✕</button>
+                        <div class="ff-auth__emblem"><img :src="brandLogoSrc" alt="" width="52" height="52"></div>
+                        <h3 id="ff-auth-title" class="ff-display ff-auth__title">Join the federation</h3>
+                        <p class="ff-auth__text">
+                            Sign in to <strong>{{ authPrompt.action }}</strong> and stand with
+                            800+ voluntary organisations across Karnataka.
+                        </p>
+                        <div class="ff-auth__btns">
+                            <Link href="/login" class="ff-btn ff-btn--gold">Log in</Link>
+                            <Link href="/register" class="ff-btn ff-btn--ghost-dark">Create account</Link>
+                        </div>
+                        <button class="ff-auth__later" @click="closeAuthPrompt">Maybe later</button>
+                    </div>
+                </div>
+            </transition>
         </div>
     </AppLayout>
 </template>
@@ -395,6 +352,7 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 
 const page = usePage()
+const brandLogoSrc = '/assets/images/fevourd-k/logo.png'
 
 const props = defineProps({
     posts: { type: Array, default: () => [] },
@@ -412,6 +370,17 @@ const props = defineProps({
 
 const flashSuccess = computed(() => page.props.flash?.success ?? null)
 const flashError = computed(() => page.props.flash?.error ?? null)
+
+/* ---- guest gating: prompt sign-in before member actions ---- */
+const isGuest = computed(() => !page.props.auth?.user)
+const authPrompt = ref({ open: false, action: '' })
+const openAuthPrompt = (action) => { authPrompt.value = { open: true, action } }
+const closeAuthPrompt = () => { authPrompt.value.open = false }
+const requireAuth = (action, fn) => {
+    if (isGuest.value) { openAuthPrompt(action); return false }
+    fn?.()
+    return true
+}
 
 const feedForm = useForm({
     title: '',
@@ -499,10 +468,10 @@ const getDistrictPolygonStyle = (feature, highlightedKey) => {
     const isHi = Boolean(highlightedKey && key && key === highlightedKey)
 
     return {
-        color: isHi ? '#1e3a8a' : '#1d4ed8',
+        color: isHi ? '#0d1f5c' : '#1d4ed8',
         weight: isHi ? 3 : 1.5,
-        fillColor: isHi ? '#2563eb' : '#93c5fd',
-        fillOpacity: isHi ? 0.4 : 0.2,
+        fillColor: isHi ? '#f2b40c' : '#93c5fd',
+        fillOpacity: isHi ? 0.32 : 0.18,
     }
 }
 
@@ -590,12 +559,18 @@ const mapHighlightAnchor = computed(() => {
 })
 
 const react = (postId, type) => {
-    router.post(`/feeds/${postId}/react`, { type }, { preserveScroll: true })
+    requireAuth('react to this post', () => {
+        router.post(`/feeds/${postId}/react`, { type }, { preserveScroll: true })
+    })
 }
 
 const submitComment = (postId) => {
     const comment = commentDrafts[postId]?.trim()
-    if (!comment) return
+    if (!comment) {
+        if (isGuest.value) openAuthPrompt('comment on this post')
+        return
+    }
+    if (!requireAuth('comment on this post')) return
 
     router.post(`/feeds/${postId}/comment`, { comment }, {
         preserveScroll: true,
@@ -699,11 +674,24 @@ const shareVia = async (post, channel) => {
         }
     }
 
-    router.post(`/feeds/${post.id}/share`, { channel }, { preserveScroll: true })
+    // Sharing itself works for everyone; only record the share when signed in.
+    if (!isGuest.value) {
+        router.post(`/feeds/${post.id}/share`, { channel }, { preserveScroll: true })
+    }
     shareFor.value = null
 }
 
 const formatTime = (isoDate) => new Date(isoDate).toLocaleString()
+
+const timeAgo = (iso) => {
+    if (!iso) return ''
+    const d = (Date.now() - new Date(iso).getTime()) / 1000
+    if (d < 60) return 'just now'
+    if (d < 3600) return Math.round(d / 60) + 'm ago'
+    if (d < 86400) return Math.round(d / 3600) + 'h ago'
+    if (d < 604800) return Math.round(d / 86400) + 'd ago'
+    return new Date(iso).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
+}
 
 const resolveImage = (url) => url || '/assets/images/fevourd-k/logo.png'
 
@@ -962,63 +950,240 @@ onMounted(async () => {
 </script>
 
 <style scoped>
-.bg-pattern-dots {
-    background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.1'%3E%3Ccircle cx='7' cy='7' r='7'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+/* ============ TOKENS ============ */
+.ff {
+    --ink: #0d1f5c;
+    --ink-2: #11286e;
+    --ink-deep: #081640;
+    --gold: #f2b40c;
+    --gold-soft: #f7c948;
+    --magenta: #c12a63;
+    --emerald: #1f8a5b;
+    --paper: #f7f0df;
+    --paper-2: #efe6cd;
+    --char: #1c2230;
+    --font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
+    color: var(--char);
+    background: var(--paper);
+    min-height: 100vh;
+}
+.ff-display { font-family: var(--font-display); font-optical-sizing: auto; }
+
+.ff-grain {
+    position: absolute; inset: 0; pointer-events: none; opacity: .5; mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
 }
 
-.feeds-map-shell {
-    isolation: isolate;
+/* ============ HERO ============ */
+.ff-hero {
+    position: relative; isolation: isolate; overflow: hidden;
+    background: radial-gradient(120% 120% at 85% -10%, #1b3aa0 0%, var(--ink-2) 38%, var(--ink-deep) 100%);
+    color: #f4eeda;
+    padding: clamp(40px, 9vw, 96px) 0 0;
 }
+.ff-hero__glow { position: absolute; z-index: -1; width: 60vw; height: 60vw; right: -12vw; top: -16vw;
+    background: radial-gradient(circle, rgba(242,180,12,.28), rgba(242,180,12,0) 62%); filter: blur(8px); }
+.ff-hero__rings { position: absolute; z-index: -1; right: -10vw; top: 40%; transform: translateY(-50%); width: min(46vw, 460px); aspect-ratio: 1; opacity: .5; }
+.ff-ring { position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed rgba(242,180,12,.4); }
+.ff-ring--2 { inset: 14%; border-style: solid; border-color: rgba(193,42,99,.35); animation: ff-spin 60s linear infinite; }
+@keyframes ff-spin { to { transform: rotate(360deg); } }
 
-.feeds-map-canvas {
-    position: relative;
-    z-index: 0;
-}
+.ff-hero__inner { position: relative; max-width: 1120px; margin: 0 auto; padding: 0 clamp(20px, 5vw, 48px) clamp(40px, 6vw, 64px); text-align: center; }
+.ff-eyebrow { display: inline-flex; align-items: center; gap: .55em; font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--gold-soft); }
+.ff-eyebrow__dot { width: 7px; height: 7px; border-radius: 50%; background: var(--gold); box-shadow: 0 0 0 4px rgba(242,180,12,.2); }
+.ff-hero__title { font-weight: 600; font-size: clamp(2.4rem, 7vw, 4.6rem); line-height: 1; letter-spacing: -.02em; margin: .45rem 0 0; }
+.ff-hero__accent { color: var(--gold); font-style: italic; font-weight: 500; }
+.ff-hero__lede { max-width: 44ch; margin: 1.1rem auto 0; font-size: clamp(1rem, 1.6vw, 1.18rem); line-height: 1.6; color: #d9d6c6; }
 
-.feeds-map-loader {
-    z-index: 20000;
-}
+.ff-hero__stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; max-width: 460px; margin: clamp(1.8rem, 4vw, 2.6rem) auto 0; }
+.ff-chip { border: 1px solid rgba(247,240,223,.16); background: rgba(247,240,223,.07); backdrop-filter: blur(6px); border-radius: 16px; padding: .85rem .4rem; }
+.ff-chip__num { display: block; font-size: clamp(1.5rem, 5vw, 2rem); font-weight: 600; line-height: 1; color: #fff; }
+.ff-chip__num--gold { color: var(--gold-soft); }
+.ff-chip__num--emerald { color: #6fe3ab; }
+.ff-chip__lbl { display: block; margin-top: .4rem; font-size: .68rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #c7c4b4; }
+.ff-hero__wave { line-height: 0; }
 
-.feeds-map-spinner {
-    animation: feeds-map-spin 0.75s linear infinite;
-}
+/* ============ BODY LAYOUT ============ */
+.ff-body { max-width: 680px; margin: 0 auto; padding: clamp(16px, 4vw, 28px) clamp(14px, 4vw, 20px) clamp(40px, 8vw, 64px); display: flex; flex-direction: column; gap: clamp(16px, 4vw, 22px); }
 
-@keyframes feeds-map-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
+/* flash */
+.ff-flash { border-radius: 16px; padding: .8rem 1rem; font-size: .9rem; font-weight: 500; }
+.ff-flash--ok { background: #e7f6ee; border: 1px solid #b9e3cc; color: #166041; }
+.ff-flash--err { background: #fdeaea; border: 1px solid #f3c0c0; color: #a12626; }
 
-.action-btn {
-    @apply rounded-lg border border-slate-200 px-2 py-1.5 text-xs font-medium text-slate-600 hover:bg-slate-50 transition;
-}
-.active-action {
-    @apply bg-blue-600 border-blue-600 text-white;
-}
-.mode-btn {
-    @apply rounded-xl border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 transition;
-}
-.mode-btn-active {
-    @apply bg-blue-600 border-blue-600 text-white;
-}
-.line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-}
-.share-chip {
-    @apply rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[11px] font-semibold text-slate-700 hover:bg-slate-100 transition;
+/* ============ BUTTONS ============ */
+.ff-btn { display: inline-flex; align-items: center; justify-content: center; gap: .45em; padding: .8em 1.4em; border-radius: 999px; font-weight: 600; font-size: .92rem; text-decoration: none; border: 1px solid transparent; cursor: pointer; transition: transform .2s ease, box-shadow .2s ease, background .2s ease, color .2s ease; }
+.ff-btn--sm { padding: .55em 1em; font-size: .8rem; }
+.ff-btn:active { transform: scale(.97); }
+.ff-btn--gold { background: var(--gold); color: #2a1c00; box-shadow: 0 12px 26px -12px rgba(242,180,12,.7); }
+.ff-btn--gold:hover { box-shadow: 0 16px 32px -12px rgba(242,180,12,.85); transform: translateY(-2px); }
+.ff-btn--gold:disabled { opacity: .6; transform: none; }
+.ff-btn--ghost { background: #fff; color: var(--ink); border-color: rgba(13,31,92,.18); }
+.ff-btn--ghost:hover { background: var(--ink); color: var(--paper); }
+.ff-btn--ghost-dark { background: transparent; color: var(--ink); border-color: rgba(13,31,92,.25); }
+.ff-btn--ghost-dark:hover { background: rgba(13,31,92,.06); }
+
+/* ============ COMPOSER ============ */
+.ff-composer { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 22px; padding: clamp(16px,3vw,22px); box-shadow: 0 18px 40px -28px rgba(13,31,92,.4); display: flex; flex-direction: column; gap: .9rem; }
+.ff-composer__top { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: .8rem; }
+.ff-composer__title { font-family: var(--font-display); font-weight: 600; font-size: 1.15rem; color: var(--ink); margin: 0; }
+.ff-composer__hint { font-size: .8rem; color: #6a6e7a; margin: .2rem 0 0; }
+.ff-composer__links { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ff-composer__note { font-size: .78rem; color: #6a6e7a; }
+.ff-composer__form { display: flex; flex-direction: column; gap: .7rem; }
+.ff-composer__sublabel { font-size: .78rem; font-weight: 600; color: #6a6e7a; margin: 0 0 .35rem; }
+.ff-field { width: 100%; border: 1px solid rgba(13,31,92,.18); border-radius: 14px; padding: .7rem .9rem; font: inherit; font-size: .92rem; background: var(--paper); color: var(--char); transition: border-color .2s ease, box-shadow .2s ease; }
+.ff-field:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,180,12,.22); }
+.ff-upload { display: flex; align-items: center; justify-content: center; border: 1.5px dashed rgba(13,31,92,.25); border-radius: 14px; padding: .9rem; font-size: .82rem; font-weight: 700; color: var(--ink); cursor: pointer; background: var(--paper); }
+.ff-upload:hover { border-color: var(--gold); background: rgba(242,180,12,.06); }
+.ff-upload__grid { margin-top: .6rem; display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+.ff-upload__cell { position: relative; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 1px solid rgba(13,31,92,.12); background: var(--paper-2); }
+.ff-upload__cell img, .ff-upload__cell video { width: 100%; height: 100%; object-fit: cover; }
+.ff-upload__x { position: absolute; top: 4px; right: 4px; width: 20px; height: 20px; border-radius: 50%; border: none; background: rgba(0,0,0,.6); color: #fff; font-size: 13px; line-height: 1; cursor: pointer; }
+.ff-err { font-size: .78rem; color: #c0392b; margin: 0; }
+
+/* ============ CONTROLS (search + mode) ============ */
+.ff-controls { position: sticky; top: 10px; z-index: 30; display: flex; flex-direction: column; gap: .6rem; background: rgba(247,240,223,.92); backdrop-filter: blur(10px); border: 1px solid rgba(13,31,92,.1); border-radius: 18px; padding: .7rem; box-shadow: 0 10px 28px -18px rgba(13,31,92,.5); }
+.ff-search { position: relative; }
+.ff-search svg { position: absolute; left: 14px; top: 50%; transform: translateY(-50%); width: 18px; height: 18px; color: #9095a1; }
+.ff-search input { width: 100%; border: 1px solid rgba(13,31,92,.16); border-radius: 13px; padding: .72rem .9rem .72rem 2.55rem; font: inherit; font-size: .92rem; background: #fff; color: var(--char); }
+.ff-search input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,180,12,.22); }
+.ff-modes { display: grid; grid-template-columns: 1fr 1fr; gap: .5rem; }
+.ff-mode { display: inline-flex; align-items: center; justify-content: center; gap: .45em; border: 1px solid rgba(13,31,92,.16); background: #fff; border-radius: 13px; padding: .6rem; font: inherit; font-weight: 600; font-size: .9rem; color: #4b5563; cursor: pointer; transition: all .2s ease; }
+.ff-mode svg { width: 17px; height: 17px; }
+.ff-mode:hover { border-color: rgba(13,31,92,.3); }
+.ff-mode--on { background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: #fff; border-color: transparent; box-shadow: 0 10px 20px -10px rgba(13,31,92,.7); }
+
+/* ============ EMPTY ============ */
+.ff-empty { text-align: center; background: #fffdf6; border: 1px dashed rgba(13,31,92,.2); border-radius: 22px; padding: clamp(36px, 9vw, 64px) 24px; }
+.ff-empty__icon { width: 56px; height: 56px; margin: 0 auto 1rem; display: grid; place-items: center; border-radius: 16px; background: var(--paper-2); color: var(--ink); }
+.ff-empty__icon svg { width: 28px; height: 28px; }
+.ff-empty__title { font-weight: 700; color: var(--ink); margin: 0; }
+.ff-empty__text { margin: .5rem 0 0; font-size: .9rem; color: #6a6e7a; }
+
+/* ============ STREAM ============ */
+.ff-stream { display: flex; flex-direction: column; gap: clamp(14px, 3vw, 18px); }
+
+/* ============ POST CARD ============ */
+.ff-post { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 22px; overflow: hidden; padding: clamp(16px, 3.5vw, 22px); box-shadow: 0 18px 44px -30px rgba(13,31,92,.45); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s ease; }
+.ff-post:hover { transform: translateY(-3px); box-shadow: 0 26px 54px -30px rgba(13,31,92,.5); }
+.ff-post__head { display: flex; align-items: center; gap: .7rem; margin-bottom: .85rem; }
+.ff-post__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: var(--gold-soft); font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; box-shadow: 0 0 0 2px rgba(242,180,12,.3); }
+.ff-post__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ff-post__id { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.ff-post__author { font-weight: 700; color: var(--ink); font-size: .96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-post__time { font-size: .78rem; color: #8a8e9a; }
+.ff-post__badge { margin-left: auto; color: var(--emerald); }
+.ff-post__badge svg { width: 20px; height: 20px; }
+.ff-post__titlelink { text-decoration: none; }
+.ff-post__title { font-weight: 600; font-size: clamp(1.2rem, 3.5vw, 1.45rem); line-height: 1.2; letter-spacing: -.01em; color: var(--ink); margin: 0; transition: color .2s ease; }
+.ff-post__titlelink:hover .ff-post__title { color: var(--magenta); }
+.ff-post__text { margin: .5rem 0 0; color: #4b4f5a; font-size: .96rem; line-height: 1.6; white-space: pre-line; }
+
+.ff-post__media { margin: 1rem 0 0; border-radius: 16px; overflow: hidden; border: 1px solid rgba(13,31,92,.08); background: var(--paper-2); }
+.ff-post__media img, .ff-post__media video { display: block; width: 100%; max-height: 460px; object-fit: cover; }
+.ff-post__media video { background: #000; }
+.ff-post__media--grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: rgba(13,31,92,.08); }
+.ff-post__media--grid img, .ff-post__media--grid video { max-height: 240px; height: 100%; }
+
+.ff-post__metrics { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid rgba(13,31,92,.08); font-size: .8rem; color: #8a8e9a; }
+.ff-post__react-sum { display: inline-flex; gap: .7rem; }
+.ff-post__counts { color: #9095a1; }
+
+.ff-post__actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: .8rem; }
+.ff-react { display: inline-flex; align-items: center; justify-content: center; gap: .35em; border: 1px solid rgba(13,31,92,.12); background: var(--paper); border-radius: 13px; padding: .6rem .3rem; font: inherit; font-weight: 600; font-size: .84rem; color: #4b5563; cursor: pointer; transition: transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease; }
+.ff-react__emoji { font-size: 1rem; transition: transform .2s ease; }
+.ff-react:hover { border-color: rgba(13,31,92,.25); transform: translateY(-1px); }
+.ff-react:active .ff-react__emoji { transform: scale(1.35); }
+.ff-react--on { color: #fff; border-color: transparent; box-shadow: 0 10px 20px -10px rgba(13,31,92,.5); }
+.ff-react--on.ff-react--like { background: linear-gradient(135deg, var(--ink), var(--ink-2)); }
+.ff-react--on.ff-react--love { background: linear-gradient(135deg, var(--magenta), #e0567f); box-shadow: 0 10px 20px -10px rgba(193,42,99,.7); }
+.ff-react--on.ff-react--support { background: linear-gradient(135deg, var(--emerald), #2bb277); box-shadow: 0 10px 20px -10px rgba(31,138,91,.7); }
+.ff-react--open { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(242,180,12,.3); }
+
+.ff-share { display: flex; flex-wrap: wrap; gap: .45rem; margin-top: .6rem; }
+.ff-share__chip { border: 1px solid rgba(13,31,92,.14); background: var(--paper); border-radius: 999px; padding: .4rem .85rem; font: inherit; font-size: .78rem; font-weight: 600; color: var(--ink); cursor: pointer; transition: background .2s ease, color .2s ease; }
+.ff-share__chip:hover { background: var(--ink); color: var(--paper); }
+
+/* comments */
+.ff-post__comments { margin-top: 1rem; padding-top: .9rem; border-top: 1px solid rgba(13,31,92,.08); }
+.ff-comments { display: flex; flex-direction: column; gap: .55rem; max-height: 220px; overflow: auto; margin-bottom: .7rem; }
+.ff-comment { display: flex; gap: .55rem; }
+.ff-comment__avatar { width: 30px; height: 30px; flex: none; border-radius: 50%; display: grid; place-items: center; background: var(--paper-2); color: var(--ink); font-weight: 700; font-size: .78rem; }
+.ff-comment__bubble { background: var(--paper); border: 1px solid rgba(13,31,92,.08); border-radius: 14px; padding: .5rem .75rem; }
+.ff-comment__name { font-size: .76rem; font-weight: 700; color: var(--ink); margin: 0; }
+.ff-comment__text { font-size: .88rem; color: #4b4f5a; margin: .1rem 0 0; }
+.ff-commentform { display: flex; gap: .5rem; }
+.ff-commentform input { flex: 1; border: 1px solid rgba(13,31,92,.16); border-radius: 999px; padding: .65rem 1rem; font: inherit; font-size: .9rem; background: var(--paper); color: var(--char); }
+.ff-commentform input:focus { outline: none; border-color: var(--gold); box-shadow: 0 0 0 3px rgba(242,180,12,.22); }
+.ff-commentform__send { flex: none; width: 42px; border: none; border-radius: 999px; background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: #fff; cursor: pointer; display: grid; place-items: center; transition: transform .15s ease; }
+.ff-commentform__send:hover { transform: translateY(-1px); }
+.ff-commentform__send svg { width: 18px; height: 18px; }
+
+/* ============ MAP ============ */
+.ff-mapwrap { display: flex; flex-direction: column; gap: .9rem; }
+.ff-maphead { }
+.ff-kicker { font-size: .72rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--magenta); margin: 0 0 .35rem; }
+.ff-h2 { font-weight: 600; font-size: clamp(1.4rem, 4vw, 1.9rem); line-height: 1.1; letter-spacing: -.01em; color: var(--ink); margin: 0; }
+.ff-maphead__sub { margin: .5rem 0 0; font-size: .9rem; color: #6a6e7a; }
+.ff-mapfilters { display: flex; flex-wrap: wrap; gap: .5rem; }
+.ff-select { border: 1px solid rgba(13,31,92,.16); background: #fff; border-radius: 13px; padding: .55rem .8rem; font: inherit; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.ff-mapcount { font-size: .82rem; color: #6a6e7a; margin: 0; }
+.ff-mapcount__hi { color: var(--ink); }
+.ff-mapcount__warn { color: #b8860b; }
+
+.ff-ngogrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+.ff-ngocard { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 18px; padding: .9rem; box-shadow: 0 12px 30px -24px rgba(13,31,92,.4); }
+.ff-ngocard__top { display: flex; align-items: center; gap: .6rem; }
+.ff-ngocard__top img { width: 40px; height: 40px; border-radius: 11px; object-fit: cover; background: var(--paper-2); }
+.ff-ngocard__name { font-size: .9rem; font-weight: 700; color: var(--ink); margin: 0; }
+.ff-ngocard__dist { font-size: .74rem; color: #8a8e9a; margin: 0; }
+.ff-ngocard__desc { font-size: .84rem; color: #565a66; margin: .6rem 0 0; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.ff-ngocard__tags { display: flex; flex-wrap: wrap; gap: .3rem; margin-top: .55rem; }
+.ff-ngocard__tags span { font-size: .68rem; font-weight: 600; color: var(--ink); background: rgba(13,31,92,.07); border: 1px solid rgba(13,31,92,.1); padding: .2rem .55rem; border-radius: 999px; }
+
+/* map shell (logic-referenced classes preserved) */
+.feeds-map-shell { isolation: isolate; border-radius: 18px; border: 1px solid rgba(13,31,92,.1); background: #fff; box-shadow: 0 14px 34px -26px rgba(13,31,92,.5); }
+.feeds-map-canvas { position: relative; z-index: 0; }
+.feeds-map-loader { z-index: 20000; background: rgba(247,240,223,.95); backdrop-filter: blur(4px); }
+.feeds-map-spinner { border: 3px solid var(--paper-2); border-top-color: var(--gold); animation: feeds-map-spin .75s linear infinite; }
+@keyframes feeds-map-spin { to { transform: rotate(360deg); } }
+
+/* ============ LOGIN MODAL ============ */
+.ff-authwrap { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 20px; background: rgba(8,22,64,.55); backdrop-filter: blur(6px); }
+.ff-auth { position: relative; width: 100%; max-width: 380px; text-align: center; background: var(--paper); border-radius: 24px; padding: clamp(28px,5vw,40px) clamp(22px,4vw,34px) clamp(20px,4vw,28px); box-shadow: 0 40px 80px -30px rgba(0,0,0,.6); border: 1px solid rgba(242,180,12,.3); }
+.ff-auth__x { position: absolute; top: 14px; right: 16px; background: none; border: none; font-size: 1.05rem; color: #8a8e9a; cursor: pointer; line-height: 1; }
+.ff-auth__x:hover { color: var(--ink); }
+.ff-auth__emblem { width: 72px; height: 72px; margin: 0 auto 1rem; border-radius: 50%; display: grid; place-items: center; background: radial-gradient(circle at 50% 38%, rgba(242,180,12,.18), rgba(242,180,12,.04) 70%); box-shadow: inset 0 0 0 1px rgba(242,180,12,.35); }
+.ff-auth__emblem img { width: 52px; height: auto; }
+.ff-auth__title { font-size: 1.6rem; font-weight: 600; color: var(--ink); margin: 0 0 .5rem; }
+.ff-auth__text { margin: 0 0 1.4rem; color: #565a66; font-size: .96rem; line-height: 1.55; }
+.ff-auth__text strong { color: var(--ink); }
+.ff-auth__btns { display: flex; flex-direction: column; gap: .65rem; }
+.ff-auth__btns .ff-btn { width: 100%; }
+.ff-auth__later { margin-top: .9rem; background: none; border: none; cursor: pointer; font: inherit; font-size: .86rem; color: #8a8e9a; }
+.ff-auth__later:hover { color: var(--ink); }
+
+/* transitions */
+.ff-fade-enter-active, .ff-fade-leave-active { transition: opacity .2s ease; }
+.ff-fade-enter-from, .ff-fade-leave-to { opacity: 0; }
+.ff-modal-enter-active, .ff-modal-leave-active { transition: opacity .25s ease; }
+.ff-modal-enter-active .ff-auth, .ff-modal-leave-active .ff-auth { transition: transform .3s cubic-bezier(.2,.8,.2,1), opacity .25s ease; }
+.ff-modal-enter-from, .ff-modal-leave-to { opacity: 0; }
+.ff-modal-enter-from .ff-auth, .ff-modal-leave-to .ff-auth { transform: translateY(16px) scale(.96); opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+    .ff-ring--2, .ff-post, .ff-react__emoji { animation: none !important; transition: none !important; }
 }
 
 :deep(.feeds-map-dist-tooltip) {
     border-radius: 0.5rem !important;
-    border: 1px solid rgb(226 232 240) !important;
+    border: 1px solid rgba(13,31,92,.15) !important;
     background: #fff !important;
-    box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.08) !important;
+    box-shadow: 0 4px 12px -2px rgba(13,31,92,.18) !important;
     font-size: 11px !important;
-    font-weight: 600 !important;
-    color: rgb(15 23 42) !important;
+    font-weight: 700 !important;
+    color: var(--ink) !important;
     padding: 4px 8px !important;
 }
 </style>
