@@ -66,7 +66,7 @@ class VikasanaShowcaseSeeder extends Seeder
         $ngo->name = 'Vikasana Institute for Rural and Urban Development';
         $ngo->slug = 'vikasana';
         $ngo->description = 'Vikasana Institute for Rural and Urban Development is a Mandya-based voluntary organisation founded on 30 December 1984, working across Mandya, Kodagu and Ramanagara districts. Guided by the motto "Inclusion through productivity", Vikasana runs 15+ development programmes spanning agriculture, water, health, environment, housing, human rights and women\'s empowerment — reaching 100+ villages over 39 years of grassroots service.';
-        $ngo->founder_name = 'Keshavan Namboodari';
+        $ngo->founder_name = 'Shri. Mahesh Chandra Guru';
         $ngo->founder_email = 'vikasanairud@gmail.com';
         $ngo->founder_phone = '9448464171';
         $ngo->cofounder_name = 'Mahesh Chandra Guru';

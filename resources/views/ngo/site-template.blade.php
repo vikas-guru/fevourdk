@@ -28,6 +28,70 @@
         ['img' => 'assets/Themes/assets/images/infrastructure/village-meeting.jpg', 'size' => '', 'title' => 'Community engagement', 'caption' => 'Village meetings & consultations'],
         ['img' => 'assets/Themes/assets/images/activities/water-resources.jpg', 'size' => '', 'title' => 'Water & environment', 'caption' => 'Sustainable resource projects'],
     ];
+
+    // ---- Archive-3 parity blocks (template defaults; founder name pulled from NGO) ----
+    $missionItems = [
+        ['icon' => 'fa-graduation-cap', 'title' => 'Education', 'body' => 'Ensuring access to quality learning for underprivileged children', 'n' => '01'],
+        ['icon' => 'fa-heartbeat', 'title' => 'Health & Well-being', 'body' => 'Providing healthcare services and awareness programs', 'n' => '02'],
+        ['icon' => 'fa-hand-holding-usd', 'title' => 'Economic Development', 'body' => 'Supporting women entrepreneurship and self-help groups', 'n' => '03'],
+        ['icon' => 'fa-seedling', 'title' => 'Sustainable Agriculture', 'body' => 'Promoting organic farming and farmer producer organizations', 'n' => '04'],
+    ];
+    $approachItems = [
+        ['icon' => 'fa-infinity', 'title' => 'Sustainable', 'body' => 'Long-term impact through self-sufficient initiatives', 'stat' => '95%', 'stat_label' => 'Success Rate'],
+        ['icon' => 'fa-users', 'title' => 'Inclusive', 'body' => 'Reaching the most vulnerable and marginalized groups', 'stat' => '50K+', 'stat_label' => 'People Reached'],
+        ['icon' => 'fa-handshake', 'title' => 'Collaborative', 'body' => 'Partnering with NGOs, government agencies, and corporates', 'stat' => '100+', 'stat_label' => 'Partners'],
+    ];
+    $approachImpact = [
+        ['number' => '1M+', 'label' => 'Lives Impacted'],
+        ['number' => '500+', 'label' => 'Active Programs'],
+        ['number' => '100+', 'label' => 'Partner Organizations'],
+    ];
+    $achievementItems = [
+        ['icon' => 'fa-mountain', 'title' => 'Natural Resource Management', 'body' => 'Treated 20,000+ hectares of dry land for agricultural use', 'number' => '20,000+'],
+        ['icon' => 'fa-female', 'title' => 'Women Empowerment', 'body' => 'Established 3,000+ Self-Help Groups (SHGs) supporting women-led businesses', 'number' => '3,000+'],
+        ['icon' => 'fa-child', 'title' => 'Child Welfare & Adoption', 'body' => 'Rescued 52+ abandoned infants and facilitated legal adoptions', 'number' => '52+'],
+        ['icon' => 'fa-home', 'title' => 'Housing for the Poor', 'body' => 'Facilitated construction of 1,500+ houses for Beedi workers and BPL families', 'number' => '1,500+'],
+        ['icon' => 'fa-leaf', 'title' => 'Sustainable Farming', 'body' => 'Helped farmers transition to organic agriculture and obtain certifications', 'number' => '500+'],
+        ['icon' => 'fa-tools', 'title' => 'Skill Development', 'body' => 'Trained 500+ rural women annually in entrepreneurship', 'number' => '500+'],
+    ];
+
+    $directorName = $ngo->founder_name ?: 'Shri. Mahesh Chandra Guru';
+    $directorImg = asset('assets/Themes/assets/images/leadership/guru.jpeg');
+    $directorHighlights = [
+        ['icon' => 'fa-award', 'strong' => '30+ Years of Service', 'span' => 'Dedicated leadership in social development'],
+        ['icon' => 'fa-users', 'strong' => '50K+ Lives Impacted', 'span' => 'Transforming communities across Karnataka'],
+        ['icon' => 'fa-handshake', 'strong' => 'State-level Leadership', 'span' => 'Coordinating NGOs through FEVOURD-K'],
+    ];
+    $directorQualities = [
+        ['icon' => 'fa-heart', 'label' => 'Compassionate Leader'],
+        ['icon' => 'fa-lightbulb', 'label' => 'Visionary Thinker'],
+        ['icon' => 'fa-hands-helping', 'label' => 'Dedicated Servant'],
+        ['icon' => 'fa-graduation-cap', 'label' => 'Wise Mentor'],
+    ];
+
+    $leaders = [
+        ['name' => 'Dr. R L Jagadish', 'role' => 'President', 'img' => 'jaga.avif', 'featured' => false,
+            'body' => 'Leading '.$ngo->name.' with vision and expertise in social development, driving strategic initiatives and organizational growth.',
+            'tags' => ['Visionary Leader', 'Strategic Planning', 'Social Development']],
+        ['name' => $directorName, 'role' => 'Director & Secretary', 'img' => 'guru.jpeg', 'featured' => true,
+            'body' => 'Leading '.$ngo->name.' with exceptional vision and unwavering commitment. Also serving as State President of FEVOURD-K, coordinating voluntary organizations across Karnataka.',
+            'tags' => ['Dedicated Service', 'State Leadership', '30+ Years Experience']],
+        ['name' => 'Shri. Krishnegowda', 'role' => 'Treasurer', 'img' => 'krishna.avif', 'featured' => false,
+            'body' => 'Managing financial operations with integrity and ensuring transparency in all monetary matters, maintaining fiscal responsibility.',
+            'tags' => ['Financial Expert', 'Transparency', 'Fiscal Management']],
+    ];
+
+    $successStories = [
+        ['img' => 'assets/Themes/assets/images/impact/success-story-1.jpg', 'title' => 'Environmental Leadership', 'date' => 'June 2020',
+            'body' => 'Successfully organized World Environment Day with Police Department collaboration, promoting environmental awareness across Doddakoppalu Mandya. Over 500 community members participated in tree plantation and cleanliness drives.',
+            'stats' => [['icon' => 'fa-tree', 'label' => '500+ Trees Planted'], ['icon' => 'fa-users', 'label' => '500+ Participants']]],
+        ['img' => 'assets/Themes/assets/images/impact/success-story-2.jpg', 'title' => 'Emergency Response Excellence', 'date' => 'June 2020',
+            'body' => 'Distributed 100 grocery kits to needy people and farm laborers during COVID-19 pandemic, reaching the most vulnerable communities. Our rapid response team ensured essential supplies reached remote villages within 48 hours.',
+            'stats' => [['icon' => 'fa-box', 'label' => '100+ Kits Distributed'], ['icon' => 'fa-clock', 'label' => '48 Hours Response']]],
+        ['img' => 'assets/Themes/assets/images/impact/success-story-3.jpg', 'title' => 'Child Rights Advocacy', 'date' => 'February 2020',
+            'body' => 'Conducted Childline school awareness program at Mahadevpura GHPS school, protecting and educating children about their rights. The program reached 200+ students and trained 15 teachers as child protection advocates.',
+            'stats' => [['icon' => 'fa-child', 'label' => '200+ Children Reached'], ['icon' => 'fa-chalkboard-teacher', 'label' => '15 Teachers Trained']]],
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -108,7 +172,7 @@
         }
     </style>
 </head>
-<body class="{{ $preview ? 'loaded' : '' }}">
+<body>
     @if($preview)
         <div class="ngo-preview-ribbon">
             Preview
@@ -362,6 +426,138 @@
                 </div>
             </div>
 
+            <!-- Our Mission -->
+            <div class="mission-section">
+                <div class="mission-header">
+                    <div class="mission-icon-large"><i class="fas fa-bullseye"></i></div>
+                    <div class="mission-text">
+                        <h3>Our Mission</h3>
+                        <p>{{ $microsite['about']['mission_intro'] ?? 'To empower marginalized communities through strategic interventions in:' }}</p>
+                    </div>
+                </div>
+                <div class="mission-grid">
+                    @foreach($missionItems as $mi)
+                        <div class="mission-item">
+                            <div class="mission-icon"><i class="fas {{ $mi['icon'] }}"></i></div>
+                            <div class="mission-content">
+                                <h4>{{ $mi['title'] }}</h4>
+                                <p>{{ $mi['body'] }}</p>
+                                <div class="mission-number">{{ $mi['n'] }}</div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Our Approach -->
+            <div class="approach-section">
+                <div class="approach-header">
+                    <div class="approach-icon-large"><i class="fas fa-route"></i></div>
+                    <div class="approach-text">
+                        <h3>Our Approach</h3>
+                        <p>{{ $ngo->name }} believes in community participation as a key driver of social change. We work hand-in-hand with local communities, fostering a sense of ownership and collective responsibility.</p>
+                    </div>
+                </div>
+                <div class="approach-items">
+                    @foreach($approachItems as $ai)
+                        <div class="approach-item">
+                            <div class="approach-icon"><i class="fas {{ $ai['icon'] }}"></i></div>
+                            <div class="approach-content">
+                                <h4>{{ $ai['title'] }}</h4>
+                                <p>{{ $ai['body'] }}</p>
+                                <div class="approach-stats">
+                                    <span class="stat-number">{{ $ai['stat'] }}</span>
+                                    <span class="stat-label">{{ $ai['stat_label'] }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+                <div class="approach-impact">
+                    @foreach($approachImpact as $aim)
+                        <div class="impact-stat">
+                            <div class="impact-number">{{ $aim['number'] }}</div>
+                            <div class="impact-label">{{ $aim['label'] }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
+            <!-- Key Achievements -->
+            <div class="achievements-section">
+                <h3>Key Achievements &amp; Milestones</h3>
+                <div class="achievements-container">
+                    <div class="achievements-track">
+                        @foreach($achievementItems as $ach)
+                            <div class="achievement-item">
+                                <div class="achievement-icon"><i class="fas {{ $ach['icon'] }}"></i></div>
+                                <h4>{{ $ach['title'] }}</h4>
+                                <p>{{ $ach['body'] }}</p>
+                                <div class="achievement-number">{{ $ach['number'] }}</div>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            <!-- Director & Secretary -->
+            <div class="guru-tribute">
+                <div class="tribute-header">
+                    <h3>Director &amp; Secretary</h3>
+                    <p>{{ $directorName }} - Leading {{ $ngo->name }} with Excellence</p>
+                    <div class="additional-roles">
+                        <span class="role-badge">State President, FEVOURD-K</span>
+                        <span class="role-description">Federation of Voluntary Organisations for Urban and Rural Development in Karnataka</span>
+                    </div>
+                </div>
+                <div class="tribute-content">
+                    <div class="tribute-left">
+                        <div class="tribute-image-container">
+                            <div class="tribute-image">
+                                <img src="{{ $directorImg }}" alt="{{ $directorName }}">
+                            </div>
+                            <div class="image-caption">
+                                <strong>{{ $directorName }}</strong><br>
+                                <span>Director &amp; Secretary, {{ \Illuminate\Support\Str::limit($ngo->name, 24) }}</span><br>
+                                <span>State President, FEVOURD-K</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tribute-right">
+                        <div class="tribute-text">
+                            <h4>Visionary Leadership &amp; Dedication</h4>
+                            <p>{{ $directorName }}, our present Director &amp; Secretary, continues to lead {{ $ngo->name }} with exceptional vision and unwavering commitment. As the State President of FEVOURD-K, he coordinates and leads voluntary organizations across Karnataka, fostering collaboration and amplifying the impact of social development initiatives throughout the state.</p>
+                            <div class="leadership-highlights">
+                                @foreach($directorHighlights as $h)
+                                    <div class="highlight-item">
+                                        <i class="fas {{ $h['icon'] }}"></i>
+                                        <div class="highlight-content">
+                                            <strong>{{ $h['strong'] }}</strong>
+                                            <span>{{ $h['span'] }}</span>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <div class="tribute-qualities">
+                                @foreach($directorQualities as $q)
+                                    <div class="quality-item">
+                                        <i class="fas {{ $q['icon'] }}"></i>
+                                        <span>{{ $q['label'] }}</span>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </div>
+                        <div class="tribute-impact">
+                            <h4>Statewide Impact Through FEVOURD-K</h4>
+                            <p>Through his leadership at FEVOURD-K, {{ $directorName }} has created a powerful network of voluntary organizations working in harmony for urban and rural development across Karnataka. His strategic vision and collaborative approach have strengthened the NGO sector, enabling thousands of organizations to serve communities more effectively.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="tribute-footer">
+                    <blockquote>"True leadership is about serving others with humility, inspiring positive change, and building bridges between organizations for greater collective impact."</blockquote>
+                </div>
+            </div>
+
             <div class="presence-section">
                 <h3>Our Presence Across Karnataka</h3>
                 <div class="karnataka-map-container">
@@ -442,33 +638,39 @@
         </div>
     </section>
 
-    @if(count($microsite['team']) > 0)
-        <section id="leadership" class="leadership">
-            <div class="container">
-                <div class="section-header">
-                    <h2 class="section-title">Leadership</h2>
-                    <p class="section-subtitle">From your registration profile — update founder details in NGO settings where available</p>
-                </div>
-                <div class="leadership-team">
-                    <h3>Our team</h3>
-                    <div class="team-grid-enhanced">
-                        @foreach($microsite['team'] as $member)
-                            <div class="team-member-card">
-                                <div class="member-image">
-                                    <img src="{{ $member['image'] }}" alt="{{ $member['name'] }}">
-                                </div>
-                                <div class="member-info">
-                                    <h4>{{ $member['name'] }}</h4>
-                                    <p class="member-role">{{ $member['role'] }}</p>
-                                    <p>{{ $member['bio'] }}</p>
+    <section id="leadership" class="leadership">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our Leadership</h2>
+                <p class="section-subtitle">Meet the dedicated team behind {{ $ngo->name }}'s success</p>
+            </div>
+            <div class="leadership-team">
+                <h3>Our Leadership Team</h3>
+                <div class="team-grid-enhanced">
+                    @foreach($leaders as $member)
+                        <div class="team-member-card {{ $member['featured'] ? 'featured' : '' }}">
+                            <div class="member-image">
+                                <img src="{{ asset('assets/Themes/assets/images/leadership/'.$member['img']) }}" alt="{{ $member['name'] }}">
+                                @if($member['featured'])
+                                    <div class="featured-badge"><i class="fas fa-star"></i><span>Director &amp; Secretary</span></div>
+                                @endif
+                            </div>
+                            <div class="member-info">
+                                <h4>{{ $member['name'] }}</h4>
+                                <p class="member-role">{{ $member['role'] }}</p>
+                                <p>{{ $member['body'] }}</p>
+                                <div class="member-qualities">
+                                    @foreach($member['tags'] as $tag)
+                                        <span class="quality-tag">{{ $tag }}</span>
+                                    @endforeach
                                 </div>
                             </div>
-                        @endforeach
-                    </div>
+                        </div>
+                    @endforeach
                 </div>
             </div>
-        </section>
-    @endif
+        </div>
+    </section>
 
     <section id="impact" class="impact">
         <div class="container">
@@ -487,6 +689,30 @@
                     </div>
                 @endforeach
             </div>
+            <div class="impact-stories">
+                <h3>Success Stories</h3>
+                <div class="stories-grid">
+                    @foreach($successStories as $ss)
+                        <div class="story-card">
+                            <div class="story-image">
+                                <img src="{{ asset($ss['img']) }}" alt="{{ $ss['title'] }}" loading="lazy">
+                            </div>
+                            <div class="story-content">
+                                <h4>{{ $ss['title'] }}</h4>
+                                <p class="story-meta"><i class="fas fa-calendar"></i> {{ $ss['date'] }}</p>
+                                <p>{{ $ss['body'] }}</p>
+                                <div class="story-stats">
+                                    @foreach($ss['stats'] as $sstat)
+                                        <span class="stat-item"><i class="fas {{ $sstat['icon'] }}"></i> {{ $sstat['label'] }}</span>
+                                    @endforeach
+                                </div>
+                                <a href="#contact" class="story-link">Connect with us</a>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+
             <div class="impact-testimonials">
                 <h3>Why our work matters</h3>
                 <div class="testimonials-grid">
