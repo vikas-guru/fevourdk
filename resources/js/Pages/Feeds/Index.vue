@@ -2,7 +2,7 @@
     <AppLayout hide-chrome-mobile>
         <div class="ff">
             <!-- ============================ HERO ============================ -->
-            <section class="ff-hero">
+            <section class="ff-hero" data-tour="intro">
                 <div class="ff-hero__glow" aria-hidden="true" />
                 <div class="ff-grain" aria-hidden="true" />
                 <div class="ff-hero__rings" aria-hidden="true">
@@ -23,6 +23,14 @@
                         Real updates, reactions and conversations from verified Karnataka
                         organisations — watch impact unfold, then join in.
                     </p>
+                    <button
+                        type="button"
+                        class="ff-eyebrow"
+                        style="margin-top:0.75rem;cursor:pointer;background:none;border:none;text-decoration:underline;text-underline-offset:3px"
+                        @click="startTour"
+                    >
+                        ✦ Take a tour
+                    </button>
 
                     <div class="ff-hero__stats">
                         <div class="ff-chip">
@@ -139,7 +147,7 @@
                 </div>
 
                 <!-- ============================ FEED STREAM ============================ -->
-                <section v-if="activeMode === 'feed'" class="ff-stream" aria-labelledby="feeds-stream-heading">
+                <section v-if="activeMode === 'feed'" class="ff-stream" aria-labelledby="feeds-stream-heading" data-tour="feed">
                     <div
                         v-if="filteredPosts.length === 0"
                         class="ff-empty"
@@ -424,12 +432,15 @@
                     </div>
                 </div>
             </transition>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </div>
     </AppLayout>
 </template>
 
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 import { Link, router, useForm, usePage } from '@inertiajs/vue3'
 import { computed, nextTick, onBeforeUnmount, onMounted, reactive, ref, watch } from 'vue'
 import L from 'leaflet'
@@ -437,6 +448,8 @@ import 'leaflet/dist/leaflet.css'
 
 const page = usePage()
 const brandLogoSrc = '/assets/images/fevourd-k/logo.png'
+
+const { tourRef, steps, storageKey, startTour } = useNgoTour('volunteer-feed')
 
 const props = defineProps({
     posts: { type: Array, default: () => [] },

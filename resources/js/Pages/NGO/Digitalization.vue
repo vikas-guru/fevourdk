@@ -3,7 +3,7 @@
         <NgoWorkspaceShell :ngo="ngo" current-key="digitalization">
             <div class="we">
                 <!-- Header -->
-                <div class="we__head">
+                <div class="we__head" data-tour="intro">
                     <div class="min-w-0">
                         <h1 class="we__title">Your website</h1>
                         <p class="we__sub">Type your changes, then tap save — your website updates instantly. No tech skills needed.</p>
@@ -23,7 +23,7 @@
 
                 <div class="we__grid">
                     <!-- ============ EDITOR PANEL ============ -->
-                    <div class="we__editor" :class="{ 'we__editor--hidden-mobile': mobileView !== 'edit' }">
+                    <div class="we__editor" :class="{ 'we__editor--hidden-mobile': mobileView !== 'edit' }" data-tour="editor">
                         <!-- 1. Look -->
                         <EditorSection emoji="🎨" title="Your look" hint="Your logo and main colour appear across the whole site." :open="openKey === 'look'" @toggle="toggle('look')">
                             <label class="we__label">Logo</label>
@@ -172,7 +172,7 @@
                     </div>
 
                     <!-- ============ LIVE PREVIEW ============ -->
-                    <div class="we__preview" :class="{ 'we__preview--hidden-mobile': mobileView !== 'preview' }">
+                    <div class="we__preview" :class="{ 'we__preview--hidden-mobile': mobileView !== 'preview' }" data-tour="preview">
                         <div class="we__preview-bar">
                             <div class="we__dots"><i /><i /><i /></div>
                             <span class="we__preview-url">{{ liveUrl || '/ngo/website-preview' }}</span>
@@ -201,6 +201,7 @@
                     </button>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -210,11 +211,15 @@ import { computed, h, ref } from 'vue'
 import { useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     ngo: Object,
     previewUrl: { type: String, default: '/ngo/website-preview' },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('digitalization')
 
 /* ---- tiny inline field components (keep this file self-contained) ---- */
 const FieldText = (p, { emit }) =>

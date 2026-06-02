@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Website analytics — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="analytics">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between" data-tour="intro">
                 <div>
                     <h1 class="text-2xl font-bold tracking-tight text-slate-900">Website analytics</h1>
                     <p class="mt-1 text-sm text-slate-600">
@@ -15,7 +15,7 @@
                 </div>
             </div>
 
-            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+            <div class="mt-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6" data-tour="metrics">
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Page views</p>
                     <p class="mt-1 text-2xl font-bold text-slate-900">{{ fmt(analytics.summary.total_views) }}</p>
@@ -56,7 +56,7 @@
                 </p>
             </div>
 
-            <div class="mt-8 grid gap-6 xl:grid-cols-2">
+            <div class="mt-8 grid gap-6 xl:grid-cols-2" data-tour="charts">
                 <div class="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
                     <h2 class="text-lg font-bold text-slate-900">Traffic (last 30 days)</h2>
                     <p class="text-xs text-slate-500">Bar height = page views per day</p>
@@ -204,6 +204,7 @@
                     </table>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -214,11 +215,15 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     ngo: { type: Object, required: true },
     analytics: { type: Object, required: true },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('analytics')
 
 const mapContainer = ref(null)
 let mapInstance = null

@@ -1,11 +1,11 @@
 <template>
     <AppLayout title="NGO profile — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="profile">
-            <h1 class="text-2xl font-bold tracking-tight text-slate-900">Organisation profile</h1>
+            <h1 class="text-2xl font-bold tracking-tight text-slate-900" data-tour="intro">Organisation profile</h1>
             <p class="mt-1 text-sm text-slate-600">Verification, banking summary, public reach, and what FEVOURD-K includes.</p>
 
             <div class="mt-6 grid gap-4 lg:grid-cols-3">
-                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm lg:col-span-2">
+                <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm lg:col-span-2" data-tour="details">
                     <h2 class="text-sm font-bold uppercase tracking-wide text-slate-500">Details</h2>
                     <dl class="mt-4 grid gap-3 text-sm sm:grid-cols-2">
                         <div>
@@ -141,6 +141,7 @@
                     One-click auto-publish of new campaigns or posts to Meta (Facebook/Instagram Graph API) is the next connector layer. Today you can deep-link your channels; OAuth and scheduled cross-posting can build on the same settings.
                 </p>
             </section>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -149,6 +150,10 @@
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
+
+const { tourRef, steps, storageKey } = useNgoTour('profile')
 
 defineProps({
     ngo: { type: Object, required: true },

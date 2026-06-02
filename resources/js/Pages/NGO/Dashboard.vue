@@ -322,6 +322,7 @@ import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
 import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     ngo: { type: Object, required: true },
@@ -475,11 +476,10 @@ function runCounts() {
 }
 
 /* ---------- reveal-on-scroll ---------- */
-const tour = ref(null)
 const autoTour = ref(true) // first-time visitors only — DashboardTour gates on localStorage
-function startTour() {
-    tour.value?.start()
-}
+// Steps come from the central registry (resources/js/ngo/tours.js); useNgoTour
+// also registers startTour into tourController so the Disha help bot can replay it.
+const { tourRef: tour, steps: tourSteps, startTour } = useNgoTour('dashboard')
 
 onMounted(() => {
     runCounts() // hero ribbon is above the fold; start immediately
@@ -527,13 +527,6 @@ function formatShortDate(d) {
     return new Date(d + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 
-const tourSteps = [
-    { selector: '[data-tour="hero"]', title: 'Your organisation, front and centre', body: 'This is your branded workspace. Your logo, verification status, and headline impact numbers live here. The gold button lets you customise your public website anytime.' },
-    { selector: '[data-tour="ribbon"]', title: 'Impact at a glance', body: 'Total raised, this month, community reach, and feed views — your four headline numbers, always live and real.' },
-    { selector: '[data-tour="stats"]', title: 'Everything you manage', body: 'Campaigns, donations, community, feed reach, ledger balance, field teams, and assets. Tap any card to jump straight to that tool.' },
-    { selector: '[data-tour="money"]', title: 'Full money transparency', body: 'Every rupee in and out, straight from your ledger. Donations come in as credits; expenses and payouts as debits — nothing hidden.' },
-    { selector: '[data-tour="post"]', title: 'Share your impact', body: 'Post an update and it goes live to the community feed — growing your reach and the numbers up top. That is the whole loop!' },
-]
 </script>
 
 <style scoped>

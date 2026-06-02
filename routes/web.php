@@ -301,6 +301,9 @@ Route::middleware('auth')->group(function () {
         Route::get('/ledger', [\App\Http\Controllers\NGO\NGODashboardController::class, 'ledger'])->name('ledger');
         Route::post('/ledger', [\App\Http\Controllers\NGO\NGODashboardController::class, 'storeLedgerEntry'])->name('ledger.store');
 
+        Route::get('/help', [\App\Http\Controllers\NGO\NGODashboardController::class, 'help'])->name('help');
+        Route::get('/help/articles', [\App\Http\Controllers\NGO\NGODashboardController::class, 'helpArticles'])->name('help.articles');
+
         Route::get('/field', [FieldOperationsController::class, 'hub'])->name('field.hub');
         Route::get('/field/app', [FieldOperationsController::class, 'app'])->name('field.app');
         Route::post('/field/tasks', [FieldOperationsController::class, 'storeTask'])->name('field.tasks.store');

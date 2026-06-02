@@ -2,7 +2,7 @@
     <AppLayout title="Post an update — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="post-update">
             <div class="mx-auto max-w-2xl space-y-6">
-                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" data-tour="intro">
                     <h1 class="text-2xl font-bold text-slate-900">Post an update</h1>
                     <p class="mt-2 text-sm leading-relaxed text-slate-600">
                         Add photos or short videos (up to 12 files). Your story goes to the <strong>live community feed</strong>.
@@ -36,7 +36,7 @@
                         >
                         <p v-if="form.errors.title" class="mt-1 text-xs text-red-600">{{ form.errors.title }}</p>
                     </div>
-                    <div>
+                    <div data-tour="compose">
                         <label class="mb-1 block text-sm font-medium text-slate-700">Your message</label>
                         <textarea
                             v-model="form.body"
@@ -99,6 +99,7 @@
                         type="submit"
                         class="w-full rounded-xl bg-blue-600 py-3 text-sm font-bold text-white shadow-sm hover:bg-blue-700 disabled:opacity-60 sm:w-auto sm:px-8"
                         :disabled="form.processing"
+                        data-tour="submit"
                     >
                         {{ form.processing ? 'Publishing…' : 'Publish update' }}
                     </button>
@@ -120,6 +121,7 @@
                     </p>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -127,12 +129,16 @@
 <script setup>
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 import { Link, useForm, usePage } from '@inertiajs/vue3'
 import { ref } from 'vue'
 
 defineProps({
     ngo: { type: Object, required: true },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('post-update')
 
 const page = usePage()
 

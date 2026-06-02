@@ -6,6 +6,8 @@ import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     ngo: Object,
@@ -17,6 +19,8 @@ const props = defineProps({
 
 const page = usePage()
 const csrf = () => document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || ''
+
+const { tourRef, steps, storageKey } = useNgoTour('field')
 
 const mapEl = ref(null)
 let map = null
@@ -133,7 +137,7 @@ onBeforeUnmount(() => {
     <AppLayout title="Field operations">
         <NgoWorkspaceShell :ngo="ngo" current-key="field">
             <div class="mx-auto max-w-6xl space-y-6">
-                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between" data-tour="intro">
                     <div>
                         <h1 class="text-2xl font-bold text-slate-900">Field operations</h1>
                         <p class="text-sm text-slate-600">Live staff locations, routes, and task assignment.</p>
@@ -147,7 +151,7 @@ onBeforeUnmount(() => {
                 </div>
 
                 <div class="grid grid-cols-1 gap-6 lg:grid-cols-2">
-                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="map">
                         <div class="border-b border-slate-100 px-4 py-3">
                             <h2 class="font-semibold text-slate-900">Live map</h2>
                             <p class="text-xs text-slate-500">Click a marker or row to load the GPS trail (where recorded).</p>
@@ -215,7 +219,7 @@ onBeforeUnmount(() => {
                     </div>
                 </div>
 
-                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="tasks">
                     <div class="border-b border-slate-100 px-4 py-3">
                         <h2 class="font-semibold text-slate-900">Tasks</h2>
                     </div>
@@ -270,6 +274,7 @@ onBeforeUnmount(() => {
 
                 <p v-if="page.props.flash?.success" class="text-sm font-medium text-emerald-600">{{ page.props.flash.success }}</p>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>

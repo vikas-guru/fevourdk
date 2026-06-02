@@ -385,6 +385,18 @@
                     <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-600">⚙</span>
                     Profile
                 </Link>
+                <Link
+                    href="/ngo/help"
+                    class="flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100"
+                    :class="{ 'bg-blue-50 text-blue-800': currentKey === 'help' }"
+                    @click="mobileNavOpen = false"
+                >
+                    <span class="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-100 text-amber-700">✦</span>
+                    <span class="flex min-w-0 flex-col leading-tight">
+                        <span>Help &amp; guides</span>
+                        <span class="truncate text-[10px] font-normal text-slate-500">Ask Disha · how-tos · tours</span>
+                    </span>
+                </Link>
                 </template>
             </nav>
 
@@ -405,12 +417,15 @@
         <main class="flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
             <slot />
         </main>
+
+        <HelpAssistant :accent="accentColor" />
     </div>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import { Link, usePage } from '@inertiajs/vue3'
+import HelpAssistant from '@/Components/NGO/HelpAssistant.vue'
 
 const props = defineProps({
     ngo: { type: Object, required: true },

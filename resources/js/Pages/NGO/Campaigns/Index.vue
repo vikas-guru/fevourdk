@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="NGO campaigns — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="campaigns">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between" data-tour="intro">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Campaigns</h1>
                     <p class="mt-1 text-sm text-slate-600">Fundraising campaigns for your organisation.</p>
@@ -9,12 +9,13 @@
                 <Link
                     href="/campaigns/create"
                     class="inline-flex items-center justify-center rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    data-tour="create"
                 >
                     New campaign
                 </Link>
             </div>
 
-            <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="list">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50">
@@ -66,6 +67,7 @@
                     </Link>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -74,9 +76,13 @@
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 defineProps({
     ngo: { type: Object, required: true },
     campaigns: { type: Object, required: true },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('campaigns')
 </script>

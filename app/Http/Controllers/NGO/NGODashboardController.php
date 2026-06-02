@@ -413,4 +413,33 @@ class NGODashboardController extends Controller
 
         return $user?->ngo;
     }
+
+    /**
+     * Help center — full browse page (search + categories + articles).
+     */
+    public function help()
+    {
+        $ngo = $this->resolveNgoOrRedirect();
+        if (! $ngo) {
+            return redirect()->route('welcome')
+                ->with('error', 'NGO not found or access denied.');
+        }
+
+        return Inertia::render('NGO/Help', [
+            'ngo' => $ngo,
+            'categories' => \App\Support\HelpCenter::categories(),
+            'articles' => \App\Support\HelpCenter::articles(),
+        ]);
+    }
+
+    /**
+     * Help articles as JSON — lazy-loaded by the floating "Disha" help bot.
+     */
+    public function helpArticles()
+    {
+        return response()->json([
+            'categories' => \App\Support\HelpCenter::categories(),
+            'articles' => \App\Support\HelpCenter::articles(),
+        ]);
+    }
 }

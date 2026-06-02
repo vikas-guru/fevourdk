@@ -2,11 +2,18 @@
     <AppShell title="Supporter dashboard — FEVOURD-K">
         <div class="min-h-screen bg-slate-50 py-4 sm:py-8">
             <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-                <div class="mb-5 rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-800 p-5 text-white shadow-lg">
+                <div class="mb-5 rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-800 p-5 text-white shadow-lg" data-tour="intro">
                     <div class="flex items-center justify-between">
                         <div>
                             <h1 class="text-2xl sm:text-3xl font-bold">Welcome, {{ user.name }}!</h1>
                             <p class="text-blue-100 mt-1 text-sm sm:text-base">Manage your donations and track your impact</p>
+                            <button
+                                type="button"
+                                class="mt-2 inline-flex items-center gap-1 text-xs font-semibold text-blue-100 underline-offset-2 hover:text-white hover:underline"
+                                @click="startTour"
+                            >
+                                ✦ Take a tour
+                            </button>
                         </div>
                         <inertia-link href="/profile" class="rounded-xl bg-white/15 px-3 py-2 text-xs sm:text-sm font-semibold border border-white/20 hover:bg-white/25 transition">
                             View Profile
@@ -53,7 +60,7 @@
                         </div>
                     </div>
 
-                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-5" data-tour="follow">
                         <div class="flex items-center">
                             <div class="flex-shrink-0">
                                 <div class="w-10 h-10 bg-purple-100 rounded-xl flex items-center justify-center">
@@ -73,7 +80,7 @@
                 </div>
 
                 <!-- Recent Donations -->
-                <div class="bg-white shadow-sm rounded-2xl border border-slate-200">
+                <div class="bg-white shadow-sm rounded-2xl border border-slate-200" data-tour="giving">
                     <div class="px-6 py-4 border-b border-gray-200">
                         <h2 class="text-lg font-medium text-gray-900">Recent Donations</h2>
                     </div>
@@ -131,15 +138,20 @@
                 </div>
             </div>
         </div>
+        <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
     </AppShell>
 </template>
 
 <script setup>
 import AppShell from '@/Layouts/AppShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     user: Object,
     donations: Array,
     stats: Object
 })
+
+const { tourRef, steps, storageKey, startTour } = useNgoTour('donor-dashboard')
 </script>

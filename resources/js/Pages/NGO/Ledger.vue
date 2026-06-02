@@ -2,10 +2,10 @@
     <AppLayout title="NGO Ledger - FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="ledger">
             <div class="max-w-6xl mx-auto">
-                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6" data-tour="intro">
                     <h1 class="text-2xl font-bold text-slate-900">NGO Ledger</h1>
                     <p class="text-sm text-slate-600 mt-1">Track every credit/debit entry with running balance.</p>
-                    <p class="mt-3 text-lg font-semibold text-emerald-700">Current Balance: ₹{{ Number(currentBalance || 0).toLocaleString() }}</p>
+                    <p class="mt-3 text-lg font-semibold text-emerald-700" data-tour="balance">Current Balance: ₹{{ Number(currentBalance || 0).toLocaleString() }}</p>
                 </div>
 
                 <div class="bg-white rounded-2xl shadow-lg border border-slate-200 p-6 mb-6">
@@ -25,7 +25,7 @@
                     <input v-model="form.description" placeholder="Description (optional)" class="mt-3 w-full rounded-xl border border-slate-300 px-3 py-2 text-sm">
                 </div>
 
-                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden">
+                <div class="bg-white rounded-2xl shadow-lg border border-slate-200 overflow-hidden" data-tour="entries">
                     <div class="px-5 py-4 border-b border-slate-200">
                         <h2 class="font-semibold text-slate-900">Ledger Entries</h2>
                     </div>
@@ -64,6 +64,7 @@
                     </div>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -72,12 +73,16 @@
 import { useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 
 const props = defineProps({
     ngo: Object,
     entries: Array,
     currentBalance: Number,
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('ledger')
 
 const form = useForm({
     entry_date: new Date().toISOString().slice(0, 10),

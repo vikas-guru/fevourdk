@@ -1,12 +1,16 @@
 <script setup>
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 import { Link } from '@inertiajs/vue3'
 
 defineProps({
     ngo: { type: Object, required: true },
     isNgoAdmin: { type: Boolean, default: false },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('hr')
 
 const modules = [
     {
@@ -67,7 +71,7 @@ const adminOnly = [
     <AppLayout title="HRMS">
         <NgoWorkspaceShell :ngo="ngo" current-key="hr-index">
             <div class="mx-auto max-w-4xl space-y-8 pb-12">
-                <div>
+                <div data-tour="intro">
                     <h1 class="text-2xl font-bold text-slate-900">HRMS & people operations</h1>
                     <p class="mt-2 max-w-2xl text-sm leading-relaxed text-slate-600">
                         Staff use the <strong>same FEVOURD-K login</strong> (NGO admin or NGO staff). From here they can
@@ -92,6 +96,7 @@ const adminOnly = [
                         v-for="m in modules"
                         :key="m.href"
                         :href="m.href"
+                        :data-tour="m.href === '/ngo/hr/team' ? 'team' : (m.href === '/ngo/hr/leaves' ? 'leave' : undefined)"
                         class="group flex gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition hover:border-indigo-200 hover:shadow-md"
                     >
                         <span class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-lg group-hover:bg-indigo-50">{{ m.icon }}</span>
@@ -120,6 +125,7 @@ const adminOnly = [
                     </div>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>

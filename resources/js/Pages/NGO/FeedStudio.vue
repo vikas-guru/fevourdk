@@ -2,7 +2,7 @@
     <AppLayout title="Feed studio — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="feed-studio">
             <div class="mx-auto max-w-6xl space-y-6">
-                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8">
+                <div class="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm sm:p-8" data-tour="intro">
                     <h1 class="text-2xl font-bold text-slate-900">Feed studio</h1>
                     <p class="mt-2 max-w-3xl text-sm leading-relaxed text-slate-600">
                         Analytics for updates you published to the live community feed: views, reactions, comments, shares, and the SEO summary we generate for each public link.
@@ -31,7 +31,7 @@
                     </div>
                 </div>
 
-                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="compose">
                     <div class="border-b border-slate-100 px-4 py-3 sm:px-6">
                         <h2 class="text-sm font-bold text-slate-900">Your posts</h2>
                         <p class="text-xs text-slate-500">Up to 100 most recent. Views count when someone opens the public post page or scrolls to your card on the main feed (once per browser session).</p>
@@ -90,6 +90,7 @@
                     </p>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -97,6 +98,8 @@
 <script setup>
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
 import { Link } from '@inertiajs/vue3'
 
 defineProps({
@@ -104,6 +107,8 @@ defineProps({
     posts: { type: Array, default: () => [] },
     totals: { type: Object, required: true },
 })
+
+const { tourRef, steps, storageKey } = useNgoTour('feed-studio')
 
 function formatDate(iso) {
     return new Date(iso).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })

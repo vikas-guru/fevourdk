@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Office & assets — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="office-inventory">
-            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between" data-tour="intro">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Office & assets</h1>
                     <p class="mt-1 max-w-2xl text-sm text-slate-600">
@@ -197,7 +197,7 @@
                 </form>
             </div>
 
-            <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="mt-8 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="inventory">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50">
@@ -271,6 +271,7 @@
                     </Link>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -280,6 +281,10 @@ import { ref } from 'vue'
 import { Link, router, useForm } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
+
+const { tourRef, steps, storageKey } = useNgoTour('office')
 
 const props = defineProps({
     ngo: { type: Object, required: true },

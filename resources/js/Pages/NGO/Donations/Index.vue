@@ -1,7 +1,7 @@
 <template>
     <AppLayout title="Donations & spending — FEVOURD-K">
         <NgoWorkspaceShell :ngo="ngo" current-key="donations">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between" data-tour="intro">
                 <div>
                     <h1 class="text-2xl font-bold text-slate-900">Donations &amp; spending</h1>
                     <p class="mt-1 max-w-2xl text-sm text-slate-600">
@@ -24,7 +24,7 @@
                 </div>
             </div>
 
-            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-tour="summary">
                 <div class="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm">
                     <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Donations (recorded)</p>
                     <p class="mt-1 text-2xl font-bold text-emerald-700">₹{{ Number(completedDonationsTotal || 0).toLocaleString('en-IN') }}</p>
@@ -88,7 +88,7 @@
                 <p class="mt-1 text-sm text-slate-600">Every completed gift to your organisation.</p>
             </div>
 
-            <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            <div class="mt-4 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm" data-tour="list">
                 <div class="overflow-x-auto">
                     <table class="min-w-full text-sm">
                         <thead class="bg-slate-50">
@@ -131,6 +131,7 @@
                     </Link>
                 </div>
             </div>
+            <DashboardTour ref="tourRef" :steps="steps" :storage-key="storageKey" auto-start />
         </NgoWorkspaceShell>
     </AppLayout>
 </template>
@@ -139,6 +140,10 @@
 import { Link } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
 import NgoWorkspaceShell from '@/Components/NGO/NgoWorkspaceShell.vue'
+import DashboardTour from '@/Components/NGO/DashboardTour.vue'
+import { useNgoTour } from '@/ngo/useNgoTour'
+
+const { tourRef, steps, storageKey } = useNgoTour('donations')
 
 defineProps({
     ngo: { type: Object, required: true },
