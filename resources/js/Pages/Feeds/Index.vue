@@ -936,12 +936,52 @@ const renderMapMarkers = () => {
     if (!map || !markersLayer) return
     markersLayer.clearLayers()
     filteredNgos.value.forEach((ngo) => {
-        const marker = L.marker([ngo.latitude, ngo.longitude])
-        const desc = (ngo.description || 'Impact NGO').slice(0, 130)
-        const profile = ngo.slug
-            ? `<br/><a href="/ngos/${ngo.slug}" style="display:inline-block;margin-top:6px;color:#1d4ed8;font-weight:700;text-decoration:none;">View profile &rarr;</a>`
+        const logo = ngo.logo || '/assets/images/fevourd-k/logo.png'
+        const cid = `ffpin-${ngo.id}`
+        const pinHtml = `
+            <svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <clipPath id="${cid}"><circle cx="24" cy="22" r="14.5"/></clipPath>
+                    <linearGradient id="${cid}-g" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0" stop-color="#1b3aa0"/><stop offset="1" stop-color="#0d1f5c"/>
+                    </linearGradient>
+                </defs>
+                <path d="M24 2.5C13.2 2.5 4.5 11.2 4.5 22c0 13.4 19.5 35 19.5 35S43.5 35.4 43.5 22C43.5 11.2 34.8 2.5 24 2.5Z"
+                    fill="url(#${cid}-g)" stroke="#f2b40c" stroke-width="2.5"/>
+                <circle cx="24" cy="22" r="16" fill="#fffdf6"/>
+                <image href="${logo}" xlink:href="${logo}" x="9.5" y="7.5" width="29" height="29"
+                    clip-path="url(#${cid})" preserveAspectRatio="xMidYMid slice"/>
+            </svg>`
+        const icon = L.divIcon({
+            className: 'ff-pin',
+            html: pinHtml,
+            iconSize: [48, 60],
+            iconAnchor: [24, 57],
+            popupAnchor: [0, -52],
+        })
+        const marker = L.marker([ngo.latitude, ngo.longitude], { icon })
+
+        const desc = (ngo.description || 'Verified NGO impact profile.').slice(0, 120)
+        const tags = (ngo.focus_areas || []).slice(0, 3)
+            .map((f) => `<span class="ff-pop__tag">${f}</span>`).join('')
+        const cta = ngo.slug
+            ? `<a class="ff-pop__btn" href="/ngos/${ngo.slug}">View impact profile &rarr;</a>`
             : ''
-        marker.bindPopup(`<strong>${ngo.name}</strong><br/>${desc}${profile}`)
+        marker.bindPopup(
+            `<div class="ff-pop">
+                <div class="ff-pop__top">
+                    <img class="ff-pop__logo" src="${logo}" alt="" onerror="this.src='/assets/images/fevourd-k/logo.png'"/>
+                    <div class="ff-pop__id">
+                        <p class="ff-pop__name">${ngo.name}</p>
+                        <p class="ff-pop__meta">Verified &middot; Karnataka</p>
+                    </div>
+                </div>
+                <p class="ff-pop__desc">${desc}</p>
+                ${tags ? `<div class="ff-pop__tags">${tags}</div>` : ''}
+                ${cta}
+            </div>`,
+            { className: 'ff-pop-wrap', maxWidth: 268, minWidth: 232 },
+        )
         marker.addTo(markersLayer)
     })
 }
@@ -1419,6 +1459,26 @@ onMounted(async () => {
     .ff-ring--2, .ff-post, .ff-react__emoji, .ff-num--bump { animation: none !important; transition: none !important; }
     .ff-reveal, .ff-reveal.is-revealed { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
+
+/* custom NGO map pin */
+:deep(.ff-pin) { background: none; border: none; filter: drop-shadow(0 5px 7px rgba(8,22,64,.4)); transition: transform .18s ease; }
+:deep(.ff-pin svg) { display: block; }
+:deep(.ff-pin:hover) { transform: scale(1.12) translateY(-2px); z-index: 1000; }
+
+/* rich marker popup */
+:deep(.ff-pop-wrap .leaflet-popup-content-wrapper) { border-radius: 18px !important; padding: 0 !important; background: #fffdf6 !important; box-shadow: 0 22px 50px -22px rgba(8,22,64,.55) !important; border: 1px solid rgba(242,180,12,.4) !important; overflow: hidden; }
+:deep(.ff-pop-wrap .leaflet-popup-content) { margin: 0 !important; width: auto !important; }
+:deep(.ff-pop-wrap .leaflet-popup-tip) { background: #fffdf6 !important; border: 1px solid rgba(242,180,12,.4) !important; }
+:deep(.ff-pop) { padding: 14px; font-family: inherit; }
+:deep(.ff-pop__top) { display: flex; align-items: center; gap: 10px; }
+:deep(.ff-pop__logo) { width: 42px; height: 42px; flex: none; border-radius: 11px; object-fit: cover; background: #efe6cd; box-shadow: 0 0 0 2px rgba(242,180,12,.35); }
+:deep(.ff-pop__name) { margin: 0; font-family: 'Fraunces','Playfair Display',Georgia,serif; font-weight: 700; font-size: 1rem; line-height: 1.15; color: #0d1f5c; }
+:deep(.ff-pop__meta) { margin: 2px 0 0; font-size: .72rem; font-weight: 600; letter-spacing: .02em; text-transform: uppercase; color: #1f8a5b; }
+:deep(.ff-pop__desc) { margin: 10px 0 0; font-size: .82rem; line-height: 1.5; color: #4b4f5a; }
+:deep(.ff-pop__tags) { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 9px; }
+:deep(.ff-pop__tag) { font-size: .66rem; font-weight: 700; color: #0d1f5c; background: rgba(13,31,92,.07); border: 1px solid rgba(13,31,92,.1); padding: 2px 8px; border-radius: 999px; }
+:deep(.ff-pop__btn) { display: block; margin-top: 12px; text-align: center; background: #f2b40c; color: #2a1c00 !important; font-weight: 700; font-size: .82rem; padding: 8px 12px; border-radius: 999px; text-decoration: none; box-shadow: 0 10px 22px -12px rgba(242,180,12,.8); transition: transform .18s ease; }
+:deep(.ff-pop__btn:hover) { transform: translateY(-1px); }
 
 :deep(.feeds-map-dist-tooltip) {
     border-radius: 0.5rem !important;
