@@ -5,6 +5,7 @@ namespace App\Http\Controllers\NGO;
 use App\Http\Controllers\Controller;
 use App\Models\NGO;
 use App\Support\NgoMicrositeContent;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
 class NGOWebsiteController extends Controller
@@ -47,5 +48,23 @@ class NGOWebsiteController extends Controller
             'preview' => true,
             'microsite' => NgoMicrositeContent::for($ngo),
         ]);
+    }
+
+    /**
+     * Upload a photo for the microsite (stories, programmes) and return its public URL.
+     * Lets non-technical NGO admins add images by clicking instead of pasting paths.
+     */
+    public function uploadImage(Request $request)
+    {
+        $ngo = Auth::user()?->ngo;
+        abort_unless($ngo, 403);
+
+        $request->validate([
+            'image' => 'required|image|mimes:jpg,jpeg,png,webp|max:5120',
+        ]);
+
+        $path = $request->file('image')->store("ngo_microsite/{$ngo->id}", 'public');
+
+        return response()->json(['url' => '/storage/'.$path]);
     }
 }

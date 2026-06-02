@@ -332,6 +332,7 @@ Route::middleware('auth')->group(function () {
         Route::post('/finance/claims', [FinanceClaimsController::class, 'store'])->name('finance.claims.store');
         Route::patch('/finance/claims/{claim}', [FinanceClaimsController::class, 'decide'])->name('finance.claims.decide');
         Route::get('/website-preview', [NGOWebsiteController::class, 'preview'])->name('website.preview');
+        Route::post('/website/upload-image', [NGOWebsiteController::class, 'uploadImage'])->name('website.upload-image');
         Route::get('/social-connect', [NGOSocialConnectController::class, 'index'])->name('social-connect');
         Route::put('/social-connect/{platform}', [NGOSocialConnectController::class, 'update'])->name('social-connect.update');
         Route::delete('/social-connect/{platform}', [NGOSocialConnectController::class, 'destroy'])->name('social-connect.destroy');
