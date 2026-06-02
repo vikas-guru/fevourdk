@@ -1,5 +1,5 @@
 <template>
-    <AppLayout>
+    <AppLayout hide-chrome-mobile>
         <div class="fk">
             <!-- ============================ HERO ============================ -->
             <section class="fk-hero">
@@ -285,8 +285,11 @@ const focusAreas = [
 ]
 
 /* ---- stats with sensible federation fallbacks (so an empty DB still reads true) ---- */
+// FEVOURD-K is an apex federation of 800+ voluntary organisations (the figure the
+// copy speaks to). Only a fraction are digitally onboarded, so use the federation
+// size as a floor rather than showing the small onboarded count (e.g. "3+").
 const displayStats = computed(() => ({
-    organisations: props.stats?.ngos > 0 ? props.stats.ngos : 800,
+    organisations: Math.max(Number(props.stats?.ngos) || 0, 800),
     districts: 31,
     founded: 1982,
     beneficiaries: '1,00,000+',
@@ -564,11 +567,39 @@ onUnmounted(() => {
 }
 @media (max-width: 620px) {
     .fk-section-head--row { flex-direction: column; align-items: flex-start; }
-    .fk-pillars__grid, .fk-camp__grid, .fk-stats__grid, .fk-orgs__grid { grid-template-columns: 1fr; }
+    .fk-pillars__grid, .fk-camp__grid, .fk-orgs__grid { grid-template-columns: 1fr; }
     .fk-org__cta { flex-direction: column; align-items: stretch; }
     .fk-org__follow { text-align: center; }
     .fk-event { grid-template-columns: 1fr; text-align: left; }
     .fk-event__date { flex-direction: row; border-right: none; border-bottom: 1px solid rgba(13,31,92,.12); padding: 0 0 .8rem; max-width: none; }
-    .fk-hero__mini { gap: 1.4rem; }
+
+    /* Chrome is hidden on mobile — let the hero own the top of the screen,
+       respecting the device safe-area (notch) for an app-like feel. */
+    .fk-hero { padding-top: calc(env(safe-area-inset-top, 0px) + 26px); }
+    .fk-hero__emblem { margin-bottom: .4rem; }
+
+    /* Denser, dashboard-style stats: 2×2 instead of four tall blocks. */
+    .fk-stats { padding: 40px 0; }
+    .fk-stats__grid { grid-template-columns: repeat(2, 1fr); border-radius: 16px; }
+    .fk-stat { padding: 20px 16px; gap: .5rem; }
+    .fk-stat__value { font-size: clamp(1.5rem, 7vw, 2.4rem); white-space: nowrap; }
+    .fk-stat__label { font-size: .8rem; max-width: 18ch; }
+
+    /* App-like full-width tap targets in the hero. */
+    .fk-hero__cta { flex-direction: column; align-items: stretch; gap: .7rem; margin-top: 1.7rem; }
+    .fk-hero__cta .fk-btn { width: 100%; justify-content: center; padding-top: .95em; padding-bottom: .95em; }
+    .fk-hero__cta .fk-btn--link { width: auto; padding: .2rem 0 0; }
+    .fk-hero__mini { gap: 1.2rem 1.8rem; }
+
+    /* Tighten the closing CTA buttons the same way. */
+    .fk-cta__buttons { flex-direction: column; align-items: stretch; }
+    .fk-cta__buttons .fk-btn { width: 100%; justify-content: center; }
+    .fk-cta__buttons .fk-btn--link { width: auto; }
+}
+@media (max-width: 430px) {
+    .fk-emblem { width: 156px; }
+    .fk-hero__title { font-size: clamp(2.15rem, 9.4vw, 2.9rem); }
+    .fk-hero__lede { font-size: 1rem; }
+    .fk-marquee__group span { font-size: 1rem; padding: .7rem .85rem; }
 }
 </style>
