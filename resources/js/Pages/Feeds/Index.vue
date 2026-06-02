@@ -47,7 +47,8 @@
                 </div>
             </section>
 
-            <div class="ff-body">
+            <div class="ff-body" :class="{ 'ff-body--map': activeMode === 'ngo' }">
+              <div class="ff-main">
                 <!-- flash -->
                 <div v-if="flashSuccess" class="ff-flash ff-flash--ok">{{ flashSuccess }}</div>
                 <div v-if="flashError" class="ff-flash ff-flash--err">{{ flashError }}</div>
@@ -346,6 +347,54 @@
                         </article>
                     </div>
                 </section>
+              </div>
+
+              <!-- ============================ DESKTOP DISCOVERY SIDEBAR ============================ -->
+              <aside class="ff-side" aria-label="Discover organisations">
+                  <div class="ff-side__card">
+                      <div class="ff-side__head">
+                          <p class="ff-side__kicker">The federation</p>
+                          <h2 class="ff-display ff-side__title">Browse verified NGOs</h2>
+                          <p class="ff-side__sub">{{ ngoCount }} organisations mapped across Karnataka. Open any profile for live impact.</p>
+                      </div>
+                      <ul class="ff-side__list">
+                          <li v-for="ngo in sidebarNgos" :key="ngo.id">
+                              <component
+                                  :is="ngo.slug ? Link : 'div'"
+                                  :href="ngo.slug ? `/ngos/${ngo.slug}` : undefined"
+                                  class="ff-side__ngo"
+                              >
+                                  <span class="ff-side__avatar">
+                                      <img :src="ngo.logo || brandLogoSrc" :alt="ngo.name" @error="handleImageError">
+                                  </span>
+                                  <span class="ff-side__meta">
+                                      <span class="ff-side__name">{{ ngo.name }}</span>
+                                      <span class="ff-side__focus">{{ (ngo.focus_areas || [])[0] || 'Verified organisation' }}</span>
+                                  </span>
+                                  <svg class="ff-side__arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 6l6 6-6 6" /></svg>
+                              </component>
+                          </li>
+                      </ul>
+                      <div class="ff-side__actions">
+                          <button type="button" class="ff-btn ff-btn--gold ff-btn--sm" @click="activateNgoMode">
+                              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:1em;height:1em"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0L6.343 16.657a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="2.5" /></svg>
+                              Open the map
+                          </button>
+                          <Link href="/ngos" class="ff-btn ff-btn--ghost ff-btn--sm">All organisations</Link>
+                      </div>
+                  </div>
+
+                  <div class="ff-side__stats">
+                      <div class="ff-side__stat">
+                          <span class="ff-display ff-side__statnum">{{ postCount }}</span>
+                          <span class="ff-side__statlbl">Posts live</span>
+                      </div>
+                      <div class="ff-side__stat">
+                          <span class="ff-display ff-side__statnum ff-side__statnum--gold">{{ ngoCount }}</span>
+                          <span class="ff-side__statlbl">Verified NGOs</span>
+                      </div>
+                  </div>
+              </aside>
             </div>
 
             <!-- ============================ LOGIN PROMPT (guest actions) ============================ -->
@@ -520,6 +569,9 @@ let karnatakaGeoCache = null
 
 const postCount = computed(() => props.posts.length)
 const ngoCount = computed(() => props.ngos.length)
+
+/* desktop discovery sidebar: a handful of verified NGOs to deep-link into */
+const sidebarNgos = computed(() => props.ngos.slice(0, 6))
 
 /* ---- local reactive mirror of posts so counts can update without mutating the prop ---- */
 const clonePost = (p) => ({
@@ -1123,7 +1175,40 @@ onMounted(async () => {
 .ff-hero__wave { line-height: 0; }
 
 /* ============ BODY LAYOUT ============ */
-.ff-body { max-width: 680px; margin: 0 auto; padding: clamp(16px, 4vw, 28px) clamp(14px, 4vw, 20px) clamp(40px, 8vw, 64px); display: flex; flex-direction: column; gap: clamp(16px, 4vw, 22px); }
+.ff-body { max-width: 680px; margin: 0 auto; padding: clamp(16px, 4vw, 28px) clamp(14px, 4vw, 20px) clamp(40px, 8vw, 64px); }
+.ff-main { display: flex; flex-direction: column; gap: clamp(16px, 4vw, 22px); min-width: 0; }
+.ff-side { display: none; }
+
+/* desktop: two-column magazine layout (feed + discovery sidebar) */
+@media (min-width: 1024px) {
+    .ff-body { max-width: 1160px; display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 34px; align-items: start; padding-top: 38px; }
+    .ff-body--map { grid-template-columns: minmax(0, 1fr); } /* let the map use the full width */
+    .ff-body--map .ff-side { display: none; }
+    .ff-side { display: flex; flex-direction: column; gap: 18px; position: sticky; top: 84px; }
+}
+
+/* ---- discovery sidebar (desktop only) ---- */
+.ff-side__card { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 22px; padding: 20px; box-shadow: 0 18px 44px -30px rgba(13,31,92,.45); }
+.ff-side__kicker { font-size: .68rem; font-weight: 700; letter-spacing: .16em; text-transform: uppercase; color: var(--magenta); margin: 0 0 .3rem; }
+.ff-side__title { font-weight: 600; font-size: 1.3rem; line-height: 1.15; letter-spacing: -.01em; color: var(--ink); margin: 0; }
+.ff-side__sub { margin: .5rem 0 0; font-size: .85rem; line-height: 1.5; color: #6a6e7a; }
+.ff-side__list { list-style: none; margin: 1rem 0 0; padding: 0; display: flex; flex-direction: column; gap: .35rem; }
+.ff-side__ngo { display: flex; align-items: center; gap: .7rem; padding: .55rem; border-radius: 14px; text-decoration: none; color: inherit; transition: background .2s ease; }
+.ff-side__ngo:hover { background: var(--paper-2); }
+.ff-side__avatar { width: 38px; height: 38px; flex: none; border-radius: 11px; overflow: hidden; background: var(--paper-2); display: grid; place-items: center; }
+.ff-side__avatar img { width: 100%; height: 100%; object-fit: cover; }
+.ff-side__meta { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.ff-side__name { font-size: .88rem; font-weight: 700; color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-side__focus { font-size: .74rem; color: #8a8e9a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-side__arrow { width: 16px; height: 16px; flex: none; margin-left: auto; color: #b4b8c2; transition: transform .2s ease, color .2s ease; }
+.ff-side__ngo:hover .ff-side__arrow { transform: translateX(3px); color: var(--gold); }
+.ff-side__actions { display: flex; gap: .5rem; margin-top: 1rem; }
+.ff-side__actions .ff-btn { flex: 1; }
+.ff-side__stats { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.ff-side__stat { background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: #fff; border-radius: 18px; padding: 1rem; text-align: center; box-shadow: 0 14px 30px -20px rgba(13,31,92,.6); }
+.ff-side__statnum { display: block; font-size: 1.9rem; font-weight: 600; line-height: 1; }
+.ff-side__statnum--gold { color: var(--gold-soft); }
+.ff-side__statlbl { display: block; margin-top: .4rem; font-size: .68rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase; color: #c7c4b4; }
 
 /* flash */
 .ff-flash { border-radius: 16px; padding: .8rem 1rem; font-size: .9rem; font-weight: 500; }

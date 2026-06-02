@@ -51,6 +51,7 @@ class FeedController extends Controller
             ->map(fn (NGO $ngo) => [
                 'id' => $ngo->id,
                 'name' => $ngo->name,
+                'slug' => $ngo->slug,
                 'logo' => $ngo->logo,
                 'description' => $ngo->description,
                 'latitude' => (float) $ngo->latitude,
