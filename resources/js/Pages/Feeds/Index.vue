@@ -941,15 +941,16 @@ const renderMapMarkers = () => {
         const pinHtml = `
             <svg width="48" height="60" viewBox="0 0 48 60" xmlns="http://www.w3.org/2000/svg">
                 <defs>
+                    <clipPath id="${cid}"><circle cx="24" cy="22" r="14.5"/></clipPath>
                     <linearGradient id="${cid}-g" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="0" stop-color="#1b3aa0"/><stop offset="1" stop-color="#0d1f5c"/>
                     </linearGradient>
                 </defs>
                 <path d="M24 2.5C13.2 2.5 4.5 11.2 4.5 22c0 13.4 19.5 35 19.5 35S43.5 35.4 43.5 22C43.5 11.2 34.8 2.5 24 2.5Z"
                     fill="url(#${cid}-g)" stroke="#f2b40c" stroke-width="2.5"/>
-                <circle cx="24" cy="22" r="13.5" fill="#fffdf6"/>
-                <path d="M24 29.4s-8-4.7-8-10.2c0-2.6 2-4.4 4.3-4.4 1.5 0 2.8.8 3.7 2.4.9-1.6 2.2-2.4 3.7-2.4 2.3 0 4.3 1.8 4.3 4.4 0 5.5-8 10.2-8 10.2Z"
-                    fill="#f2b40c" stroke="#0d1f5c" stroke-width="0.6"/>
+                <circle cx="24" cy="22" r="16" fill="#fffdf6"/>
+                <image href="${logo}" xlink:href="${logo}" x="9.5" y="7.5" width="29" height="29"
+                    clip-path="url(#${cid})" preserveAspectRatio="xMidYMid slice"/>
             </svg>`
         const icon = L.divIcon({
             className: 'ff-pin',
