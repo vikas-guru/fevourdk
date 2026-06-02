@@ -244,7 +244,7 @@ class NGODashboardController extends Controller
             'google_business_location_id' => 'nullable|string|max:255',
             'google_business_auto_post' => 'nullable|boolean',
             'digitalization_settings' => 'nullable|array',
-            'microsite_json' => 'nullable|string|max:50000',
+            'microsite_json' => 'nullable|string|max:120000',
             'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
         ]);
 

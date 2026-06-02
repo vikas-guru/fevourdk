@@ -63,30 +63,40 @@
                         <!-- 2. Welcome banner -->
                         <EditorSection emoji="👋" title="Welcome banner" hint="The big first thing visitors see." :open="openKey === 'hero'" @toggle="toggle('hero')">
                             <FieldText v-model="form.microsite.hero_subtitle" label="Short tagline" eg="e.g. Empowering rural communities since 1998" />
+                            <FieldText v-model="form.microsite.hero_subtitle_kn" label="ಕನ್ನಡ — Short tagline (optional)" eg="e.g. 1998 ರಿಂದ ಗ್ರಾಮೀಣ ಸಮುದಾಯಗಳ ಸಬಲೀಕರಣ" kn />
                             <FieldArea v-model="form.microsite.hero_description" label="Welcome message" eg="A warm sentence or two about who you help. Leave empty to use your saved description." />
+                            <FieldArea v-model="form.microsite.hero_description_kn" label="ಕನ್ನಡ — Welcome message (optional)" eg="ನೀವು ಯಾರಿಗೆ ಸಹಾಯ ಮಾಡುತ್ತೀರಿ ಎಂಬುದರ ಬಗ್ಗೆ ಒಂದೆರಡು ಸಾಲುಗಳು." kn />
                         </EditorSection>
 
                         <!-- 3. Mission & vision -->
                         <EditorSection emoji="🎯" title="Mission &amp; vision" hint="What you do, and the change you want to see." :open="openKey === 'mv'" @toggle="toggle('mv')">
                             <FieldText v-model="form.microsite.mission_subtitle" label="Mission headline" eg="e.g. Inclusion through action" />
+                            <FieldText v-model="form.microsite.mission_subtitle_kn" label="ಕನ್ನಡ — Mission headline (optional)" eg="e.g. ಕ್ರಿಯೆಯ ಮೂಲಕ ಒಳಗೊಳ್ಳುವಿಕೆ" kn />
                             <FieldArea v-model="form.microsite.mission_description" label="Mission text" eg="What your organisation does, in simple words." />
+                            <FieldArea v-model="form.microsite.mission_description_kn" label="ಕನ್ನಡ — Mission text (optional)" eg="ನಿಮ್ಮ ಸಂಸ್ಥೆ ಏನು ಮಾಡುತ್ತದೆ, ಸರಳ ಪದಗಳಲ್ಲಿ." kn />
                             <div class="we__divider" />
                             <FieldText v-model="form.microsite.vision_subtitle" label="Vision headline" eg="e.g. A future that includes everyone" />
+                            <FieldText v-model="form.microsite.vision_subtitle_kn" label="ಕನ್ನಡ — Vision headline (optional)" eg="e.g. ಎಲ್ಲರನ್ನೂ ಒಳಗೊಳ್ಳುವ ಭವಿಷ್ಯ" kn />
                             <FieldArea v-model="form.microsite.vision_description" label="Vision text" eg="The world you are working towards." />
+                            <FieldArea v-model="form.microsite.vision_description_kn" label="ಕನ್ನಡ — Vision text (optional)" eg="ನೀವು ಕೆಲಸ ಮಾಡುತ್ತಿರುವ ಜಗತ್ತು." kn />
                         </EditorSection>
 
                         <!-- 4. Key facts -->
                         <EditorSection emoji="🔢" title="Key facts" hint="Four quick facts shown as a strip. Keep them short." :open="openKey === 'facts'" @toggle="toggle('facts')">
                             <div v-for="i in 4" :key="i" class="we__fact">
                                 <FieldText v-model="form.microsite['stat_'+i+'_h']" :label="'Fact ' + i + ' — title'" eg="e.g. Registered" />
+                                <FieldText v-model="form.microsite['stat_'+i+'_h_kn']" :label="'ಕನ್ನಡ — Fact ' + i + ' title'" eg="e.g. ನೋಂದಾಯಿತ" kn />
                                 <FieldText v-model="form.microsite['stat_'+i+'_p']" :label="'Fact ' + i + ' — detail'" eg="e.g. Since 1998" />
+                                <FieldText v-model="form.microsite['stat_'+i+'_p_kn']" :label="'ಕನ್ನಡ — Fact ' + i + ' detail'" eg="e.g. 1998 ರಿಂದ" kn />
                             </div>
                         </EditorSection>
 
                         <!-- 5. About -->
                         <EditorSection emoji="📖" title="About your NGO" hint="Extra detail and an inspiring line." :open="openKey === 'about'" @toggle="toggle('about')">
                             <FieldArea v-model="form.microsite.about_extra" label="Extra paragraph" eg="Anything more you'd like visitors to know." />
+                            <FieldArea v-model="form.microsite.about_extra_kn" label="ಕನ್ನಡ — Extra paragraph (optional)" eg="ಸಂದರ್ಶಕರಿಗೆ ತಿಳಿಯಬೇಕಾದ ಹೆಚ್ಚಿನ ಮಾಹಿತಿ." kn />
                             <FieldText v-model="form.microsite.about_vision_quote" label="Inspiring quote" eg="e.g. Humanity is the first step of social change." />
+                            <FieldText v-model="form.microsite.about_vision_quote_kn" label="ಕನ್ನಡ — Inspiring quote (optional)" eg="e.g. ಮಾನವೀಯತೆಯೇ ಸಾಮಾಜಿಕ ಬದಲಾವಣೆಯ ಮೊದಲ ಹೆಜ್ಜೆ." kn />
                         </EditorSection>
 
                         <!-- 6. Programmes -->
@@ -97,7 +107,9 @@
                                     <button v-if="form.microsite.programs.length > 1" type="button" class="we__remove" @click="removeProgram(idx)">Remove</button>
                                 </div>
                                 <FieldText v-model="p.title" label="Name" eg="e.g. Education for all" />
+                                <FieldText v-model="p.title_kn" label="ಕನ್ನಡ — Name (optional)" eg="e.g. ಎಲ್ಲರಿಗೂ ಶಿಕ್ಷಣ" kn />
                                 <FieldArea v-model="p.body" label="Short description" eg="One line about this programme." />
+                                <FieldArea v-model="p.body_kn" label="ಕನ್ನಡ — Short description (optional)" eg="ಈ ಕಾರ್ಯಕ್ರಮದ ಬಗ್ಗೆ ಒಂದು ಸಾಲು." kn />
                                 <label class="we__label">Pick an icon</label>
                                 <div class="we__icons">
                                     <button
@@ -122,10 +134,14 @@
                                     <button type="button" class="we__remove" @click="removeStory(idx)">Remove</button>
                                 </div>
                                 <FieldText v-model="s.title" label="Headline" eg="e.g. 200 families received clean water" />
+                                <FieldText v-model="s.title_kn" label="ಕನ್ನಡ — Headline (optional)" eg="e.g. 200 ಕುಟುಂಬಗಳಿಗೆ ಶುದ್ಧ ನೀರು" kn />
                                 <FieldArea v-model="s.body" label="What happened" eg="A short paragraph about this story." />
+                                <FieldArea v-model="s.body_kn" label="ಕನ್ನಡ — What happened (optional)" eg="ಈ ಕಥೆಯ ಬಗ್ಗೆ ಒಂದು ಸಣ್ಣ ಪ್ಯಾರಾ." kn />
                                 <div class="we__story-meta">
                                     <FieldText v-model="s.category" label="Category" eg="e.g. Water" />
+                                    <FieldText v-model="s.category_kn" label="ಕನ್ನಡ — Category" eg="e.g. ನೀರು" kn />
                                     <FieldText v-model="s.date" label="When" eg="e.g. Mar 2026" />
+                                    <FieldText v-model="s.date_kn" label="ಕನ್ನಡ — When" eg="e.g. ಮಾರ್ಚ್ 2026" kn />
                                 </div>
                                 <label class="we__label">Photo</label>
                                 <div class="we__logo-row">
@@ -146,13 +162,17 @@
                         <!-- 8. Donations -->
                         <EditorSection emoji="💛" title="Donations" hint="Encourage visitors to support you." :open="openKey === 'donate'" @toggle="toggle('donate')">
                             <FieldText v-model="form.microsite.donate_title" label="Title" eg="e.g. Support our mission" />
+                            <FieldText v-model="form.microsite.donate_title_kn" label="ಕನ್ನಡ — Title (optional)" eg="e.g. ನಮ್ಮ ಧ್ಯೇಯವನ್ನು ಬೆಂಬಲಿಸಿ" kn />
                             <FieldText v-model="form.microsite.donate_subtitle" label="Subtitle" eg="One line on why giving matters." />
+                            <FieldText v-model="form.microsite.donate_subtitle_kn" label="ಕನ್ನಡ — Subtitle (optional)" eg="ನೀಡುವಿಕೆ ಏಕೆ ಮುಖ್ಯ ಎಂಬ ಒಂದು ಸಾಲು." kn />
                             <FieldArea v-model="form.microsite.donate_impact_blurb" label="Impact note" eg="What a donation makes possible." />
+                            <FieldArea v-model="form.microsite.donate_impact_blurb_kn" label="ಕನ್ನಡ — Impact note (optional)" eg="ದೇಣಿಗೆ ಏನನ್ನು ಸಾಧ್ಯವಾಗಿಸುತ್ತದೆ." kn />
                         </EditorSection>
 
                         <!-- 9. Contact -->
                         <EditorSection emoji="✉️" title="Contact" hint="Invite people to reach out." :open="openKey === 'contact'" @toggle="toggle('contact')">
                             <FieldText v-model="form.microsite.contact_intro" label="Intro line" eg="e.g. We'd love to hear from you." />
+                            <FieldText v-model="form.microsite.contact_intro_kn" label="ಕನ್ನಡ — Intro line (optional)" eg="e.g. ನಿಮ್ಮಿಂದ ಕೇಳಲು ನಾವು ಇಷ್ಟಪಡುತ್ತೇವೆ." kn />
                         </EditorSection>
 
                         <!-- 10. Advanced -->
@@ -223,30 +243,32 @@ const { tourRef, steps, storageKey } = useNgoTour('digitalization')
 
 /* ---- tiny inline field components (keep this file self-contained) ---- */
 const FieldText = (p, { emit }) =>
-    h('div', { class: 'we__field' }, [
+    h('div', { class: ['we__field', p.kn && 'we__field--kn'] }, [
         h('label', { class: 'we__label' }, p.label),
         h('input', {
-            class: 'we__input',
+            class: ['we__input', p.kn && 'we__input--kn'],
             value: p.modelValue,
             placeholder: p.eg,
+            lang: p.kn ? 'kn' : null,
             onInput: (e) => emit('update:modelValue', e.target.value),
         }),
     ])
-FieldText.props = ['modelValue', 'label', 'eg']
+FieldText.props = ['modelValue', 'label', 'eg', 'kn']
 FieldText.emits = ['update:modelValue']
 
 const FieldArea = (p, { emit }) =>
-    h('div', { class: 'we__field' }, [
+    h('div', { class: ['we__field', p.kn && 'we__field--kn'] }, [
         h('label', { class: 'we__label' }, p.label),
         h('textarea', {
-            class: 'we__input we__textarea',
+            class: ['we__input', 'we__textarea', p.kn && 'we__input--kn'],
             rows: 3,
             value: p.modelValue,
             placeholder: p.eg,
+            lang: p.kn ? 'kn' : null,
             onInput: (e) => emit('update:modelValue', e.target.value),
         }),
     ])
-FieldArea.props = ['modelValue', 'label', 'eg']
+FieldArea.props = ['modelValue', 'label', 'eg', 'kn']
 FieldArea.emits = ['update:modelValue']
 
 const EditorSection = (p, { emit, slots }) =>
@@ -322,16 +344,17 @@ const iconChoices = [
 function defaultMicrosite() {
     const ms = props.ngo.digitalization_settings?.microsite ?? {}
     const programs = Array.isArray(ms.programs) && ms.programs.length
-        ? ms.programs.map((p) => ({ title: p.title ?? '', body: p.body ?? '', icon: (p.icon ?? 'star').replace(/^fa-/, '') }))
+        ? ms.programs.map((p) => ({ title: p.title ?? '', title_kn: p.title_kn ?? '', body: p.body ?? '', body_kn: p.body_kn ?? '', icon: (p.icon ?? 'star').replace(/^fa-/, '') }))
         : [
-            { title: '', body: '', icon: 'graduation-cap' },
-            { title: '', body: '', icon: 'hands-helping' },
-            { title: '', body: '', icon: 'seedling' },
+            { title: '', title_kn: '', body: '', body_kn: '', icon: 'graduation-cap' },
+            { title: '', title_kn: '', body: '', body_kn: '', icon: 'hands-helping' },
+            { title: '', title_kn: '', body: '', body_kn: '', icon: 'seedling' },
         ]
     const stories = Array.isArray(ms.stories)
-        ? ms.stories.map((s) => ({ title: s.title ?? '', body: s.body ?? '', category: s.category ?? '', date: s.date ?? '', image: s.image ?? '' }))
+        ? ms.stories.map((s) => ({ title: s.title ?? '', title_kn: s.title_kn ?? '', body: s.body ?? '', body_kn: s.body_kn ?? '', category: s.category ?? '', category_kn: s.category_kn ?? '', date: s.date ?? '', date_kn: s.date_kn ?? '', image: s.image ?? '' }))
         : []
     return {
+        ...ms, // round-trip any Kannada (*_kn) and other saved keys
         hero_subtitle: ms.hero_subtitle ?? '', hero_description: ms.hero_description ?? '',
         mission_subtitle: ms.mission_subtitle ?? '', mission_description: ms.mission_description ?? '',
         vision_subtitle: ms.vision_subtitle ?? '', vision_description: ms.vision_description ?? '',
@@ -362,14 +385,14 @@ const form = useForm({
     logo: null,
 })
 
-const addProgram = () => form.microsite.programs.length < 12 && form.microsite.programs.push({ title: '', body: '', icon: 'star' })
+const addProgram = () => form.microsite.programs.length < 12 && form.microsite.programs.push({ title: '', title_kn: '', body: '', body_kn: '', icon: 'star' })
 const removeProgram = (idx) => {
     form.microsite.programs.splice(idx, 1)
     if (form.microsite.programs.length === 0) {
-        form.microsite.programs.push({ title: '', body: '', icon: 'star' })
+        form.microsite.programs.push({ title: '', title_kn: '', body: '', body_kn: '', icon: 'star' })
     }
 }
-const addStory = () => form.microsite.stories.length < 6 && form.microsite.stories.push({ title: '', body: '', category: '', date: '', image: '' })
+const addStory = () => form.microsite.stories.length < 6 && form.microsite.stories.push({ title: '', title_kn: '', body: '', body_kn: '', category: '', category_kn: '', date: '', date_kn: '', image: '' })
 const removeStory = (idx) => form.microsite.stories.splice(idx, 1)
 
 function onLogoChange(event) {
@@ -414,10 +437,10 @@ const save = () => {
         const { microsite, ...rest } = data
         const cleanedPrograms = (microsite.programs || [])
             .filter((p) => (p.title || '').trim() !== '')
-            .map((p) => ({ title: (p.title || '').trim(), body: (p.body || '').trim(), icon: (p.icon || 'star').replace(/^fa-/, '') }))
+            .map((p) => ({ title: (p.title || '').trim(), title_kn: (p.title_kn || '').trim(), body: (p.body || '').trim(), body_kn: (p.body_kn || '').trim(), icon: (p.icon || 'star').replace(/^fa-/, '') }))
         const cleanedStories = (microsite.stories || [])
             .filter((s) => (s.title || '').trim() !== '')
-            .map((s) => ({ title: (s.title || '').trim(), body: (s.body || '').trim(), category: (s.category || '').trim(), date: (s.date || '').trim(), image: (s.image || '').trim() }))
+            .map((s) => ({ title: (s.title || '').trim(), title_kn: (s.title_kn || '').trim(), body: (s.body || '').trim(), body_kn: (s.body_kn || '').trim(), category: (s.category || '').trim(), category_kn: (s.category_kn || '').trim(), date: (s.date || '').trim(), date_kn: (s.date_kn || '').trim(), image: (s.image || '').trim() }))
         return {
             ...rest,
             microsite_json: JSON.stringify({ ...microsite, programs: cleanedPrograms, stories: cleanedStories }),
@@ -476,6 +499,13 @@ const save = () => {
 .we__input::placeholder { color: #94a3b8; font-size: 0.82rem; }
 .we__input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15); }
 .we__textarea { resize: vertical; line-height: 1.4; }
+
+/* Optional Kannada companion fields — Kannada font + subtle gold marker so they read as "extra" */
+.we__field--kn { margin-top: 0.35rem; }
+.we__field--kn .we__label { color: #92740a; font-weight: 600; }
+.we__input--kn { font-family: 'Noto Sans Kannada', 'Inter', system-ui, sans-serif; border-style: dashed; border-color: #e6c454; background: #fffdf5; }
+.we__input--kn::placeholder { font-family: 'Noto Sans Kannada', 'Inter', sans-serif; }
+.we__input--kn:focus { border-color: #f2b40c; border-style: solid; box-shadow: 0 0 0 3px rgba(242, 180, 12, 0.18); }
 
 .we__tiny { margin-top: 0.3rem; font-size: 0.72rem; color: #94a3b8; }
 .we__divider { margin: 0.9rem 0; border-top: 1px dashed #e2e8f0; }

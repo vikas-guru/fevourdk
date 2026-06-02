@@ -37,7 +37,9 @@
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700,800&display=swap" rel="stylesheet">
     <link href="https://fonts.bunny.net/css?family=fraunces:400,500,600,700,9..144,500,9..144,600&display=swap" rel="stylesheet">
-    
+    {{-- Kannada webfont so admin-entered ಕನ್ನಡ renders in the website editor (not tofu) --}}
+    <link href="https://fonts.bunny.net/css?family=noto-sans-kannada:400,500,600,700&display=swap" rel="stylesheet">
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     
