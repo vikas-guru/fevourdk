@@ -330,13 +330,20 @@
                     </div>
 
                     <div class="ff-ngogrid">
-                        <article v-for="ngo in filteredNgos" :key="ngo.id" class="ff-ngocard">
+                        <component
+                            :is="ngo.slug ? Link : 'article'"
+                            v-for="ngo in filteredNgos"
+                            :key="ngo.id"
+                            :href="ngo.slug ? `/ngos/${ngo.slug}` : undefined"
+                            class="ff-ngocard"
+                            :class="{ 'ff-ngocard--link': ngo.slug }"
+                        >
                             <div class="ff-ngocard__top">
                                 <img :src="ngo.logo || '/assets/images/fevourd-k/logo.png'" :alt="ngo.name" @error="handleImageError">
                                 <div>
                                     <p class="ff-ngocard__name">{{ ngo.name }}</p>
                                     <p class="ff-ngocard__dist">
-                                        {{ ngo.distance_km !== null ? `${ngo.distance_km.toFixed(1)} km away` : `Lat ${ngo.latitude.toFixed(3)}, Lng ${ngo.longitude.toFixed(3)}` }}
+                                        {{ ngo.distance_km !== null ? `${ngo.distance_km.toFixed(1)} km away` : 'On the Karnataka map' }}
                                     </p>
                                 </div>
                             </div>
@@ -344,7 +351,8 @@
                             <div class="ff-ngocard__tags">
                                 <span v-for="focus in (ngo.focus_areas || []).slice(0, 3)" :key="focus">{{ focus }}</span>
                             </div>
-                        </article>
+                            <span v-if="ngo.slug" class="ff-ngocard__cta">View impact &rarr;</span>
+                        </component>
                     </div>
                 </section>
               </div>
@@ -929,7 +937,11 @@ const renderMapMarkers = () => {
     markersLayer.clearLayers()
     filteredNgos.value.forEach((ngo) => {
         const marker = L.marker([ngo.latitude, ngo.longitude])
-        marker.bindPopup(`<strong>${ngo.name}</strong><br/>${ngo.description || 'Impact NGO'}`)
+        const desc = (ngo.description || 'Impact NGO').slice(0, 130)
+        const profile = ngo.slug
+            ? `<br/><a href="/ngos/${ngo.slug}" style="display:inline-block;margin-top:6px;color:#1d4ed8;font-weight:700;text-decoration:none;">View profile &rarr;</a>`
+            : ''
+        marker.bindPopup(`<strong>${ngo.name}</strong><br/>${desc}${profile}`)
         marker.addTo(markersLayer)
     })
 }
@@ -1360,7 +1372,11 @@ onMounted(async () => {
 .ff-mapcount__warn { color: #b8860b; }
 
 .ff-ngogrid { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
-.ff-ngocard { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 18px; padding: .9rem; box-shadow: 0 12px 30px -24px rgba(13,31,92,.4); }
+.ff-ngocard { display: block; background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 18px; padding: .9rem; box-shadow: 0 12px 30px -24px rgba(13,31,92,.4); }
+.ff-ngocard--link { text-decoration: none; color: inherit; transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease; }
+.ff-ngocard--link:hover { transform: translateY(-2px); box-shadow: 0 18px 40px -24px rgba(13,31,92,.5); border-color: rgba(242,180,12,.5); }
+.ff-ngocard__cta { display: inline-block; margin-top: .6rem; font-size: .78rem; font-weight: 700; color: var(--ink); }
+.ff-ngocard--link:hover .ff-ngocard__cta { color: var(--magenta); }
 .ff-ngocard__top { display: flex; align-items: center; gap: .6rem; }
 .ff-ngocard__top img { width: 40px; height: 40px; border-radius: 11px; object-fit: cover; background: var(--paper-2); }
 .ff-ngocard__name { font-size: .9rem; font-weight: 700; color: var(--ink); margin: 0; }

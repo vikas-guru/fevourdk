@@ -87,6 +87,10 @@ class VikasanaShowcaseSeeder extends Seeder
         if ($mandyaCity) {
             $ngo->city_id = $mandyaCity->id;
         }
+        // Plot the org on the feeds map (Mandya, Karnataka). Without lat/lng the
+        // NGO is filtered out of the map query and never appears as a marker.
+        $ngo->latitude = 12.5223;
+        $ngo->longitude = 76.8954;
         $ngo->theme_color = '#2e7d32';
         $ngo->logo = '/assets/vikasana/logos/vikasana-logo.png';
         $ngo->website_url = '/vikasana';
