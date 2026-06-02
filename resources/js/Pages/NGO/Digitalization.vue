@@ -6,7 +6,7 @@
                 <div class="we__head">
                     <div class="min-w-0">
                         <h1 class="we__title">Your website</h1>
-                        <p class="we__sub">Edit on the left, watch it change on the right. No tech skills needed — just type and tap save.</p>
+                        <p class="we__sub">Type your changes, then tap save — your website updates instantly. No tech skills needed.</p>
                     </div>
                     <div class="we__head-actions">
                         <a v-if="liveUrl" :href="liveUrl" target="_blank" rel="noopener" class="we__btn we__btn--ghost">
@@ -41,7 +41,7 @@
                                 </div>
                             </div>
 
-                            <label class="we__label mt-4">Main colour</label>
+                            <label class="we__label we__mt">Main colour</label>
                             <div class="we__swatches">
                                 <button
                                     v-for="c in colourPresets"
@@ -433,7 +433,10 @@ const save = () => {
 }
 </script>
 
-<style scoped>
+<style>
+/* NOT scoped on purpose: EditorSection/FieldText/FieldArea are separate inline
+   components, and scoped styles don't reach a child component's internal DOM.
+   All selectors are `we__`-prefixed to avoid global collisions. */
 .we { position: relative; padding-bottom: 5.5rem; }
 
 .we__head { display: flex; flex-wrap: wrap; align-items: flex-start; justify-content: space-between; gap: 0.75rem; }
@@ -471,7 +474,7 @@ const save = () => {
 
 .we__tiny { margin-top: 0.3rem; font-size: 0.72rem; color: #94a3b8; }
 .we__divider { margin: 0.9rem 0; border-top: 1px dashed #e2e8f0; }
-.mt-4 { margin-top: 1rem; }
+.we__mt { margin-top: 1rem; }
 
 /* Logo + colour */
 .we__logo-row { display: flex; align-items: center; gap: 0.85rem; }
