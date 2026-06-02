@@ -83,7 +83,7 @@ class WelcomeController extends Controller
             ]);
 
         // Latest community feed — a live teaser of what organisations are posting.
-        $latestPosts = FeedPost::with(['ngo:id,name,logo', 'user:id,name'])
+        $latestPosts = FeedPost::with(['ngo:id,name,slug,logo', 'user:id,name'])
             ->withCount(['reactions', 'comments'])
             ->where('is_published', true)
             ->latest()
@@ -99,6 +99,7 @@ class WelcomeController extends Controller
                 'reactions_count' => (int) $post->reactions_count,
                 'comments_count' => (int) $post->comments_count,
                 'author' => $post->ngo?->name ?? $post->user?->name ?? 'FEVOURD-K',
+                'ngo_slug' => $post->ngo?->slug,
                 'logo' => $post->ngo?->logo,
             ]);
 

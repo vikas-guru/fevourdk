@@ -153,18 +153,27 @@
                     <article
                         v-for="post in filteredPosts"
                         :key="post.id"
+                        v-reveal
                         :data-feed-post="String(post.id)"
                         class="ff-post"
+                        :style="{ '--accent': postAccent(post) }"
                     >
                         <header class="ff-post__head">
-                            <span class="ff-post__avatar">
-                                <img v-if="post.ngo?.logo" :src="post.ngo.logo" :alt="post.ngo?.name" @error="handleImageError">
-                                <span v-else>{{ (post.ngo?.name || post.author?.name || 'F').charAt(0).toUpperCase() }}</span>
-                            </span>
-                            <span class="ff-post__id">
-                                <span class="ff-post__author">{{ post.ngo?.name || post.author?.name }}</span>
-                                <span class="ff-post__time">{{ timeAgo(post.created_at) }}</span>
-                            </span>
+                            <component
+                                :is="post.ngo?.slug ? Link : 'span'"
+                                :href="post.ngo?.slug ? `/ngos/${post.ngo.slug}` : undefined"
+                                class="ff-post__id"
+                                :class="{ 'ff-post__id--link': post.ngo?.slug }"
+                            >
+                                <span class="ff-post__avatar">
+                                    <img v-if="post.ngo?.logo" :src="post.ngo.logo" :alt="post.ngo?.name" @error="handleImageError">
+                                    <span v-else>{{ (post.ngo?.name || post.author?.name || 'F').charAt(0).toUpperCase() }}</span>
+                                </span>
+                                <span class="ff-post__idmeta">
+                                    <span class="ff-post__author">{{ post.ngo?.name || post.author?.name }}</span>
+                                    <time class="ff-post__time" :datetime="post.created_at" :title="formatTime(post.created_at)">{{ timeAgo(post.created_at) }}</time>
+                                </span>
+                            </component>
                             <span v-if="post.ngo" class="ff-post__badge" title="Verified organisation">
                                 <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd" /></svg>
                             </span>
@@ -193,11 +202,24 @@
 
                         <div class="ff-post__metrics">
                             <span class="ff-post__react-sum">
-                                <span>👍 {{ post.reactions.totals.like }}</span>
-                                <span>❤️ {{ post.reactions.totals.love }}</span>
-                                <span>🤝 {{ post.reactions.totals.support }}</span>
+                                <span class="ff-react-tally"><span class="ff-react-tally__e">👍</span><b v-bump="post.reactions.totals.like" class="ff-num">{{ post.reactions.totals.like }}</b></span>
+                                <span class="ff-react-tally"><span class="ff-react-tally__e">❤️</span><b v-bump="post.reactions.totals.love" class="ff-num">{{ post.reactions.totals.love }}</b></span>
+                                <span class="ff-react-tally"><span class="ff-react-tally__e">🤝</span><b v-bump="post.reactions.totals.support" class="ff-num">{{ post.reactions.totals.support }}</b></span>
                             </span>
-                            <span class="ff-post__counts">{{ post.views_count ?? 0 }} views · {{ post.comments.length }} comments · {{ post.shares_count }} shares</span>
+                            <span class="ff-post__chips">
+                                <span class="ff-metric" title="Views">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M2.5 12S5.5 5.5 12 5.5 21.5 12 21.5 12 18.5 18.5 12 18.5 2.5 12 2.5 12z" /><circle cx="12" cy="12" r="3" /></svg>
+                                    <b v-bump="post.views_count ?? 0" class="ff-num">{{ post.views_count ?? 0 }}</b>
+                                </span>
+                                <span class="ff-metric" title="Comments">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z" /></svg>
+                                    <b v-bump="post.comments.length" class="ff-num">{{ post.comments.length }}</b>
+                                </span>
+                                <span class="ff-metric" title="Shares">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3" /><circle cx="6" cy="12" r="3" /><circle cx="18" cy="19" r="3" /><path stroke-linecap="round" stroke-linejoin="round" d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4" /></svg>
+                                    <b v-bump="post.shares_count" class="ff-num">{{ post.shares_count }}</b>
+                                </span>
+                            </span>
                         </div>
 
                         <div class="ff-post__actions">
@@ -224,6 +246,11 @@
                                 <button type="button" class="ff-share__chip" @click="shareVia(post, 'instagram')">Instagram caption</button>
                             </div>
                         </transition>
+
+                        <Link v-if="post.ngo?.slug" :href="`/ngos/${post.ngo.slug}`" class="ff-post__impact">
+                            <span>View {{ post.ngo.name }}'s impact</span>
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6l6 6-6 6" /></svg>
+                        </Link>
 
                         <div class="ff-post__comments">
                             <div v-if="post.comments.length" class="ff-comments">
@@ -494,17 +521,68 @@ let karnatakaGeoCache = null
 const postCount = computed(() => props.posts.length)
 const ngoCount = computed(() => props.ngos.length)
 
+/* ---- local reactive mirror of posts so counts can update without mutating the prop ---- */
+const clonePost = (p) => ({
+    ...p,
+    reactions: {
+        totals: { ...(p.reactions?.totals ?? {}) },
+        my_reaction: p.reactions?.my_reaction ?? null,
+    },
+})
+const localPosts = ref(props.posts.map(clonePost))
+watch(
+    () => props.posts,
+    (next) => { localPosts.value = (next || []).map(clonePost) },
+    { deep: true },
+)
+
 const filteredPosts = computed(() => {
     if (!searchText.value.trim()) {
-        return props.posts
+        return localPosts.value
     }
     const q = searchText.value.toLowerCase()
-    return props.posts.filter((post) =>
+    return localPosts.value.filter((post) =>
         post.title?.toLowerCase().includes(q) ||
         post.body?.toLowerCase().includes(q) ||
         post.ngo?.name?.toLowerCase().includes(q)
     )
 })
+
+/* subtle teal→blue accent hue derived from the post id (design-language per-id hue) */
+const postAccent = (post) => `hsl(${175 + (Number(post.id) * 47) % 70} 64% 42%)`
+
+/* directive: gentle number bump whenever a displayed count changes */
+const vBump = {
+    updated(el, binding) {
+        if (binding.value === binding.oldValue) return
+        el.classList.remove('ff-num--bump')
+        void el.offsetWidth // restart the animation
+        el.classList.add('ff-num--bump')
+    },
+}
+
+/* directive: reveal-on-scroll entrance, respecting reduced-motion */
+const vReveal = {
+    mounted(el) {
+        const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches
+        if (reduce || typeof IntersectionObserver === 'undefined') {
+            el.classList.add('is-revealed')
+            return
+        }
+        el.classList.add('ff-reveal')
+        const io = new IntersectionObserver((entries, obs) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    el.classList.add('is-revealed')
+                    obs.unobserve(entry.target)
+                }
+            })
+        }, { threshold: 0.08 })
+        io.observe(el)
+        el._revealObs = io
+    },
+    unmounted(el) { el._revealObs?.disconnect() },
+}
 
 const ngosWithDistance = computed(() => {
     return props.ngos.map((ngo) => {
@@ -558,9 +636,49 @@ const mapHighlightAnchor = computed(() => {
     return { lat: 15.3173, lng: 75.7139 }
 })
 
+const applyReaction = (postId, type) => {
+    const post = localPosts.value.find((p) => p.id === postId)
+    if (!post) return
+    const totals = post.reactions.totals
+    const prev = post.reactions.my_reaction
+    // Mirror the server: react() does updateOrCreate keyed on (post, user), so
+    // repeating the same reaction is a no-op and a different one switches it.
+    if (prev === type) return
+    if (prev && totals[prev] != null) {
+        totals[prev] = Math.max(0, totals[prev] - 1)
+    }
+    totals[type] = (totals[type] ?? 0) + 1
+    post.reactions.my_reaction = type
+}
+
+const bumpViews = (postId) => {
+    const post = localPosts.value.find((p) => String(p.id) === String(postId))
+    if (post) {
+        post.views_count = (post.views_count ?? 0) + 1
+    }
+}
+
+const postReaction = (postId, type) => {
+    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content')
+    fetch(`/feeds/${postId}/react`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Accept: 'application/json',
+            'X-CSRF-TOKEN': token || '',
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        credentials: 'same-origin',
+        body: JSON.stringify({ type }),
+    }).catch(() => {})
+}
+
 const react = (postId, type) => {
     requireAuth('react to this post', () => {
-        router.post(`/feeds/${postId}/react`, { type }, { preserveScroll: true })
+        // Optimistic UI is authoritative; the write is sent without a full
+        // Inertia reload so overlapping taps can't clobber newer local state.
+        applyReaction(postId, type)
+        postReaction(postId, type)
     })
 }
 
@@ -736,6 +854,7 @@ const setupFeedViewObserver = () => {
                     return
                 }
                 seenIds.add(id)
+                bumpViews(id) // optimistic, once per post per session
                 fetch(`/feeds/${id}/view`, {
                     method: 'POST',
                     headers: {
@@ -1065,13 +1184,28 @@ onMounted(async () => {
 .ff-stream { display: flex; flex-direction: column; gap: clamp(14px, 3vw, 18px); }
 
 /* ============ POST CARD ============ */
-.ff-post { background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 22px; overflow: hidden; padding: clamp(16px, 3.5vw, 22px); box-shadow: 0 18px 44px -30px rgba(13,31,92,.45); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s ease; }
+.ff-post { position: relative; background: #fffdf6; border: 1px solid rgba(13,31,92,.1); border-radius: 22px; overflow: hidden; padding: clamp(16px, 3.5vw, 22px); box-shadow: 0 18px 44px -30px rgba(13,31,92,.45); transition: transform .4s cubic-bezier(.2,.7,.2,1), box-shadow .4s ease; }
+.ff-post::before { content: ''; position: absolute; inset: 0 0 auto 0; height: 3px; background: linear-gradient(90deg, var(--accent, var(--gold)), transparent 78%); opacity: .65; pointer-events: none; }
 .ff-post:hover { transform: translateY(-3px); box-shadow: 0 26px 54px -30px rgba(13,31,92,.5); }
+
+/* reveal-on-scroll entrance */
+.ff-reveal { opacity: 0; transform: translateY(14px); }
+.ff-reveal.is-revealed { opacity: 1; transform: none; transition: opacity .5s ease, transform .55s cubic-bezier(.2,.7,.2,1); }
+
+/* animated tabular counts */
+.ff-num { font-variant-numeric: tabular-nums; display: inline-block; }
+.ff-num--bump { animation: ff-bump .4s cubic-bezier(.2,.8,.2,1); }
+@keyframes ff-bump { 0% { transform: scale(1); } 35% { transform: scale(1.3); color: var(--accent, var(--gold)); } 100% { transform: scale(1); } }
 .ff-post__head { display: flex; align-items: center; gap: .7rem; margin-bottom: .85rem; }
-.ff-post__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: var(--gold-soft); font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; box-shadow: 0 0 0 2px rgba(242,180,12,.3); }
+.ff-post__id { display: flex; align-items: center; gap: .7rem; min-width: 0; flex: 1; text-decoration: none; color: inherit; border-radius: 14px; }
+.ff-post__id--link { transition: opacity .2s ease; }
+.ff-post__id--link:hover { opacity: .82; }
+.ff-post__id--link:hover .ff-post__author { color: var(--accent, var(--magenta)); }
+.ff-post__avatar { width: 44px; height: 44px; flex: none; border-radius: 50%; overflow: hidden; display: grid; place-items: center; background: linear-gradient(135deg, var(--ink), var(--ink-2)); color: var(--gold-soft); font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; box-shadow: 0 0 0 2px var(--accent, rgba(242,180,12,.3)); transition: box-shadow .2s ease; }
+.ff-post__id--link:hover .ff-post__avatar { box-shadow: 0 0 0 3px var(--accent, rgba(242,180,12,.45)); }
 .ff-post__avatar img { width: 100%; height: 100%; object-fit: cover; }
-.ff-post__id { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
-.ff-post__author { font-weight: 700; color: var(--ink); font-size: .96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ff-post__idmeta { display: flex; flex-direction: column; min-width: 0; line-height: 1.25; }
+.ff-post__author { font-weight: 700; color: var(--ink); font-size: .96rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color .2s ease; }
 .ff-post__time { font-size: .78rem; color: #8a8e9a; }
 .ff-post__badge { margin-left: auto; color: var(--emerald); }
 .ff-post__badge svg { width: 20px; height: 20px; }
@@ -1086,9 +1220,17 @@ onMounted(async () => {
 .ff-post__media--grid { display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: rgba(13,31,92,.08); }
 .ff-post__media--grid img, .ff-post__media--grid video { max-height: 240px; height: 100%; }
 
-.ff-post__metrics { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .4rem .8rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid rgba(13,31,92,.08); font-size: .8rem; color: #8a8e9a; }
-.ff-post__react-sum { display: inline-flex; gap: .7rem; }
-.ff-post__counts { color: #9095a1; }
+.ff-post__metrics { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem .8rem; margin-top: 1rem; padding-top: .85rem; border-top: 1px solid rgba(13,31,92,.08); font-size: .8rem; color: #8a8e9a; }
+.ff-post__react-sum { display: inline-flex; gap: .4rem; }
+.ff-react-tally { display: inline-flex; align-items: center; gap: .3em; background: var(--paper); border: 1px solid rgba(13,31,92,.08); border-radius: 999px; padding: .2rem .55rem; font-size: .8rem; font-weight: 600; color: #565a66; }
+.ff-react-tally__e { font-size: .92rem; line-height: 1; }
+.ff-post__chips { display: inline-flex; align-items: center; gap: .5rem; }
+.ff-metric { display: inline-flex; align-items: center; gap: .32em; font-weight: 600; font-size: .8rem; color: #8a8e9a; }
+.ff-metric svg { width: 15px; height: 15px; opacity: .75; }
+.ff-post__impact { display: inline-flex; align-items: center; gap: .35em; margin-top: .85rem; font-size: .82rem; font-weight: 700; color: var(--accent, var(--ink)); text-decoration: none; transition: gap .2s ease, opacity .2s ease; }
+.ff-post__impact svg { width: 15px; height: 15px; transition: transform .2s ease; }
+.ff-post__impact:hover { opacity: .82; }
+.ff-post__impact:hover svg { transform: translateX(3px); }
 
 .ff-post__actions { display: grid; grid-template-columns: repeat(4, 1fr); gap: .5rem; margin-top: .8rem; }
 .ff-react { display: inline-flex; align-items: center; justify-content: center; gap: .35em; border: 1px solid rgba(13,31,92,.12); background: var(--paper); border-radius: 13px; padding: .6rem .3rem; font: inherit; font-weight: 600; font-size: .84rem; color: #4b5563; cursor: pointer; transition: transform .15s ease, background .2s ease, color .2s ease, border-color .2s ease, box-shadow .2s ease; }
@@ -1173,7 +1315,8 @@ onMounted(async () => {
 .ff-modal-enter-from .ff-auth, .ff-modal-leave-to .ff-auth { transform: translateY(16px) scale(.96); opacity: 0; }
 
 @media (prefers-reduced-motion: reduce) {
-    .ff-ring--2, .ff-post, .ff-react__emoji { animation: none !important; transition: none !important; }
+    .ff-ring--2, .ff-post, .ff-react__emoji, .ff-num--bump { animation: none !important; transition: none !important; }
+    .ff-reveal, .ff-reveal.is-revealed { opacity: 1 !important; transform: none !important; transition: none !important; }
 }
 
 :deep(.feeds-map-dist-tooltip) {

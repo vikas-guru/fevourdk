@@ -29,7 +29,7 @@ class FeedController extends Controller
 
         $posts = FeedPost::query()
             ->with([
-                'ngo:id,name,logo',
+                'ngo:id,name,slug,logo',
                 'user:id,name',
                 'comments.user:id,name',
                 'reactions',
@@ -96,7 +96,7 @@ class FeedController extends Controller
         abort_unless($post->is_published, 404);
 
         $post->load([
-            'ngo:id,name,logo',
+            'ngo:id,name,slug,logo',
             'user:id,name',
             'comments.user:id,name',
             'reactions',
@@ -385,6 +385,7 @@ class FeedController extends Controller
             'ngo' => $post->ngo ? [
                 'id' => $post->ngo->id,
                 'name' => $post->ngo->name,
+                'slug' => $post->ngo->slug,
                 'logo' => $post->ngo->logo,
             ] : null,
             'author' => [
