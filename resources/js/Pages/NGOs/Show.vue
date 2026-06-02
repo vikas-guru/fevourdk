@@ -7,6 +7,8 @@
             <header class="np-hero">
                 <div class="np-hero__mesh"></div>
                 <div class="np-hero__grain"></div>
+                <img v-if="ngo.logo" class="np-hero__watermark" :src="ngo.logo" alt="" aria-hidden="true" @error="(e)=>e.target.style.display='none'">
+                <div class="np-hero__rings" aria-hidden="true"><span></span><span></span></div>
 
                 <div class="np-hero__inner">
                     <Link href="/ngos" class="np-back">
@@ -486,8 +488,18 @@ const toggleSupport = () => {
     position: absolute; inset: 0; opacity: .3; mix-blend-mode: overlay;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
+.np-hero__watermark {
+    position: absolute; right: -4%; top: 50%; transform: translateY(-50%);
+    width: min(42vw, 420px); height: auto; aspect-ratio: 1;
+    object-fit: contain; opacity: .07; filter: grayscale(1) brightness(2.4);
+    pointer-events: none; z-index: 0;
+}
+.np-hero__rings { position: absolute; right: -8%; top: 30%; width: min(40vw, 380px); aspect-ratio: 1; opacity: .5; pointer-events: none; z-index: 0; }
+.np-hero__rings span { position: absolute; inset: 0; border-radius: 50%; border: 1.5px dashed hsl(40 96% 62% / .4); }
+.np-hero__rings span:last-child { inset: 16%; border-style: solid; border-color: rgba(255,255,255,.14); }
 .np-hero__inner {
     position: relative;
+    z-index: 1;
     max-width: 1120px;
     margin: 0 auto;
     padding: 26px 24px 0;
@@ -507,6 +519,11 @@ const toggleSupport = () => {
     margin-top: 30px; flex-wrap: wrap;
 }
 .np-crestwrap { position: relative; flex: none; }
+.np-crestwrap::before {
+    content: ''; position: absolute; inset: -14px; border-radius: 34px; z-index: -1;
+    background: radial-gradient(circle, hsl(40 96% 60% / .55), transparent 68%);
+    filter: blur(6px);
+}
 .np-crest__since {
     position: absolute; left: 50%; bottom: -11px; transform: translateX(-50%);
     white-space: nowrap; padding: 3px 11px; border-radius: 999px;
@@ -518,8 +535,8 @@ const toggleSupport = () => {
     width: 104px; height: 104px; flex: none;
     border-radius: 26px; background: #fff;
     display: grid; place-items: center; overflow: hidden;
-    border: 1px solid rgba(255,255,255,.5);
-    box-shadow: 0 20px 40px -16px rgba(0,0,0,.55);
+    border: 3px solid hsl(40 96% 62%);
+    box-shadow: 0 20px 44px -14px rgba(0,0,0,.6), 0 0 0 6px rgba(255,255,255,.14);
 }
 .np-crest img { width: 100%; height: 100%; object-fit: cover; }
 .np-crest span {
@@ -595,6 +612,7 @@ const toggleSupport = () => {
 /* Stat ribbon */
 .np-stats {
     position: relative;
+    z-index: 1;
     max-width: 1120px; margin: 34px auto -28px; padding: 0 24px;
     display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px;
 }
