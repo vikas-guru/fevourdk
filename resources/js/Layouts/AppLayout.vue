@@ -37,8 +37,11 @@
             </div>
         </Teleport>
 
+        <!-- First-visit splash + permission + geolocation onboarding (self-teleports to body) -->
+        <SplashOnboard :start="!isLoading" />
+
         <!-- Navigation -->
-    <nav class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-2xl border-b border-blue-500/20 sticky top-0 z-50 backdrop-blur-lg">
+    <nav v-if="!hideChrome && !(hideChromeMobile && isMobileViewport)" class="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-800 shadow-2xl border-b border-blue-500/20 sticky top-0 z-50 backdrop-blur-lg">
         <div class="max-w-8xl mx-auto px-6 sm:px-8 lg:px-12">
             <div class="flex justify-between items-center h-20">
 
@@ -49,7 +52,7 @@
                         <img :src="logoImage" alt="FEVOURD-K" class="w-12 h-12 object-contain">
                         </div>
                         <div class="flex flex-col">
-                            <span class="text font-bold text-white tracking-tight">FEVOURD-K</span>
+                            <span class="text font-bold text-white tracking-tight whitespace-nowrap">FEVOURD-K</span>
                             <p class="text-sm text-blue-200 font-medium hidden sm:block">Empowering Karnataka</p>
                         </div>
                     </Link>
@@ -737,14 +740,14 @@
 </div>
 
         <!-- Page Content -->
-        <main :class="{ 'pb-20': showPwaShell }">
+        <main :class="{ 'pb-20': showMobileTabBar && !hideChrome }">
             <slot />
         </main>
-        
+
         <!-- Footer -->
-        <footer v-if="!isInstalledPwa" class="bg-gray-900 text-white" :class="{ 'mb-16 lg:mb-0': showPwaShell }">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+        <footer v-if="!hideChrome && !isInstalledPwa && !(hideChromeMobile && isMobileViewport)" class="bg-gray-900 text-white" :class="{ 'mb-20 lg:mb-0': showMobileTabBar }">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
+                <div class="hidden md:grid md:grid-cols-2 lg:grid-cols-4 gap-8">
                     <!-- Organization Info -->
                     <div class="space-y-4">
                         <h3 class="text-lg font-semibold mb-4">FEVOURD-K</h3>
@@ -846,13 +849,21 @@
                     </div>
                 </div>
                 
+                <!-- Compact legal links — mobile only (heavy columns are hidden < md) -->
+                <div class="flex md:hidden flex-wrap justify-center gap-x-5 gap-y-2 text-sm text-gray-300">
+                    <inertia-link href="/about" class="hover:text-white">About</inertia-link>
+                    <inertia-link href="/ngos" class="hover:text-white">NGOs</inertia-link>
+                    <inertia-link href="/terms" class="hover:text-white">Terms</inertia-link>
+                    <inertia-link href="/privacy" class="hover:text-white">Privacy</inertia-link>
+                </div>
+
                 <!-- Bottom Bar -->
-                <div class="border-t border-gray-800 mt-8 pt-8">
-                    <div class="flex flex-col md:flex-row justify-between items-center">
-                        <div class="text-gray-400 text-sm">
+                <div class="mt-6 pt-6 border-t border-gray-800 md:mt-8 md:pt-8">
+                    <div class="flex flex-col md:flex-row justify-between items-center gap-2">
+                        <div class="text-gray-400 text-sm text-center">
                             2025 FEVOURD-K. All rights reserved.
                         </div>
-                        <div class="flex items-center space-x-4 text-sm text-gray-400">
+                        <div class="flex items-center space-x-2 text-sm text-gray-400">
                             <span>Powered by</span>
                             <a href="https://www.virtualngoconnect.com/" target="_blank" class="hover:text-white">
                                 VNC
@@ -863,19 +874,23 @@
             </div>
         </footer>
 
-        <div
-            v-if="showPwaShell"
-            class="lg:hidden fixed bottom-0 left-0 right-0 z-[55] border-t border-blue-100 bg-white/95 backdrop-blur-xl shadow-[0_-8px_24px_rgba(15,23,42,0.12)]"
+        <nav
+            v-if="showMobileTabBar && !hideChrome"
+            class="lg:hidden fixed bottom-0 left-0 right-0 z-[55] border-t border-slate-200/70 bg-white/95 backdrop-blur-2xl rounded-t-[1.6rem] shadow-[0_-16px_44px_-8px_rgba(15,23,42,0.24),0_-2px_10px_rgba(15,23,42,0.06)] pb-[env(safe-area-inset-bottom)]"
+            aria-label="Primary"
         >
-            <div class="grid gap-1 px-2 py-2" :style="{ gridTemplateColumns: `repeat(${roleBasedMobileTabs.length}, minmax(0, 1fr))` }">
+            <div class="grid gap-0.5 px-1.5 pt-1.5 pb-1" :style="{ gridTemplateColumns: `repeat(${roleBasedMobileTabs.length}, minmax(0, 1fr))` }">
                 <Link
                     v-for="tab in roleBasedMobileTabs"
                     :key="tab.key"
                     :href="tab.href"
-                    class="rounded-xl px-2 py-1.5 text-center text-[10px] font-medium transition"
-                    :class="isActiveLink(tab.href) ? 'bg-blue-600 text-white shadow' : 'text-gray-600 hover:bg-blue-50'"
+                    class="group relative flex flex-col items-center gap-1 rounded-2xl px-1 pt-1.5 pb-1 text-[11px] font-semibold tracking-tight transition-colors duration-200"
+                    :class="isActiveLink(tab.href) ? 'text-blue-600' : 'text-slate-400 active:text-slate-600'"
                 >
-                    <div class="mx-auto mb-0.5 flex h-5 w-5 items-center justify-center">
+                    <span
+                        class="flex h-8 w-[3.25rem] items-center justify-center rounded-2xl transition-all duration-200 group-active:scale-90 [&_svg]:h-[22px] [&_svg]:w-[22px]"
+                        :class="isActiveLink(tab.href) ? 'bg-gradient-to-b from-blue-50 to-indigo-50 ring-1 ring-blue-100/80 shadow-sm' : ''"
+                    >
                         <svg v-if="tab.key === 'dashboard'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7 7 7-7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
                         </svg>
@@ -904,21 +919,29 @@
                         <svg v-else class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
-                    </div>
-                    {{ tab.label }}
+                    </span>
+                    <span>{{ tab.label }}</span>
                 </Link>
             </div>
-        </div>
+        </nav>
     </div>
 </template>
 
 <script setup>
 import SeoHead from '@/Components/SeoHead.vue'
+import SplashOnboard from '@/Components/SplashOnboard.vue'
 import { ref, onMounted, onUnmounted, computed, watch, nextTick } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
 import lottie from 'lottie-web'
 /** Served from public/ — avoids Vite path issues for install / standalone */
 const logoImage = '/assets/images/fevourd-k/logo.png'
+
+// Focused full-screen flows (e.g. registration) can hide the top nav + bottom tab bar on mobile.
+const props = defineProps({
+    hideChromeMobile: { type: Boolean, default: false },
+    // Fully hide top nav + footer + bottom tab bar (used by the sidebar AppShell).
+    hideChrome: { type: Boolean, default: false },
+})
 
 const showExploreMenu = ref(false)
 const showUserMenu = ref(false)
@@ -941,6 +964,8 @@ const unreadNotificationsCount = computed(() => page.props.auth?.unread_notifica
 const currentPath = computed(() => page.url || window.location.pathname)
 const isMobileViewport = ref(false)
 const showPwaShell = computed(() => !!currentUser.value && (isStandaloneMode.value || isMobileViewport.value))
+// Bottom tab bar shows on any mobile screen (or installed PWA), logged in or not.
+const showMobileTabBar = computed(() => isStandaloneMode.value || isMobileViewport.value)
 const isInstalledPwa = computed(() => isStandaloneMode.value)
 const profileGender = computed(() => String(currentUser.value?.gender ?? '').toLowerCase())
 const profileAvatarLottiePath = computed(() => {

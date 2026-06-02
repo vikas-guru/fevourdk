@@ -6,7 +6,7 @@ return [
     |--------------------------------------------------------------------------
     | Phone OTP (pilot vs production SMS)
     |--------------------------------------------------------------------------
-    | Pilot mode: fixed OTP from OTP_PILOT_CODE (default 1234) — use for NGO
+    | Pilot mode: fixed OTP from OTP_PILOT_CODE (default 123456) — use for NGO
     | pilots without SMS/DLT. Turn off (OTP_PILOT_MODE=false) before production
     | and set SMS_DRIVER=msg91 (or another provider) with real delivery.
     */
@@ -20,7 +20,7 @@ return [
             env('OTP_PILOT_MODE', env('APP_ENV') === 'local'),
             FILTER_VALIDATE_BOOLEAN
         ),
-        'pilot_code' => (string) env('OTP_PILOT_CODE', '1234'),
+        'pilot_code' => (string) env('OTP_PILOT_CODE', '123456'),
     ],
 
     'president' => [
@@ -57,7 +57,7 @@ EOT
     | logo is hosted elsewhere (CDN).
     */
     'brand' => [
-        'logo_public_path' => 'assets/images/fevourd-k/logo.png',
+        'logo_public_path' => 'icons/icon-512.png',
         'logo_url' => env('FEVOURD_LOGO_URL'),
     ],
 

@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="NGO workspace — FEVOURD-K">
+    <AppLayout title="NGO workspace — FEVOURD-K" :hide-chrome="true">
         <NgoWorkspaceShell :ngo="ngo" current-key="dashboard">
                 <!-- Welcome (first visit after registration) -->
                 <div
@@ -54,28 +54,46 @@
                     </div>
                 </div>
 
-                <h1 class="text-2xl font-bold tracking-tight text-slate-900">Overview</h1>
-                <p class="mt-1 text-sm text-slate-600">Your impact at a glance</p>
+                <!-- Branded overview hero -->
+                <div class="fkbrand-hero relative mb-6 overflow-hidden rounded-2xl p-6 shadow-lg sm:p-7">
+                    <div class="fkbrand-hero__grain" aria-hidden="true"></div>
+                    <div class="relative z-10 flex flex-wrap items-end justify-between gap-4">
+                        <div class="min-w-0">
+                            <p class="inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#f7c948]">
+                                <span class="h-2 w-2 rounded-full bg-[#f2b40c] shadow-[0_0_0_4px_rgba(242,180,12,0.2)]"></span>
+                                NGO Workspace
+                            </p>
+                            <h1 class="fkbrand-display mt-2 truncate text-3xl font-semibold tracking-tight text-white sm:text-4xl">{{ ngo.name || 'Overview' }}</h1>
+                            <p class="mt-1 text-sm text-blue-100/80">Your impact at a glance</p>
+                        </div>
+                        <Link
+                            href="/ngo/digitalization"
+                            class="inline-flex shrink-0 items-center gap-1 rounded-full bg-[#f2b40c] px-4 py-2.5 text-sm font-bold text-[#2a1c00] shadow-[0_14px_30px_-14px_rgba(242,180,12,0.85)] transition hover:-translate-y-0.5"
+                        >
+                            Customise website →
+                        </Link>
+                    </div>
+                </div>
 
                 <!-- Stats -->
                 <div class="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Active campaigns</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">{{ stats.campaigns }}</p>
                         <Link href="/ngo/campaigns" class="mt-3 inline-block text-xs font-semibold text-blue-600 hover:text-blue-700">Manage →</Link>
                     </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Total raised</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">₹{{ Number(stats.totalRaised || 0).toLocaleString('en-IN') }}</p>
                         <p class="mt-1 text-xs text-slate-500">This month: ₹{{ Number(stats.thisMonth || 0).toLocaleString('en-IN') }}</p>
                         <Link href="/ngo/donations" class="mt-3 inline-block text-xs font-semibold text-emerald-600 hover:text-emerald-700">Donations →</Link>
                     </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Supporters</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">{{ stats.donors }}</p>
                         <p class="mt-3 text-xs text-slate-500">Unique donors (completed)</p>
                     </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Ledger balance</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">₹{{ Number(ledgerSummary.current_balance || 0).toLocaleString('en-IN') }}</p>
                         <div class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold">
@@ -83,7 +101,7 @@
                             <Link href="/ngo/banking" class="text-slate-600 hover:text-slate-800">Banking →</Link>
                         </div>
                     </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Field teams</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">GPS</p>
                         <div class="mt-3 flex flex-wrap gap-x-3 gap-y-1 text-xs font-semibold">
@@ -91,7 +109,7 @@
                             <Link href="/ngo/field/app" class="text-emerald-600 hover:text-emerald-700">Field app →</Link>
                         </div>
                     </div>
-                    <div class="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm xl:col-span-1">
+                    <div class="stat-card rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md xl:col-span-1">
                         <p class="text-xs font-semibold uppercase tracking-wide text-slate-500">Office & assets</p>
                         <p class="mt-2 text-3xl font-bold text-slate-900">{{ inventoryTotal }}</p>
                         <p class="mt-1 text-xs text-slate-500">
@@ -398,4 +416,26 @@ function formatShortDate(d) {
     return new Date(d + 'T12:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })
 }
 </script>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+
+.fkbrand-display { font-family: 'Fraunces','Playfair Display',Georgia,serif; font-optical-sizing: auto; }
+
+/* Branded ink hero, matching the NGO setup wizard / splash */
+.fkbrand-hero { background: radial-gradient(120% 120% at 85% -10%, #1b3aa0 0%, #11286e 42%, #081640 100%); }
+.fkbrand-hero__grain {
+    position: absolute; inset: 0; z-index: 0; opacity: .45; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* Stat cards get a subtle gold top accent that warms on hover */
+.stat-card { position: relative; }
+.stat-card::before {
+    content: ""; position: absolute; inset: 0 0 auto 0; height: 3px;
+    border-radius: 16px 16px 0 0; background: linear-gradient(90deg, #f2b40c, #f7c948);
+    opacity: .35; transition: opacity .2s ease;
+}
+.stat-card:hover::before { opacity: 1; }
+</style>
 

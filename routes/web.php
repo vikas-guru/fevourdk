@@ -8,6 +8,8 @@ use App\Http\Controllers\Admin\ProgramController as AdminProgramController;
 use App\Http\Controllers\Admin\SettingsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Auth\AuthenticatedSessionController;
+use App\Http\Controllers\LocationController;
+use App\Http\Controllers\NgoFollowController;
 use App\Http\Controllers\Auth\MultiRoleRegistrationController;
 use App\Http\Controllers\CampaignController;
 use App\Http\Controllers\CSRController;
@@ -100,6 +102,13 @@ Route::get('/sitemap.xml', function () {
 })->name('sitemap.xml');
 
 // Static Pages
+// Location lookups consumed by the NGO discovery filters (JSON).
+Route::prefix('api/locations')->group(function () {
+    Route::get('states', [LocationController::class, 'getStates']);
+    Route::get('districts', [LocationController::class, 'getDistricts']);
+    Route::get('cities', [LocationController::class, 'getCities']);
+});
+
 Route::get('/', [WelcomeController::class, 'index'])->name('welcome');
 Route::get('/about', [WelcomeController::class, 'about'])->name('about');
 Route::get('/programs', [ProgramController::class, 'index'])->name('programs');
@@ -170,12 +179,31 @@ Route::middleware('guest')->group(function () {
         ->middleware('throttle:60,1')
         ->name('auth.send-otp');
 
+    // Progressive NGO onboarding — minimal signup (creates account + logs in),
+    // then the heavier profile is completed via the authed setup wizard below.
+    Route::post('/register/ngo/signup', [MultiRoleRegistrationController::class, 'registerNgoSignup'])
+        ->middleware('throttle:20,1')
+        ->name('register.ngo.signup');
+
     Route::get('/login', [AuthenticatedSessionController::class, 'create'])->name('login');
     Route::post('/login', [AuthenticatedSessionController::class, 'store']);
 });
 
 Route::middleware('auth')->group(function () {
     Route::post('/logout', [AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+    // Progressive NGO onboarding — setup wizard (runs after minimal signup logs the user in).
+    Route::get('/register/ngo/setup', [MultiRoleRegistrationController::class, 'showNgoSetup'])->name('register.ngo.setup');
+    Route::post('/register/ngo/setup/step', [MultiRoleRegistrationController::class, 'saveNgoSetupStep'])
+        ->middleware('throttle:60,1')->name('register.ngo.setup.step');
+    Route::post('/register/ngo/setup/finalize', [MultiRoleRegistrationController::class, 'finalizeNgoSetup'])
+        ->middleware('throttle:20,1')->name('register.ngo.setup.finalize');
+
+    // Social graph — any authenticated role can follow / support an NGO.
+    Route::post('/ngos/{ngo}/follow', [NgoFollowController::class, 'toggleFollow'])
+        ->middleware('throttle:60,1')->name('ngos.follow');
+    Route::post('/ngos/{ngo}/support', [NgoFollowController::class, 'toggleSupport'])
+        ->middleware('throttle:60,1')->name('ngos.support');
 
     // Profile and settings
     Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
@@ -216,7 +244,30 @@ Route::middleware('auth')->group(function () {
             return redirect('/donor/dashboard');
         }
 
-        return inertia('Dashboard');
+        // Everyone else (volunteers, general members) gets a living social dashboard.
+        $u = auth()->user();
+        $followedIds = $u->followedNgos()->wherePivot('is_following', true)->pluck('ngos.id');
+        $followedNgos = $u->followedNgos()->wherePivot('is_following', true)
+            ->get(['ngos.id', 'ngos.name', 'ngos.slug', 'ngos.logo', 'ngos.theme_color'])
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'name' => $n->name,
+                'slug' => $n->slug,
+                'logo' => $n->logo,
+                'theme_color' => $n->theme_color,
+                'is_supporting' => (bool) $n->pivot->is_supporting,
+            ]);
+        $feed = \App\Models\FeedPost::whereIn('ngo_id', $followedIds)
+            ->where('is_published', true)
+            ->with('ngo:id,name,slug,logo')
+            ->latest()
+            ->take(8)
+            ->get(['id', 'ngo_id', 'title', 'body', 'image_url', 'views_count', 'created_at']);
+
+        return inertia('Dashboard', [
+            'followedNgos' => $followedNgos,
+            'feed' => $feed,
+        ]);
     })->name('dashboard');
 
     // NGO Dashboard Routes (finance officers use a scoped subset — see NgoFinanceWorkspaceScope)
@@ -384,6 +435,27 @@ Route::middleware(['auth', 'role:corporate_csr_manager'])->prefix('csr')->name('
 Route::middleware(['auth', 'role:donor'])->prefix('donor')->name('donor.')->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\Donor\DonorDashboardController::class, 'index'])->name('dashboard');
 });
+
+// Pincode lookup proxy (India Post) — server-side to avoid browser CORS. Two segments,
+// so it never collides with the single-segment /{ngoSlug} microsite route below.
+Route::get('/tools/pincode', function (\Illuminate\Http\Request $request) {
+    $q = trim((string) $request->query('q', ''));
+    if (mb_strlen($q) < 3) {
+        return response()->json(['pincode' => null]);
+    }
+    try {
+        $res = \Illuminate\Support\Facades\Http::timeout(5)
+            ->get('https://api.postalpincode.in/postoffice/'.rawurlencode($q));
+        $offices = $res->json('0.PostOffice') ?? [];
+        if (is_array($offices) && count($offices)) {
+            $match = collect($offices)->firstWhere('State', 'Karnataka') ?? $offices[0];
+            return response()->json(['pincode' => $match['Pincode'] ?? null]);
+        }
+    } catch (\Throwable $e) {
+        // fall through to null
+    }
+    return response()->json(['pincode' => null]);
+})->name('tools.pincode');
 
 // Public NGO website microsites: /{ngo-slug}
 Route::get('/{ngoSlug}', [NGOWebsiteController::class, 'showBySlug'])

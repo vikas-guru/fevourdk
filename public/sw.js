@@ -1,4 +1,4 @@
-const CACHE_VERSION = 'fevourdk-v4';
+const CACHE_VERSION = 'fevourdk-v6';
 const OFFLINE_URL = '/offline.html';
 
 const APP_SHELL_ASSETS = [
@@ -6,9 +6,8 @@ const APP_SHELL_ASSETS = [
     '/login',
     '/manifest.json',
     '/offline.html',
-    '/assets/images/fevourd-k/logo.png',
-    '/icons/icon-192.svg',
-    '/icons/icon-512.svg',
+    '/icons/icon-192.png',
+    '/icons/icon-512.png',
 ];
 
 self.addEventListener('install', (event) => {

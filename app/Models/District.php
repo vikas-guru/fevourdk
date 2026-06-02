@@ -84,8 +84,8 @@ class District extends Model
     {
         return [
             'cities_count' => $this->cities()->count(),
-            'ngos_count' => $this->ngos()->where('is_verified', true)->count(),
-            'active_campaigns' => $this->campaigns()->where('status', 'active')->count(),
+            'ngos_count' => $this->ngos()->where('verification_status', 'verified')->count(),
+            'active_campaigns' => \App\Models\Campaign::whereHas('ngo', fn ($q) => $q->where('district_id', $this->id))->where('status', 'active')->count(),
             'total_population' => $this->population,
             'literacy_rate' => $this->literacy_rate
         ];

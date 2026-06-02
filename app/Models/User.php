@@ -5,6 +5,7 @@ namespace App\Models;
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -114,8 +115,13 @@ class User extends Authenticatable
     {
         $relation = $this->hasOne(NGOUser::class, 'user_id');
 
+        // Never use whereColumn(..., 'users.ngo_id'): production DBs without a migrated
+        // `users.ngo_id` column would throw "Unknown column 'users.ngo_id' in 'WHERE'".
         if (Schema::hasColumn($this->getTable(), 'ngo_id')) {
-            $relation->whereColumn('ngo_users.ngo_id', $this->getTable().'.ngo_id');
+            $ngoId = $this->getAttribute('ngo_id');
+            if ($ngoId !== null && $ngoId !== '') {
+                $relation->where('ngo_users.ngo_id', $ngoId);
+            }
         }
 
         return $relation;
@@ -139,6 +145,21 @@ class User extends Authenticatable
     public function feedPosts(): HasMany
     {
         return $this->hasMany(FeedPost::class);
+    }
+
+    /**
+     * Social graph — NGOs this user follows/supports (works for every role).
+     */
+    public function ngoFollows(): HasMany
+    {
+        return $this->hasMany(NgoSupporter::class, 'user_id');
+    }
+
+    public function followedNgos(): BelongsToMany
+    {
+        return $this->belongsToMany(NGO::class, 'ngo_supporters', 'user_id', 'ngo_id')
+            ->withPivot(['is_following', 'is_supporting', 'followed_at', 'supported_at'])
+            ->withTimestamps();
     }
 
     public function feedReactions(): HasMany

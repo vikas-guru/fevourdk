@@ -19,12 +19,12 @@ class OtpService
     }
 
     /**
-     * Expected OTP length for forms and validation (4 in pilot with default 1234, else 6).
+     * Expected OTP length for forms and validation (6 in pilot with default 123456, else 6).
      */
     public function otpCodeLength(): int
     {
         if ($this->isPilotMode()) {
-            $digits = preg_replace('/\D/', '', (string) config('fevourd.otp.pilot_code')) ?: '1234';
+            $digits = preg_replace('/\D/', '', (string) config('fevourd.otp.pilot_code')) ?: '123456';
 
             return strlen($digits);
         }
@@ -63,9 +63,9 @@ class OtpService
         $this->assertSendRateLimit($phone);
 
         if ($this->isPilotMode()) {
-            $otp = preg_replace('/\D/', '', (string) config('fevourd.otp.pilot_code')) ?: '1234';
+            $otp = preg_replace('/\D/', '', (string) config('fevourd.otp.pilot_code')) ?: '123456';
             if (strlen($otp) < 4 || strlen($otp) > 6) {
-                $otp = '1234';
+                $otp = '123456';
             }
         } else {
             $otp = (string) random_int(100000, 999999);

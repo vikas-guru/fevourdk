@@ -3,6 +3,7 @@
 .env
 .env.backup
 .env.production
+.deploy/
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -22,3 +23,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+
+# Local scratch / session artifacts
+/.playwright-mcp
+/*.png
+/*.zip
+/agentdb.rvf
+/agentdb.rvf.lock
+/ruvector.db

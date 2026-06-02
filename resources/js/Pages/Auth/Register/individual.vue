@@ -1,49 +1,30 @@
 <template>
-    <AppLayout title="Individual Registration - FEVOURD-K">
-        <div class="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 py-12">
+    <AppLayout title="Individual Registration - FEVOURD-K" :hide-chrome-mobile="true">
+        <div class="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-blue-50 py-6 sm:py-10">
             <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Progress Bar -->
                 <div class="mb-8">
-                    <div class="flex items-center justify-center mb-4">
-                        <div class="flex items-center space-x-1">
-                            <!-- Step 1 -->
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                                     :class="currentStep >= 1 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
-                                    1
-                                </div>
-                                <div class="w-16 h-2 transition-all duration-300"
-                                     :class="currentStep >= 2 ? 'bg-green-600' : 'bg-gray-300'"></div>
+                    <div class="flex items-center w-full max-w-sm sm:max-w-md mx-auto mb-5">
+                        <template v-for="s in 4" :key="s">
+                            <div
+                                class="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
+                                :class="currentStep > s
+                                    ? 'bg-green-600 text-white shadow-lg shadow-green-600/30'
+                                    : currentStep === s
+                                        ? 'bg-green-600 text-white shadow-lg shadow-green-600/30 ring-4 ring-green-600/15'
+                                        : 'bg-white text-gray-400 ring-1 ring-gray-200'"
+                            >
+                                <svg v-if="currentStep > s" class="w-4 h-4" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fill-rule="evenodd" d="M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4l3.3 3.3 7.3-7.3a1 1 0 011.4 0z" clip-rule="evenodd" />
+                                </svg>
+                                <span v-else>{{ s }}</span>
                             </div>
-                            
-                            <!-- Step 2 -->
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                                     :class="currentStep >= 2 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
-                                    2
-                                </div>
-                                <div class="w-16 h-2 transition-all duration-300"
-                                     :class="currentStep >= 3 ? 'bg-green-600' : 'bg-gray-300'"></div>
-                            </div>
-                            
-                            <!-- Step 3 -->
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                                     :class="currentStep >= 3 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
-                                    3
-                                </div>
-                                <div class="w-16 h-2 transition-all duration-300"
-                                     :class="currentStep >= 4 ? 'bg-green-600' : 'bg-gray-300'"></div>
-                            </div>
-                            
-                            <!-- Step 4 -->
-                            <div class="flex items-center">
-                                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold transition-all duration-300"
-                                     :class="currentStep >= 4 ? 'bg-green-600 text-white shadow-lg' : 'bg-gray-300 text-gray-600'">
-                                    4
-                                </div>
-                            </div>
-                        </div>
+                            <div
+                                v-if="s < 4"
+                                class="flex-1 h-1.5 mx-1.5 sm:mx-2 rounded-full transition-all duration-500"
+                                :class="currentStep > s ? 'bg-green-600' : 'bg-gray-200'"
+                            ></div>
+                        </template>
                     </div>
                     <div class="text-center">
                         <div class="mb-4 inline-flex rounded-lg border border-gray-300 overflow-hidden">
@@ -70,7 +51,7 @@
                 </div>
 
                 <!-- Registration Form -->
-                <form @submit.prevent="submitForm" class="bg-white rounded-2xl shadow-xl p-8">
+                <form @submit.prevent="submitForm" class="reg-form bg-white rounded-3xl shadow-xl shadow-slate-300/30 ring-1 ring-slate-100 p-5 sm:p-8">
                     <div
                         v-if="showDraftPrompt"
                         class="mb-4 rounded-xl border border-indigo-200 bg-indigo-50 p-4"
@@ -140,22 +121,18 @@
                                     </div>
                                 </div>
 
-                                <div v-if="otpPilot" class="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3 text-amber-900 text-sm">
-                                    <strong>Pilot mode:</strong> phone OTP is fixed for NGO pilots (no live SMS). After &quot;Send OTP&quot;, use the code shown — default is <code class="font-mono font-semibold">1234</code> unless your host changed <code>OTP_PILOT_CODE</code>.
-                                </div>
-
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('phone_number') }} *</label>
                                     <div class="flex gap-2">
-                                        <div class="flex items-center px-3 border border-gray-300 rounded-lg bg-gray-50 text-gray-700 min-w-[112px] w-fit">
-                                            <span class="text-lg mr-2" aria-hidden="true">🇮🇳</span>
-                                            <span class="font-medium">+91</span>
+                                        <div class="flex items-center gap-1.5 px-3 border border-gray-200 rounded-xl bg-slate-50 text-gray-700 shrink-0 select-none cursor-default">
+                                            <span class="text-lg" aria-hidden="true">🇮🇳</span>
+                                            <span class="font-semibold">+91</span>
                                         </div>
-                                        <input 
+                                        <input
                                             v-model="form.phone"
-                                            type="tel" 
+                                            type="tel"
                                             inputmode="numeric"
-                                            class="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                            class="flex-1 min-w-0 px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                             :class="{ 'border-red-500': fieldHasError('phone') }"
                                             @input="onPhoneInput"
                                             placeholder="9876543210"
@@ -182,67 +159,34 @@
                                 </div>
 
                                 <div>
-                                    <button 
+                                    <button
                                         type="button"
                                         @click="sendOTP"
                                         :disabled="otpSent || form.phone.length !== 10 || !form.email"
-                                        class="px-4 py-2.5 bg-green-500 text-white rounded-lg hover:bg-green-600 disabled:bg-gray-400 transition-colors w-full sm:w-auto"
+                                        class="w-full px-5 py-3.5 bg-green-600 text-white rounded-xl font-semibold shadow-lg shadow-green-600/25 hover:bg-green-700 active:scale-95 disabled:bg-gray-300 disabled:shadow-none disabled:cursor-not-allowed transition-all"
                                     >
                                         {{ otpSent ? t('otp_sent') : t('send_otp_email_phone') }}
                                     </button>
                                 </div>
 
-                                <div v-if="form.location_permission !== 'granted'" class="rounded-xl border border-blue-200 bg-blue-50/60 p-4">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <h4 class="font-semibold text-blue-900">{{ t('location_card_title') }}</h4>
-                                            <p class="text-sm text-blue-800 mt-1">{{ t('location_card_desc') }}</p>
-                                            <p v-if="locationStatusMessage" class="text-xs text-blue-700 mt-2">{{ locationStatusMessage }}</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            @click="requestLocationAccess"
-                                            class="px-3 py-2 text-sm rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors whitespace-nowrap"
-                                        >
-                                            {{ t('allow_location') }}
-                                        </button>
-                                    </div>
-                                </div>
-
-                                <div v-if="form.notification_permission !== 'granted'" class="rounded-xl border border-purple-200 bg-purple-50/60 p-4">
-                                    <div class="flex items-start justify-between gap-3">
-                                        <div>
-                                            <h4 class="font-semibold text-purple-900">{{ t('notification_card_title') }}</h4>
-                                            <p class="text-sm text-purple-800 mt-1">{{ t('notification_card_desc') }}</p>
-                                            <p v-if="notificationStatusMessage" class="text-xs text-purple-700 mt-2">{{ notificationStatusMessage }}</p>
-                                        </div>
-                                        <button
-                                            type="button"
-                                            @click="requestNotificationAccess"
-                                            class="px-3 py-2 text-sm rounded-lg bg-purple-600 text-white hover:bg-purple-700 transition-colors whitespace-nowrap"
-                                        >
-                                            {{ t('allow_notifications') }}
-                                        </button>
-                                    </div>
-                                </div>
-
                                 <!-- OTP Verification -->
                                 <div v-if="otpSent">
                                     <label class="block text-sm font-medium text-gray-700 mb-2">{{ t('otp_code') }} *</label>
-                                    <input 
+                                    <input
                                         v-model="form.otp_code"
-                                        type="text" 
+                                        type="text"
                                         inputmode="numeric"
                                         autocomplete="one-time-code"
                                         :maxlength="otpLength"
-                                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
+                                        class="otp-input w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent"
                                         :class="{ 'border-red-500': fieldHasError('otp_code') }"
-                                        :placeholder="t('otp_placeholder').replace('{len}', otpLength)"
+                                        :placeholder="'•'.repeat(otpLength)"
                                         @input="clearClientError('otp_code')"
                                     >
-                                    <p v-if="otpPilot && lastPilotOtp" class="mt-2 text-sm text-amber-900 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2">
-                                        <span class="font-medium">Use this OTP:</span>
-                                        <code class="ml-2 font-mono font-bold tracking-widest">{{ lastPilotOtp }}</code>
+                                    <p v-if="otpPilot && lastPilotOtp" class="mt-2 flex items-center justify-center gap-2 text-emerald-900 bg-emerald-50 border border-emerald-200 rounded-xl px-3 py-2.5">
+                                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>
+                                        <span class="text-sm font-medium">Your code</span>
+                                        <code class="font-mono text-lg font-bold tracking-[0.3em] text-emerald-700">{{ lastPilotOtp }}</code>
                                     </p>
                                     <div v-if="fieldHasError('otp_code')" class="text-red-500 text-sm mt-1">{{ fieldError('otp_code') }}</div>
                                 </div>
@@ -586,31 +530,31 @@
                     </div>
 
                 <!-- Navigation Buttons -->
-                    <div class="flex justify-between mt-8">
-                        <button 
+                    <div class="flex items-center justify-between gap-3 mt-8">
+                        <button
                             type="button"
                             @click="previousStep"
                             v-if="currentStep > 1"
-                            class="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                            class="px-5 py-3.5 border border-gray-300 rounded-xl text-gray-700 font-medium hover:bg-gray-50 active:scale-95 transition-all"
                         >
                             {{ t('previous') }}
                         </button>
                         <div v-else></div>
 
-                        <button 
+                        <button
                             type="button"
                             @click="nextStep"
                             v-if="currentStep < 4"
-                            class="px-6 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                            class="px-7 py-3.5 bg-green-600 text-white rounded-xl font-semibold shadow-lg shadow-green-600/30 hover:bg-green-700 active:scale-95 transition-all"
                         >
                             {{ t('next') }}
                         </button>
 
-                        <button 
+                        <button
                             type="submit"
                             v-if="currentStep === 4"
                             :disabled="form.processing || !form.terms_accepted"
-                            class="px-8 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                            class="px-8 py-3.5 bg-green-600 text-white rounded-xl font-semibold shadow-lg shadow-green-600/30 hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed active:scale-95 transition-all"
                         >
                             <span v-if="form.processing">{{ t('creating_account') }}</span>
                             <span v-else>{{ t('complete_registration') }}</span>
@@ -633,6 +577,7 @@
 import { ref, reactive, computed, onUnmounted, watch, nextTick } from 'vue'
 import { useForm, Link, router, usePage } from '@inertiajs/vue3'
 import AppLayout from '@/Layouts/AppLayout.vue'
+import { useLocation } from '@/composables/useLocation'
 
 const page = usePage()
 const otpPilot = computed(() => page.props.otp?.pilot_mode ?? false)
@@ -858,6 +803,13 @@ const draftMeta = reactive({ id: '', saved_at: 0 })
 const draftStatusMessage = ref('')
 let autoSaveTimer = null
 const manualLocationOverride = ref(false)
+
+// Seed Step-2 location fields from the globally-detected location (only if empty).
+const { get: getStoredLocation, set: setStoredLocation } = useLocation()
+const storedLocation = getStoredLocation()
+if (!form.state_name && storedLocation.state) form.state_name = storedLocation.state
+if (!form.district_name && storedLocation.district) form.district_name = storedLocation.district
+if (!form.city_name && storedLocation.city) form.city_name = storedLocation.city
 
 const fieldError = (name) => form.errors[name] || clientErrors[name] || ''
 const fieldHasError = (name) => Boolean(fieldError(name))
@@ -1130,6 +1082,16 @@ const reverseGeocodeAndAutofill = async (lat, lng) => {
     clearClientError('district_name')
     clearClientError('city_name')
     clearClientError('address')
+
+    // Share what we detected with the rest of the app (splash + other forms).
+    setStoredLocation({
+        city: form.city_name,
+        state: form.state_name,
+        district: form.district_name,
+        lat,
+        lng,
+        source: 'geolocation',
+    })
 }
 
 const requestLocationAccess = async () => {
@@ -1380,3 +1342,53 @@ const submitForm = () => {
     })
 }
 </script>
+
+<style scoped>
+/* App-grade form fields — applies to every input/select/textarea across all 4 steps.
+   The .reg-form wrapper gives these enough specificity to refine the Tailwind utilities. */
+.reg-form :deep(input:not([type='checkbox']):not([type='radio']):not([type='file'])),
+.reg-form :deep(select),
+.reg-form :deep(textarea) {
+    border-radius: 0.85rem;
+    background-color: #f8fafc;
+    border-color: #e6eaf1;
+    font-size: 16px;              /* 16px stops iOS Safari from zooming on focus */
+    padding-top: 0.8rem;
+    padding-bottom: 0.8rem;
+    transition: border-color .15s ease, box-shadow .15s ease, background-color .15s ease;
+}
+.reg-form :deep(input:focus),
+.reg-form :deep(select:focus),
+.reg-form :deep(textarea:focus) {
+    outline: none;
+    background-color: #fff;
+    border-color: #16a34a;
+    box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.16);
+}
+.reg-form :deep(input::placeholder),
+.reg-form :deep(textarea::placeholder) {
+    color: #9ca3af;
+}
+
+/* OTP code field — big, centered, spaced like an app verification input */
+.reg-form :deep(.otp-input) {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: 700;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;          /* offset the trailing letter-spacing so it looks centered */
+    caret-color: #16a34a;
+}
+.reg-form :deep(.otp-input::placeholder) {
+    letter-spacing: 0.4em;
+    font-size: 1.1rem;
+    color: #cbd5e1;
+}
+
+/* Tighter, app-like rhythm on phones */
+@media (max-width: 640px) {
+    .reg-form :deep(h3) { font-size: 1.05rem; }
+    .reg-form :deep(label) { font-size: 0.82rem; }
+    .reg-form :deep(.space-y-6) > * + * { margin-top: 1.1rem; }
+}
+</style>

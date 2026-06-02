@@ -1,5 +1,5 @@
 <template>
-    <AppLayout>
+    <AppShell title="Supporter dashboard — FEVOURD-K">
         <div class="min-h-screen bg-slate-50 py-4 sm:py-8">
             <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
                 <div class="mb-5 rounded-2xl bg-gradient-to-r from-blue-700 to-indigo-800 p-5 text-white shadow-lg">
@@ -131,11 +131,11 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </AppShell>
 </template>
 
 <script setup>
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppShell from '@/Layouts/AppShell.vue'
 
 const props = defineProps({
     user: Object,

@@ -160,6 +160,24 @@ class NGO extends Model
         return $this->hasMany(NgoOutboundPayment::class, 'ngo_id');
     }
 
+    /**
+     * Social graph rows — users who follow and/or support this NGO.
+     */
+    public function supporters(): HasMany
+    {
+        return $this->hasMany(NgoSupporter::class, 'ngo_id');
+    }
+
+    public function getFollowersCountAttribute(): int
+    {
+        return $this->supporters()->where('is_following', true)->count();
+    }
+
+    public function getSupportersCountAttribute(): int
+    {
+        return $this->supporters()->where('is_supporting', true)->count();
+    }
+
     public function auditLogs(): MorphMany
     {
         return $this->morphMany(AuditLog::class, 'model');

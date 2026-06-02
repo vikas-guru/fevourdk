@@ -67,8 +67,8 @@ class State extends Model
      */
     public static function getDefault()
     {
-        return static::where('is_default', true)->first() 
-            ?? static::where('code', 'KA')->first()
+        // Note: states table has no is_default column — resolve by KA, then first.
+        return static::where('code', 'KA')->first()
             ?? static::first();
     }
 
@@ -87,8 +87,8 @@ class State extends Model
     {
         return [
             'districts_count' => $this->districts()->count(),
-            'ngos_count' => $this->ngos()->where('is_verified', true)->count(),
-            'active_campaigns' => $this->campaigns()->where('status', 'active')->count(),
+            'ngos_count' => $this->ngos()->where('verification_status', 'verified')->count(),
+            'active_campaigns' => \App\Models\Campaign::whereHas('ngo', fn ($q) => $q->where('state_id', $this->id))->where('status', 'active')->count(),
             'total_population' => $this->population,
             'area_km2' => $this->area_km2
         ];

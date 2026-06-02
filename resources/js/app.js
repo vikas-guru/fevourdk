@@ -4,6 +4,7 @@ import '../css/app.css';
 import { createApp, h, nextTick } from 'vue';
 import { createInertiaApp, Link, router } from '@inertiajs/vue3';
 import { Ziggy } from './ziggy';
+import GlobalErrorModal from './Components/GlobalErrorModal.vue';
 
 createInertiaApp({
     title: (title) => `${title} Fevourd-K`,
@@ -16,7 +17,7 @@ createInertiaApp({
         return page.default || page;
     },
     setup({ el, App, props, plugin }) {
-        createApp({ render: () => h(App, props) })
+        createApp({ render: () => [h(App, props), h(GlobalErrorModal)] })
             .use(plugin)
             .provide('ziggy', Ziggy)
             .component('inertia-link', Link)
@@ -91,9 +92,11 @@ if ('serviceWorker' in navigator) {
         }
     } else {
         window.addEventListener('load', () => {
-            navigator.serviceWorker.register('/sw.js').catch((error) => {
-                console.warn('Service worker registration failed:', error);
-            });
+            navigator.serviceWorker.register('/sw.js', { updateViaCache: 'none' })
+                .then((registration) => registration.update())
+                .catch((error) => {
+                    console.warn('Service worker registration failed:', error);
+                });
         });
     }
 }

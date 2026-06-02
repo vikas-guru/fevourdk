@@ -824,6 +824,96 @@ onUnmounted(() => {
     color: #64748b;
 }
 
+/* ===================================================================
+   PREMIUM MOBILE (stacked) — only the phone layout, desktop untouched.
+   Immersive brand backdrop, a floating glass card, softer inputs.
+   =================================================================== */
+.login-page:not(.login-page--layout-wide) {
+    background: radial-gradient(135% 95% at 50% -8%, #1f47c0 0%, #14307e 42%, #0a1a4d 100%);
+}
+.login-page:not(.login-page--layout-wide) .login-page__blob {
+    filter: blur(60px);
+}
+.login-page:not(.login-page--layout-wide) .login-page__blob--1 { background: #3b82f6; opacity: 0.4; top: -7rem; left: -6rem; }
+.login-page:not(.login-page--layout-wide) .login-page__blob--2 { background: #8b5cf6; opacity: 0.34; }
+.login-page:not(.login-page--layout-wide) .login-page__blob--3 { background: #f2b40c; opacity: 0.2; }
+
+.login-page:not(.login-page--layout-wide) .login-page__main {
+    padding: 1.25rem 1.1rem calc(1.5rem + env(safe-area-inset-bottom));
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__card {
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    border-radius: 1.85rem;
+    background: rgba(255, 255, 255, 0.98);
+    padding: 1.6rem 1.4rem 1.85rem;
+    box-shadow:
+        0 34px 64px -22px rgba(6, 14, 46, 0.65),
+        0 8px 20px -10px rgba(6, 14, 46, 0.4);
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__mobile-hero {
+    margin-bottom: 1.25rem;
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__logo-box--center {
+    width: 4.75rem;
+    height: 4.75rem;
+    border-radius: 1.4rem;
+    border: 1px solid #e0e7ff;
+    background: linear-gradient(140deg, #eff6ff 0%, #ede9fe 100%);
+    box-shadow: 0 12px 26px -12px rgba(37, 99, 235, 0.55);
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__lottie-mobile-wrap {
+    max-width: 260px;
+    height: 168px;
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__h1 {
+    font-size: 1.8rem;
+    letter-spacing: -0.02em;
+    background: linear-gradient(90deg, #2563eb, #7c3aed);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__label {
+    font-weight: 600;
+    color: #475569;
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__input {
+    padding: 1rem 1.05rem;
+    border-radius: 0.95rem;
+    border-color: #e6eaf2;
+    background: #f8fafc;
+    font-size: 1.02rem;
+}
+.login-page:not(.login-page--layout-wide) .login-page__input:focus {
+    background: #fff;
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__submit {
+    padding: 1.05rem 1rem;
+    border-radius: 0.95rem;
+    font-size: 1.03rem;
+    letter-spacing: 0.01em;
+    box-shadow: 0 18px 32px -14px rgba(37, 99, 235, 0.65);
+}
+.login-page:not(.login-page--layout-wide) .login-page__submit:active:not(:disabled) {
+    transform: translateY(1px);
+}
+
+.login-page:not(.login-page--layout-wide) .login-page__links {
+    margin-top: 1.6rem;
+}
+.login-page:not(.login-page--layout-wide) .login-page__legal {
+    margin-top: 1.5rem;
+    color: #94a3b8;
+}
+
 /* Error dialog (above blobs + card) */
 .login-error-modal {
     position: fixed;

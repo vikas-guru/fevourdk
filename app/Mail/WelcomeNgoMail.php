@@ -4,8 +4,10 @@ namespace App\Mail;
 
 use App\Models\NGO;
 use App\Models\User;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
+use Illuminate\Mail\Mailables\Attachment;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
@@ -40,5 +42,25 @@ class WelcomeNgoMail extends Mailable
                 'presidentImageUrl' => asset('assets/President.png'),
             ]
         );
+    }
+
+    /**
+     * Attach an NGO Welcome Kit / registration acknowledgement PDF.
+     */
+    public function attachments(): array
+    {
+        return [
+            Attachment::fromData(function () {
+                return Pdf::loadView('emails.pdf.ngo-welcome-kit', [
+                    'ngo' => $this->ngo,
+                    'user' => $this->user,
+                    'loginUrl' => url('/login'),
+                    'websiteUrl' => $this->ngo->website_url ?: url('/'.$this->ngo->slug),
+                    'generatedAt' => now()->format('d M Y'),
+                    'presidentName' => (string) config('fevourd.president.name'),
+                    'presidentTitle' => (string) config('fevourd.president.title'),
+                ])->setPaper('a4')->output();
+            }, 'FEVOURD-K-NGO-Welcome-Kit.pdf')->withMime('application/pdf'),
+        ];
     }
 }

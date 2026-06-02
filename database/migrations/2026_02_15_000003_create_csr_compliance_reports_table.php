@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        if (Schema::hasTable('csr_compliance_reports')) {
+            return;
+        }
+
         Schema::create('csr_compliance_reports', function (Blueprint $table) {
             $table->id();
             $table->foreignId('company_id')->constrained('csr_company_profiles')->onDelete('cascade');

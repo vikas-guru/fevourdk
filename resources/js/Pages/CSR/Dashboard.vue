@@ -1,5 +1,5 @@
 <template>
-    <AppLayout title="CSR Dashboard - FEVOURD-K">
+    <AppShell title="CSR Dashboard - FEVOURD-K">
         <div class="min-h-screen bg-gray-50 py-12">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <!-- Page Header -->
@@ -224,12 +224,12 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </AppShell>
 </template>
 
 <script setup>
 import { ref } from 'vue'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppShell from '@/Layouts/AppShell.vue'
 import { Link } from '@inertiajs/vue3'
 
 defineProps({

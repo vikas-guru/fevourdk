@@ -1,7 +1,33 @@
 @php
-    $logoUrl = $ngo->logo ? asset('storage/'.$ngo->logo) : asset('assets/Themes/assets/images/about/vikasana-brand.png');
+    $logoUrl = $ngo->logo
+        ? (\Illuminate\Support\Str::startsWith($ngo->logo, ['http://', 'https://'])
+            ? $ngo->logo
+            : asset(\Illuminate\Support\Str::startsWith($ngo->logo, '/') ? ltrim($ngo->logo, '/') : 'storage/'.$ngo->logo))
+        : asset('assets/Themes/assets/images/about/vikasana-brand.png');
     $hex = $microsite['theme_hex'] ?? '#2563eb';
     $blogSlides = (int) max(1, ceil(count($microsite['stories']) / 3));
+
+    // Impact counters (template defaults; swap in NGO-specific values via microsite later)
+    $impactCards = [
+        ['icon' => 'fa-users', 'target' => '5000', 'display' => '5,000+', 'label' => 'Lives touched'],
+        ['icon' => 'fa-hands-helping', 'target' => '120', 'display' => '120+', 'label' => 'Programmes run'],
+        ['icon' => 'fa-map-marked-alt', 'target' => '50', 'display' => '50+', 'label' => 'Communities reached'],
+        ['icon' => 'fa-handshake', 'target' => '30', 'display' => '30+', 'label' => 'Partners'],
+        ['icon' => 'fa-user-friends', 'target' => '200', 'display' => '200+', 'label' => 'Volunteers'],
+        ['icon' => 'fa-smile', 'target' => '95', 'display' => '95%', 'label' => 'Positive feedback'],
+    ];
+
+    // Gallery (template stock activity imagery — replace per NGO when uploads exist)
+    $galleryItems = [
+        ['img' => 'assets/Themes/assets/images/activities/world-environment-day.jpg', 'size' => 'large', 'title' => 'Field initiatives', 'caption' => 'On-ground programmes with the community'],
+        ['img' => 'assets/Themes/assets/images/activities/covid-relief.jpg', 'size' => '', 'title' => 'Relief & support', 'caption' => 'Essential aid for those in need'],
+        ['img' => 'assets/Themes/assets/images/activities/childline-awareness.jpg', 'size' => '', 'title' => 'Awareness drives', 'caption' => 'School and youth outreach'],
+        ['img' => 'assets/Themes/assets/images/activities/gender-discrimination.jpg', 'size' => '', 'title' => 'Equality & rights', 'caption' => 'Inclusion-focused sessions'],
+        ['img' => 'assets/Themes/assets/images/infrastructure/community-center.jpg', 'size' => 'wide', 'title' => 'Community development', 'caption' => 'Building lasting local capacity'],
+        ['img' => 'assets/Themes/assets/images/activities/health-camp.jpg', 'size' => '', 'title' => 'Health camps', 'caption' => 'Medical services for rural areas'],
+        ['img' => 'assets/Themes/assets/images/infrastructure/village-meeting.jpg', 'size' => '', 'title' => 'Community engagement', 'caption' => 'Village meetings & consultations'],
+        ['img' => 'assets/Themes/assets/images/activities/water-resources.jpg', 'size' => '', 'title' => 'Water & environment', 'caption' => 'Sustainable resource projects'],
+    ];
 @endphp
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +65,47 @@
             color: #93c5fd;
             margin-left: 8px;
         }
+        /* Footer "Powered by NGO OS · Vikas Guru" badge */
+        .fk-footer-bottom {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+            gap: 14px;
+        }
+        .fk-footer-bottom .fk-copy { margin: 0; opacity: .85; }
+        .fk-powered {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            font: 500 13.5px/1 Inter, system-ui, sans-serif;
+            color: rgba(255,255,255,.78);
+        }
+        .fk-powered__label { letter-spacing: .03em; text-transform: uppercase; font-size: 11px; opacity: .7; }
+        .fk-powered__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 7px 14px;
+            border-radius: 999px;
+            font-weight: 800;
+            letter-spacing: .02em;
+            color: #fff;
+            background: linear-gradient(135deg, {{ $hex }}, #111827);
+            box-shadow: 0 6px 18px -6px {{ $hex }}99, inset 0 0 0 1px rgba(255,255,255,.14);
+        }
+        .fk-powered__badge i { font-size: 12px; opacity: .92; }
+        .fk-powered__dot { opacity: .45; }
+        .fk-powered__by strong {
+            background: linear-gradient(90deg, #fff, {{ $hex }});
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+        }
+        @media (max-width: 640px) {
+            .fk-footer-bottom { flex-direction: column; align-items: flex-start; }
+        }
     </style>
 </head>
 <body class="{{ $preview ? 'loaded' : '' }}">
@@ -47,6 +114,59 @@
             Preview
             <a href="{{ url('/ngo/digitalization') }}">Edit content</a>
         </div>
+    @endif
+
+    @if(empty($isOwner))
+        <div class="fk-follow-bar" style="--fkc: {{ $hex }}">
+            <div class="fk-follow-bar__counts">
+                <span><strong>{{ number_format($followersCount ?? 0) }}</strong> following</span>
+                <span class="fk-follow-bar__dot">·</span>
+                <span><strong>{{ number_format($supportersCount ?? 0) }}</strong> supporting</span>
+            </div>
+            <div class="fk-follow-bar__actions">
+                @if(!empty($authed))
+                    <form method="POST" action="{{ url('/ngos/'.$ngo->id.'/follow') }}">
+                        @csrf
+                        <button type="submit" class="fk-fb-btn {{ !empty($isFollowing) ? 'is-on' : '' }}">
+                            {!! !empty($isFollowing) ? '&#10003; Following' : '&#43; Follow' !!}
+                        </button>
+                    </form>
+                    <form method="POST" action="{{ url('/ngos/'.$ngo->id.'/support') }}">
+                        @csrf
+                        <button type="submit" class="fk-fb-btn fk-fb-btn--support {{ !empty($isSupporting) ? 'is-on' : '' }}">
+                            {!! !empty($isSupporting) ? '&#9829; Supporting' : '&#9825; Support' !!}
+                        </button>
+                    </form>
+                @else
+                    <a href="{{ url('/login') }}" class="fk-fb-btn">&#43; Follow</a>
+                    <a href="{{ url('/login') }}" class="fk-fb-btn fk-fb-btn--support">&#9825; Support</a>
+                @endif
+            </div>
+        </div>
+        <style>
+            .fk-follow-bar { position: fixed; z-index: 99990; left: 50%; bottom: 18px; transform: translateX(-50%);
+                display: flex; align-items: center; gap: 14px; padding: 10px 12px 10px 18px;
+                background: rgba(17,24,39,.92); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,.12);
+                border-radius: 999px; box-shadow: 0 18px 44px -16px rgba(0,0,0,.55); color: #fff;
+                font: 500 14px/1 Inter, system-ui, sans-serif; max-width: calc(100vw - 24px); }
+            .fk-follow-bar__counts { display: flex; align-items: center; gap: 8px; white-space: nowrap; color: #d1d5db; font-size: 13px; }
+            .fk-follow-bar__counts strong { color: #fff; }
+            .fk-follow-bar__dot { opacity: .5; }
+            .fk-follow-bar__actions { display: flex; gap: 8px; }
+            .fk-follow-bar form { margin: 0; }
+            .fk-fb-btn { display: inline-flex; align-items: center; gap: 6px; padding: 9px 16px; border-radius: 999px;
+                border: 0; cursor: pointer; font: 700 13.5px/1 Inter, system-ui, sans-serif; text-decoration: none;
+                background: var(--fkc, #2e7d32); color: #fff; transition: transform .18s ease, filter .18s ease, opacity .18s ease; }
+            .fk-fb-btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
+            .fk-fb-btn.is-on { background: rgba(255,255,255,.16); color: #fff; }
+            .fk-fb-btn--support { background: #e11d48; }
+            .fk-fb-btn--support.is-on { background: rgba(225,29,72,.22); color: #fecdd3; }
+            @media (max-width: 560px) {
+                .fk-follow-bar { flex-direction: column; gap: 10px; border-radius: 22px; left: 12px; right: 12px; transform: none; max-width: none; padding: 14px; }
+                .fk-follow-bar__actions { width: 100%; }
+                .fk-fb-btn { flex: 1; justify-content: center; }
+            }
+        </style>
     @endif
 
     <div class="loader">
@@ -78,6 +198,8 @@
                     <li class="nav-item"><a href="#home" class="nav-link">Home</a></li>
                     <li class="nav-item"><a href="#about" class="nav-link">About</a></li>
                     <li class="nav-item"><a href="#activities" class="nav-link">Activities</a></li>
+                    <li class="nav-item"><a href="#impact" class="nav-link">Impact</a></li>
+                    <li class="nav-item"><a href="#gallery" class="nav-link">Gallery</a></li>
                     <li class="nav-item"><a href="#blog" class="nav-link">Stories</a></li>
                     <li class="nav-item"><a href="#contact" class="nav-link">Contact</a></li>
                     <li class="nav-item"><a href="#donate" class="nav-link btn btn-primary">Donate</a></li>
@@ -89,6 +211,8 @@
                         <a href="#home" class="menu-item"><i class="fas fa-home"></i><span>Home</span></a>
                         <a href="#about" class="menu-item"><i class="fas fa-info-circle"></i><span>About</span></a>
                         <a href="#activities" class="menu-item"><i class="fas fa-tasks"></i><span>Activities</span></a>
+                        <a href="#impact" class="menu-item"><i class="fas fa-chart-line"></i><span>Impact</span></a>
+                        <a href="#gallery" class="menu-item"><i class="fas fa-images"></i><span>Gallery</span></a>
                         <a href="#blog" class="menu-item"><i class="fas fa-blog"></i><span>Stories</span></a>
                         <a href="#contact" class="menu-item"><i class="fas fa-envelope"></i><span>Contact</span></a>
                         <a href="#donate" class="menu-item donate"><i class="fas fa-heart"></i><span>Donate</span></a>
@@ -237,6 +361,62 @@
                     </div>
                 </div>
             </div>
+
+            <div class="presence-section">
+                <h3>Our Presence Across Karnataka</h3>
+                <div class="karnataka-map-container">
+                    <div class="karnataka-map">
+                        <div id="karnataka-map-container" class="geojson-map">
+                            <svg id="karnataka-svg" class="karnataka-svg" xmlns="http://www.w3.org/2000/svg">
+                                <g id="karnataka-path"></g>
+                                <g id="district-markers"></g>
+                            </svg>
+                        </div>
+                        <div class="map-legend">
+                            <div class="legend-item">
+                                <span class="legend-dot active"></span>
+                                <span>Active districts</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot hq"></span>
+                                <span>Headquarters</span>
+                            </div>
+                            <div class="legend-item">
+                                <span class="legend-dot upcoming"></span>
+                                <span>Upcoming expansion</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="districts-panel">
+                        <h4>Where we work</h4>
+                        <div class="districts-list">
+                            @php
+                                $presenceDistricts = $microsite['districts'] ?? ['Mandya (HQ)', 'Mysuru', 'Bengaluru Urban', 'Bengaluru Rural', 'Hassan', 'Tumakuru', 'Kodagu', 'Chamarajanagar'];
+                            @endphp
+                            @foreach($presenceDistricts as $d)
+                                <div class="district-chip active">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>{{ $d }}</span>
+                                </div>
+                            @endforeach
+                        </div>
+                        <div class="districts-stats">
+                            <div class="stats-row">
+                                <span class="stat-value">{{ count($presenceDistricts) }}</span>
+                                <span class="stat-desc">Districts engaged</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stat-value">{{ $ngo->city?->name ?? 'Karnataka' }}</span>
+                                <span class="stat-desc">Base location</span>
+                            </div>
+                            <div class="stats-row">
+                                <span class="stat-value">India</span>
+                                <span class="stat-desc">Region</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
 
@@ -289,6 +469,91 @@
             </div>
         </section>
     @endif
+
+    <section id="impact" class="impact">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Our impact</h2>
+                <p class="section-subtitle">Transforming lives and communities through dedicated service</p>
+            </div>
+            <div class="impact-stats">
+                @foreach($impactCards as $ic)
+                    <div class="impact-card">
+                        <div class="impact-icon">
+                            <i class="fas {{ $ic['icon'] }}"></i>
+                        </div>
+                        <div class="impact-number" data-target="{{ $ic['target'] }}">{{ $ic['display'] }}</div>
+                        <div class="impact-label">{{ $ic['label'] }}</div>
+                    </div>
+                @endforeach
+            </div>
+            <div class="impact-testimonials">
+                <h3>Why our work matters</h3>
+                <div class="testimonials-grid">
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>"{{ $microsite['about']['vision_quote'] }}"</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"><i class="fas fa-quote-right"></i></div>
+                            <div class="author-info">
+                                <h5>{{ $ngo->name }}</h5>
+                                <p>Our guiding vision</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>{{ \Illuminate\Support\Str::limit(strip_tags($ngo->description ?? 'Committed to lasting, community-led change across Karnataka.'), 180) }}</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"><i class="fas fa-users"></i></div>
+                            <div class="author-info">
+                                <h5>Community first</h5>
+                                <p>How we work</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <div class="testimonial-content">
+                            <p>"Transparent, accountable, and verified on FEVOURD-K — every contribution is tracked and reported."</p>
+                        </div>
+                        <div class="testimonial-author">
+                            <div class="author-avatar"><i class="fas fa-shield-alt"></i></div>
+                            <div class="author-info">
+                                <h5>Trust &amp; transparency</h5>
+                                <p>Our commitment</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="gallery" class="gallery">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">Gallery</h2>
+                <p class="section-subtitle">Visual stories of our work and impact</p>
+            </div>
+            <div class="gallery-grid">
+                @foreach($galleryItems as $g)
+                    <div class="gallery-item {{ $g['size'] }}">
+                        <div class="gallery-image">
+                            <img src="{{ asset($g['img']) }}" alt="{{ $g['title'] }}" loading="lazy">
+                            <div class="gallery-overlay">
+                                <div class="gallery-content">
+                                    <h4>{{ $g['title'] }}</h4>
+                                    <p>{{ $g['caption'] }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
 
     <section id="contact" class="contact">
         <div class="container">
@@ -446,9 +711,16 @@
                     </div>
                 </div>
             </div>
-            <div class="footer-bottom">
-                <p>&copy; {{ date('Y') }} {{ $ngo->name }}. Microsite theme: FEVOURD-K / public/assets/Themes.</p>
-                <p><a href="https://fevourd-k.org">FEVOURD-K</a> — Karnataka voluntary ecosystem platform.</p>
+            <div class="footer-bottom fk-footer-bottom">
+                <p class="fk-copy">&copy; {{ date('Y') }} {{ $ngo->name }}. All rights reserved.</p>
+                <div class="fk-powered">
+                    <span class="fk-powered__label">Powered by</span>
+                    <span class="fk-powered__badge">
+                        <i class="fas fa-cube"></i> NGO&nbsp;OS
+                    </span>
+                    <span class="fk-powered__dot">·</span>
+                    <span class="fk-powered__by">Crafted by <strong>Vikas&nbsp;Guru</strong></span>
+                </div>
             </div>
         </div>
     </footer>
@@ -474,5 +746,6 @@
     </script>
     <script src="{{ asset('assets/Themes/script.js') }}"></script>
     <script src="{{ asset('assets/Themes/scroll-animations.js') }}"></script>
+    <script src="{{ asset('assets/Themes/karnataka-map.js') }}"></script>
 </body>
 </html>

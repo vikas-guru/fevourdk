@@ -116,100 +116,82 @@
                     </div>
                     
                     <!-- NGOs Grid -->
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        <div v-for="ngo in filteredNGOs.data" :key="ngo.id" 
-                             class="group bg-white rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 overflow-hidden border border-gray-100">
-                            
-                            <!-- NGO Header -->
-                            <div class="relative h-48 bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-                                <!-- NGO Logo -->
-                                <div class="absolute top-4 left-4">
-                                    <div class="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
-                                        <img v-if="ngo.logo" :src="ngo.logo" :alt="ngo.name" class="w-12 h-12 object-contain">
-                                        <svg v-else class="w-12 h-12 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                                        </svg>
-                                    </div>
-                                </div>
-                                
-                                <!-- Verification Badge -->
-                                <div class="absolute top-4 right-4">
-                                    <div class="bg-green-500 text-white rounded-lg px-3 py-1 shadow-lg">
-                                        <div class="text-xs font-bold flex items-center">
-                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010-1.414l-8 8a1 1 0 01-1.414 0l-8 8a1 1 0 01-1.414 0l8-8a1 1 0 011.414 0z" clip-rule="evenodd" />
-                                            </svg>
-                                            Verified
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- NGO Name -->
-                                <div class="absolute bottom-4 left-4 right-4">
-                                    <h3 class="text-xl font-bold text-white">{{ ngo.name }}</h3>
-                                    <p class="text-blue-100 text-sm">{{ ngo.getShortLocation }}</p>
-                                </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+                        <article v-for="(ngo, i) in filteredNGOs.data" :key="ngo.id"
+                                 class="ngo-card group"
+                                 :style="cardStyle(ngo, i)">
+
+                            <!-- Banner -->
+                            <div class="ngo-card__banner">
+                                <div class="ngo-card__mesh"></div>
+                                <div class="ngo-card__grain"></div>
+                                <div class="ngo-card__sheen"></div>
+
+                                <span v-if="primaryArea(ngo)" class="ngo-card__kicker">{{ primaryArea(ngo) }}</span>
+
+                                <span class="ngo-card__verified" title="Verified by FEVOURD-K">
+                                    <svg viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.7-9.3a1 1 0 00-1.4-1.4L9 10.6 7.7 9.3a1 1 0 00-1.4 1.4l2 2a1 1 0 001.4 0l4-4z" clip-rule="evenodd" /></svg>
+                                    Verified
+                                </span>
                             </div>
-                            
-                            <!-- NGO Content -->
-                            <div class="p-6">
-                                <!-- Focus Areas -->
-                                <div class="mb-4">
-                                    <h4 class="text-sm font-semibold text-gray-700 mb-2">Focus Areas</h4>
-                                    <div class="flex flex-wrap gap-2">
-                                        <span v-for="area in ngo.focus_areas" :key="area" 
-                                              class="px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-xs font-medium">
-                                            {{ area }}
-                                        </span>
-                                    </div>
-                                </div>
-                                
-                                <!-- Description -->
-                                <p class="text-gray-600 mb-4 line-clamp-3">
-                                    {{ ngo.description }}
+
+                            <!-- Logo medallion -->
+                            <div class="ngo-card__crest">
+                                <img v-if="ngo.logo" :src="ngo.logo" :alt="ngo.name">
+                                <span v-else>{{ initials(ngo.name) }}</span>
+                            </div>
+
+                            <!-- Body -->
+                            <div class="ngo-card__body">
+                                <h3 class="ngo-card__name">{{ ngo.name }}</h3>
+                                <p class="ngo-card__loc">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a2 2 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><circle cx="12" cy="11" r="2.5" /></svg>
+                                    {{ loc(ngo) }}
                                 </p>
-                                
-                                <!-- Location Info -->
-                                <div class="flex items-center mb-4 text-sm text-gray-500">
-                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a1.998 1.998 0 010-2.828l4.244-4.244a1.998 1.998 0 012.828 0l4.244 4.244a1.998 1.998 0 010 2.828z" />
-                                    </svg>
-                                    <span>{{ ngo.getFullLocation }}</span>
+
+                                <p class="ngo-card__mission">{{ ngo.description }}</p>
+
+                                <div class="ngo-card__chips" v-if="chips(ngo).length">
+                                    <span v-for="area in chips(ngo)" :key="area" class="ngo-chip">{{ area }}</span>
+                                    <span v-if="extra(ngo) > 0" class="ngo-chip ngo-chip--more">+{{ extra(ngo) }}</span>
                                 </div>
-                                
-                                <!-- Stats -->
-                                <div class="grid grid-cols-3 gap-4 mb-6">
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-blue-600">{{ ngo.campaigns_count || 0 }}</div>
-                                        <div class="text-xs text-gray-500">Campaigns</div>
+
+                                <div class="ngo-card__stats">
+                                    <div>
+                                        <span class="num">{{ ngo.followers_count || 0 }}</span>
+                                        <span class="lbl">Followers</span>
                                     </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-green-600">{{ ngo.donors_count || 0 }}</div>
-                                        <div class="text-xs text-gray-500">Donors</div>
+                                    <div>
+                                        <span class="num">{{ ngo.supporters_count || 0 }}</span>
+                                        <span class="lbl">Supporters</span>
                                     </div>
-                                    <div class="text-center">
-                                        <div class="text-2xl font-bold text-purple-600">{{ ngo.years_active || 0 }}</div>
-                                        <div class="text-xs text-gray-500">Years Active</div>
+                                    <div>
+                                        <span class="num">{{ joinedYear(ngo) }}</span>
+                                        <span class="lbl">Since</span>
                                     </div>
                                 </div>
-                                
-                                <!-- Action Buttons -->
-                                <div class="flex space-x-3">
-                                    <Link :href="`/ngos/${ngo.slug}`" class="flex-1 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-xl font-bold hover:from-blue-700 hover:to-purple-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        View Profile
+
+                                <div class="ngo-card__actions">
+                                    <Link :href="`/ngos/${ngo.slug}`" class="ngo-btn ngo-btn--view">
+                                        View profile
+                                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 12h14m-6-6l6 6-6 6" /></svg>
                                     </Link>
-                                    <button class="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-3 px-4 rounded-xl font-bold hover:from-green-600 hover:to-emerald-700 transition-all duration-300 transform hover:scale-105 shadow-lg">
-                                        <svg class="w-4 h-4 inline mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                        </svg>
-                                        Donate
+                                    <button @click="toggleFollow(ngo)"
+                                            :class="fs(ngo).following ? 'is-active' : ''"
+                                            class="ngo-btn ngo-btn--follow"
+                                            :title="fs(ngo).following ? 'Following' : 'Follow'">
+                                        <svg viewBox="0 0 20 20" fill="currentColor"><path :d="fs(ngo).following ? 'M16.7 5.3a1 1 0 010 1.4l-8 8a1 1 0 01-1.4 0l-4-4a1 1 0 011.4-1.4l3.3 3.3 7.3-7.3a1 1 0 011.4 0z' : 'M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z'" /></svg>
+                                        <span>{{ fs(ngo).following ? 'Following' : 'Follow' }}</span>
+                                    </button>
+                                    <button @click="toggleSupport(ngo)"
+                                            :class="fs(ngo).supporting ? 'is-active' : ''"
+                                            class="ngo-btn ngo-btn--support"
+                                            :title="fs(ngo).supporting ? 'Supporting' : 'Support'">
+                                        <svg viewBox="0 0 24 24" :fill="fs(ngo).supporting ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
                                     </button>
                                 </div>
                             </div>
-                        </div>
+                        </article>
                     </div>
                     
                     <!-- Pagination -->
@@ -289,8 +271,55 @@ const props = defineProps({
     ngos: {
         type: Object,
         required: true
+    },
+    followState: {
+        type: Object,
+        default: () => ({})
+    },
+    authed: {
+        type: Boolean,
+        default: false
     }
 })
+
+// Social graph helpers — follow / support an NGO (works for every role).
+const fs = (ngo) => props.followState?.[ngo.id] || { following: false, supporting: false }
+
+// ── Card presentation helpers ───────────────────────────────────────────────
+// Per-card banner hue rotates within a teal→blue family for subtle variety.
+const cardStyle = (ngo, i) => ({
+    '--hue': 150 + ((Number(ngo.id) * 37) % 70),
+    '--delay': `${Math.min(i, 11) * 70}ms`,
+})
+
+const initials = (name = '') => name.trim().split(/\s+/).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '★'
+
+// Build location from the eager-loaded state/district/city relations (real data).
+const loc = (ngo) => {
+    const parts = [ngo.city?.name, ngo.district?.name, ngo.state?.name]
+        .filter(Boolean)
+        .filter((v, i, a) => v !== a[i - 1])
+    return parts.length ? parts.slice(0, 2).join(', ') : 'Karnataka, India'
+}
+
+const areas = (ngo) => Array.isArray(ngo.focus_areas) ? ngo.focus_areas.filter(Boolean) : []
+const primaryArea = (ngo) => areas(ngo)[0] || ''
+const chips = (ngo) => areas(ngo).slice(0, 3)
+const extra = (ngo) => Math.max(0, areas(ngo).length - 3)
+const joinedYear = (ngo) => {
+    const y = ngo.created_at ? new Date(ngo.created_at).getFullYear() : null
+    return y && !Number.isNaN(y) ? y : '—'
+}
+
+const toggleFollow = (ngo) => {
+    if (!props.authed) { router.visit('/login'); return }
+    router.post(`/ngos/${ngo.id}/follow`, {}, { preserveScroll: true, preserveState: false })
+}
+
+const toggleSupport = (ngo) => {
+    if (!props.authed) { router.visit('/login'); return }
+    router.post(`/ngos/${ngo.id}/support`, {}, { preserveScroll: true, preserveState: false })
+}
 
 // Reactive data
 const searchQuery = ref('')
@@ -412,6 +441,275 @@ onMounted(() => {
     overflow: hidden;
     line-clamp: 3;
     -o-line-clamp: 3;
+}
+
+/* ── Impact Dossier card ──────────────────────────────────────────────────── */
+.ngo-card {
+    --accent: 38 92% 50%;            /* saffron/amber accent (HSL parts) */
+    --hue: 168;                       /* overridden per-card */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    background: #ffffff;
+    border-radius: 24px;
+    border: 1px solid rgba(15, 23, 42, 0.06);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 12px 28px -12px rgba(15, 23, 42, 0.16);
+    overflow: hidden;
+    transition: transform .45s cubic-bezier(.2, .8, .2, 1), box-shadow .45s cubic-bezier(.2, .8, .2, 1);
+    opacity: 0;
+    transform: translateY(18px);
+    animation: ngo-rise .7s cubic-bezier(.2, .8, .2, 1) forwards;
+    animation-delay: var(--delay, 0ms);
+    will-change: transform;
+}
+@keyframes ngo-rise {
+    to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .ngo-card { animation: none; opacity: 1; transform: none; }
+}
+.ngo-card:hover {
+    transform: translateY(-8px);
+    box-shadow:
+        0 1px 2px rgba(15, 23, 42, 0.04),
+        0 30px 60px -18px hsl(var(--hue) 60% 30% / .42),
+        0 0 0 1px hsl(var(--hue) 50% 60% / .12);
+}
+
+/* Banner */
+.ngo-card__banner {
+    position: relative;
+    height: 118px;
+    overflow: hidden;
+    background: hsl(var(--hue) 45% 16%);
+}
+.ngo-card__mesh {
+    position: absolute;
+    inset: -20%;
+    background:
+        radial-gradient(60% 80% at 18% 20%, hsl(var(--hue) 72% 42% / .95), transparent 60%),
+        radial-gradient(55% 75% at 85% 15%, hsl(calc(var(--hue) + 28) 75% 46% / .9), transparent 62%),
+        radial-gradient(70% 90% at 75% 95%, hsl(var(--accent) / .55), transparent 60%),
+        linear-gradient(135deg, hsl(var(--hue) 55% 22%), hsl(calc(var(--hue) - 20) 50% 14%));
+    transition: transform 1.1s cubic-bezier(.2, .8, .2, 1);
+}
+.ngo-card:hover .ngo-card__mesh { transform: scale(1.08) rotate(-1deg); }
+.ngo-card__grain {
+    position: absolute;
+    inset: 0;
+    opacity: .35;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='80'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+.ngo-card__sheen {
+    position: absolute;
+    top: 0; left: -60%;
+    width: 50%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: skewX(-18deg);
+    transition: left .8s cubic-bezier(.2, .8, .2, 1);
+}
+.ngo-card:hover .ngo-card__sheen { left: 130%; }
+
+.ngo-card__kicker {
+    position: absolute;
+    top: 14px; left: 16px;
+    z-index: 2;
+    padding: 5px 11px;
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #fff;
+    background: rgba(255, 255, 255, .14);
+    border: 1px solid rgba(255, 255, 255, .28);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+    max-width: 62%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+.ngo-card__verified {
+    position: absolute;
+    top: 14px; right: 16px;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px 5px 8px;
+    font-size: 11px;
+    font-weight: 700;
+    color: hsl(38 95% 96%);
+    background: hsl(var(--accent) / .22);
+    border: 1px solid hsl(var(--accent) / .55);
+    border-radius: 999px;
+    backdrop-filter: blur(6px);
+}
+.ngo-card__verified svg { width: 14px; height: 14px; color: hsl(40 96% 70%); }
+
+/* Logo medallion overlapping the banner */
+.ngo-card__crest {
+    position: relative;
+    z-index: 3;
+    width: 76px; height: 76px;
+    margin: -38px 0 0 24px;
+    border-radius: 20px;
+    display: grid;
+    place-items: center;
+    background: #fff;
+    border: 1px solid rgba(15, 23, 42, .06);
+    box-shadow: 0 10px 24px -10px hsl(var(--hue) 50% 25% / .5);
+    overflow: hidden;
+    transition: transform .45s cubic-bezier(.2, .8, .2, 1);
+}
+.ngo-card:hover .ngo-card__crest { transform: translateY(-3px) rotate(-2deg); }
+.ngo-card__crest img { width: 100%; height: 100%; object-fit: cover; }
+.ngo-card__crest span {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 26px;
+    color: hsl(var(--hue) 45% 28%);
+}
+
+/* Body */
+.ngo-card__body { padding: 14px 24px 22px; display: flex; flex-direction: column; flex: 1; }
+.ngo-card__name {
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 21px;
+    line-height: 1.18;
+    color: #111827;
+    letter-spacing: -.01em;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.ngo-card__loc {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    margin-bottom: 12px;
+}
+.ngo-card__loc svg { width: 14px; height: 14px; color: hsl(var(--hue) 55% 45%); flex: none; }
+.ngo-card__mission {
+    font-size: 13.5px;
+    line-height: 1.55;
+    color: #4b5563;
+    margin-bottom: 14px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    min-height: 42px;
+}
+.ngo-card__chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; }
+.ngo-chip {
+    padding: 4px 10px;
+    font-size: 11.5px;
+    font-weight: 600;
+    color: hsl(var(--hue) 40% 30%);
+    background: hsl(var(--hue) 55% 96%);
+    border: 1px solid hsl(var(--hue) 45% 88%);
+    border-radius: 8px;
+}
+.ngo-chip--more { color: #6b7280; background: #f3f4f6; border-color: #e5e7eb; }
+
+/* Stats strip */
+.ngo-card__stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-bottom: 18px;
+    border: 1px solid rgba(15, 23, 42, .06);
+    border-radius: 14px;
+    overflow: hidden;
+    background: #fcfcfd;
+}
+.ngo-card__stats > div {
+    text-align: center;
+    padding: 11px 4px;
+    min-width: 0;
+    border-right: 1px solid rgba(15, 23, 42, .06);
+}
+.ngo-card__stats > div:last-child { border-right: 0; }
+.ngo-card__stats .num {
+    display: block;
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 600;
+    font-size: 19px;
+    color: hsl(var(--hue) 45% 24%);
+    line-height: 1;
+    white-space: nowrap;
+}
+.ngo-card__stats .lbl {
+    display: block;
+    margin-top: 4px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .02em;
+    text-transform: uppercase;
+    color: #9ca3af;
+    white-space: nowrap;
+}
+
+/* Actions */
+.ngo-card__actions { display: flex; gap: 8px; margin-top: auto; }
+.ngo-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 7px;
+    height: 44px;
+    border-radius: 13px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: transform .2s ease, background .2s ease, box-shadow .2s ease, color .2s ease;
+}
+.ngo-btn:active { transform: scale(.97); }
+.ngo-btn--view {
+    flex: 1;
+    color: #fff;
+    background: linear-gradient(135deg, hsl(var(--hue) 60% 34%), hsl(calc(var(--hue) + 22) 58% 40%));
+    box-shadow: 0 10px 20px -10px hsl(var(--hue) 60% 30% / .8);
+}
+.ngo-btn--view svg { width: 17px; height: 17px; transition: transform .25s ease; }
+.ngo-btn--view:hover { box-shadow: 0 14px 26px -10px hsl(var(--hue) 60% 30% / .9); }
+.ngo-btn--view:hover svg { transform: translateX(3px); }
+.ngo-btn--follow {
+    padding: 0 14px;
+    color: hsl(var(--hue) 45% 30%);
+    background: hsl(var(--hue) 55% 96%);
+    border-color: hsl(var(--hue) 45% 86%);
+}
+.ngo-btn--follow svg { width: 16px; height: 16px; }
+.ngo-btn--follow:hover { background: hsl(var(--hue) 55% 92%); }
+.ngo-btn--follow.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, hsl(var(--hue) 60% 34%), hsl(calc(var(--hue) + 22) 58% 40%));
+    border-color: transparent;
+}
+.ngo-btn--support {
+    width: 44px;
+    color: hsl(347 80% 50%);
+    background: hsl(347 90% 97%);
+    border-color: hsl(347 80% 90%);
+}
+.ngo-btn--support svg { width: 18px; height: 18px; }
+.ngo-btn--support:hover { background: hsl(347 90% 94%); }
+.ngo-btn--support.is-active {
+    color: #fff;
+    background: linear-gradient(135deg, hsl(347 78% 52%), hsl(12 82% 56%));
+    border-color: transparent;
+    box-shadow: 0 10px 20px -10px hsl(347 78% 50% / .8);
 }
 
 /* Custom animations */

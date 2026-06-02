@@ -19,10 +19,20 @@ class NGOWebsiteController extends Controller
             abort(404);
         }
 
+        $myState = $currentUser
+            ? \App\Models\NgoSupporter::where('ngo_id', $ngo->id)->where('user_id', $currentUser->id)->first()
+            : null;
+
         return view('ngo.site-template', [
             'ngo' => $ngo,
             'preview' => $isOwnerPreview,
             'microsite' => NgoMicrositeContent::for($ngo),
+            'followersCount' => $ngo->followers_count,
+            'supportersCount' => $ngo->supporters_count,
+            'isFollowing' => (bool) ($myState?->is_following),
+            'isSupporting' => (bool) ($myState?->is_supporting),
+            'authed' => (bool) $currentUser,
+            'isOwner' => $isOwnerPreview,
         ]);
     }
 

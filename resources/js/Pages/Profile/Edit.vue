@@ -1,18 +1,22 @@
 <template>
-    <AppLayout>
+    <AppShell title="My profile — FEVOURD-K">
         <div class="min-h-screen bg-slate-50 py-8 sm:py-12">
             <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-                <div class="bg-gradient-to-r from-blue-700 to-indigo-800 rounded-2xl p-6 text-white">
-                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div class="fkbrand-hero relative overflow-hidden rounded-2xl p-6 text-white shadow-lg">
+                    <div class="fkbrand-hero__grain" aria-hidden="true"></div>
+                    <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
-                            <p class="text-blue-100 text-sm">Profile Center</p>
-                            <h1 class="text-2xl sm:text-3xl font-bold">Your Impact Identity</h1>
-                            <p class="text-blue-100 mt-1 text-sm">Keep your profile updated to unlock smarter recommendations.</p>
+                            <p class="inline-flex items-center gap-2 text-[0.7rem] font-semibold uppercase tracking-[0.14em] text-[#f7c948]">
+                                <span class="h-2 w-2 rounded-full bg-[#f2b40c] shadow-[0_0_0_4px_rgba(242,180,12,0.2)]"></span>
+                                Profile Center
+                            </p>
+                            <h1 class="fkbrand-display mt-2 text-2xl font-semibold sm:text-3xl">Your Impact Identity</h1>
+                            <p class="text-blue-100/80 mt-1 text-sm">Keep your profile updated to unlock smarter recommendations.</p>
                         </div>
-                        <div v-if="loyaltyMeta" class="rounded-xl bg-white/15 px-4 py-3 border border-white/20 min-w-[220px]">
-                            <p class="text-blue-100 text-xs">Social Cause Level</p>
-                            <p class="text-lg font-semibold">{{ loyaltyMeta.level }}</p>
-                            <p class="text-xs text-blue-100">{{ loyaltyMeta.social_cause_points }} points · Rank #{{ loyaltyMeta.leaderboard_rank }}</p>
+                        <div v-if="loyaltyMeta" class="rounded-xl bg-white/10 px-4 py-3 border border-[#f2b40c]/40 min-w-[220px]">
+                            <p class="text-[#f7c948] text-xs font-semibold uppercase tracking-wide">Social Cause Level</p>
+                            <p class="text-lg font-bold">{{ loyaltyMeta.level }}</p>
+                            <p class="text-xs text-blue-100/80">{{ loyaltyMeta.social_cause_points }} points · Rank #{{ loyaltyMeta.leaderboard_rank }}</p>
                         </div>
                     </div>
                 </div>
@@ -31,7 +35,7 @@
                                     type="button"
                                     @click="selectedAvatar = avatar.className"
                                     class="h-8 rounded-full border transition"
-                                    :class="[avatar.className, selectedAvatar === avatar.className ? 'ring-2 ring-offset-2 ring-blue-500 border-blue-500' : 'border-transparent']"
+                                    :class="[avatar.className, selectedAvatar === avatar.className ? 'ring-2 ring-offset-2 ring-[#f2b40c] border-[#f2b40c]' : 'border-transparent']"
                                     :title="avatar.label"
                                 />
                             </div>
@@ -40,11 +44,11 @@
                         <div v-if="loyaltyMeta" class="bg-white rounded-2xl border border-slate-200 p-5">
                             <p class="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-3">Social Cause Progress</p>
                             <div class="flex items-end justify-between mb-2">
-                                <p class="text-xl font-bold text-blue-700">{{ loyaltyMeta.social_cause_points }} pts</p>
+                                <p class="text-xl font-bold text-[#0d1f5c]">{{ loyaltyMeta.social_cause_points }} pts</p>
                                 <p class="text-xs text-slate-500">Next: {{ loyaltyMeta.next_milestone }} pts</p>
                             </div>
                             <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-                                <div class="h-2 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-full" :style="{ width: loyaltyPercent + '%' }"></div>
+                                <div class="h-2 bg-gradient-to-r from-[#f2b40c] to-[#f7c948] rounded-full" :style="{ width: loyaltyPercent + '%' }"></div>
                             </div>
                             <p class="text-xs text-slate-500 mt-2">{{ loyaltyMeta.next_milestone_gap }} points to next level</p>
                             <div class="mt-3 grid grid-cols-3 gap-2 text-[11px]">
@@ -94,7 +98,7 @@
                                 <p class="text-sm font-semibold text-slate-700 mb-1">Profile Completion</p>
                                 <p class="text-xs text-slate-500 mb-3">Higher completion improves matching, trust, and discoverability.</p>
                                 <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
-                                    <div class="h-2 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full" :style="{ width: (loyaltyMeta?.completion_percent || 0) + '%' }"></div>
+                                    <div class="h-2 bg-gradient-to-r from-[#f2b40c] to-[#f7c948] rounded-full" :style="{ width: (loyaltyMeta?.completion_percent || 0) + '%' }"></div>
                                 </div>
                                 <p class="text-xs text-slate-500 mt-2">{{ loyaltyMeta?.completion_percent || 0 }}% completed</p>
                             </div>
@@ -103,7 +107,7 @@
                                 <Link href="/dashboard" class="px-4 py-2.5 border border-slate-300 rounded-xl text-slate-700 hover:bg-slate-50">
                                     Cancel
                                 </Link>
-                                <button type="submit" :disabled="processing" class="px-4 py-2.5 bg-blue-600 text-white rounded-xl hover:bg-blue-700 disabled:bg-slate-400">
+                                <button type="submit" :disabled="processing" class="px-5 py-2.5 bg-[#f2b40c] text-[#2a1c00] font-bold rounded-xl shadow-[0_14px_30px_-14px_rgba(242,180,12,0.85)] transition hover:-translate-y-0.5 disabled:translate-y-0 disabled:opacity-60 disabled:shadow-none">
                                     {{ processing ? 'Saving...' : 'Save Changes' }}
                                 </button>
                             </div>
@@ -118,7 +122,7 @@
                             v-for="(member, index) in leaderboard"
                             :key="member.id"
                             class="flex items-center justify-between rounded-xl border px-3 py-2 cursor-pointer transition"
-                            :class="member.id === user.id ? 'border-blue-300 bg-blue-50' : 'border-slate-200 bg-white'"
+                            :class="member.id === user.id ? 'border-[#f2b40c]/60 bg-[#f2b40c]/10' : 'border-slate-200 bg-white hover:border-slate-300'"
                             @click="openMember(member)"
                         >
                             <div class="flex items-center gap-3">
@@ -133,11 +137,11 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <p class="text-sm font-medium text-slate-800">{{ member.name }}</p>
-                                    <span v-if="member.id === user.id" class="text-[10px] px-2 py-0.5 rounded-full bg-blue-100 text-blue-700 border border-blue-200">You</span>
+                                    <span v-if="member.id === user.id" class="text-[10px] px-2 py-0.5 rounded-full bg-[#f2b40c]/20 text-[#8a6d12] border border-[#f2b40c]/40 font-semibold">You</span>
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <p class="text-sm font-semibold text-blue-700">{{ member.social_cause_points || 0 }} pts</p>
+                                <p class="text-sm font-semibold text-[#0d1f5c]">{{ member.social_cause_points || 0 }} pts</p>
                                 <svg class="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
                                 </svg>
@@ -235,13 +239,13 @@
                 </div>
             </div>
         </div>
-    </AppLayout>
+    </AppShell>
 </template>
 
 <script setup>
 import { computed, ref } from 'vue'
 import { Link, router, usePage } from '@inertiajs/vue3'
-import AppLayout from '@/Layouts/AppLayout.vue'
+import AppShell from '@/Layouts/AppShell.vue'
 
 const props = defineProps({
     user: Object,
@@ -327,6 +331,17 @@ const openMember = (member) => {
 </script>
 
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&display=swap');
+
+.fkbrand-display { font-family: 'Fraunces','Playfair Display',Georgia,serif; font-optical-sizing: auto; }
+
+/* Branded ink hero, matching the NGO setup wizard / splash */
+.fkbrand-hero { background: radial-gradient(120% 120% at 85% -10%, #1b3aa0 0%, #11286e 42%, #081640 100%); }
+.fkbrand-hero__grain {
+    position: absolute; inset: 0; z-index: 0; opacity: .45; mix-blend-mode: overlay; pointer-events: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
 .avatar-3d {
     box-shadow:
         inset -8px -10px 18px rgba(255, 255, 255, 0.22),

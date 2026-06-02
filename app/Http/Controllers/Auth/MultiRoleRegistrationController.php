@@ -475,6 +475,328 @@ class MultiRoleRegistrationController extends Controller
     }
 
     /**
+     * Progressive NGO onboarding — STEP 1: minimal signup.
+     * Captures only org name, contact person, email, phone (OTP-verified) and a
+     * password. Creates the NGO (pending/inactive) + admin user, logs them in,
+     * and hands off to the setup wizard. Everything compliance-related is deferred.
+     */
+    public function registerNgoSignup(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'ngo_name' => 'required|string|max:255',
+            'founder_name' => 'required|string|max:255',
+            'email' => ['required', 'string', 'email', 'max:255', Rule::unique('ngos', 'email'), Rule::unique('users', 'email')],
+            'phone' => 'required|string|max:20',
+            'otp_code' => $this->otpCodeValidationRule(),
+            'password' => 'required|string|min:6|max:64|confirmed',
+            'accept_terms' => 'required|accepted',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'errors' => $validator->errors()], 422);
+        }
+
+        // Reuse the same OTP gate as the full chat flow: a fresh code OR a recent
+        // session-verified code for this normalized phone both pass.
+        $normalizedPhone = app(OtpService::class)->normalizeIndianPhone((string) $request->phone);
+        $otpOk = $normalizedPhone !== null && $this->verifyOTP($request->phone, $request->otp_code);
+        if (! $otpOk && $normalizedPhone !== null) {
+            $otpOk = $this->ngoChatOtpSessionMatches($normalizedPhone);
+        }
+        if (! $otpOk) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired OTP. Please request a new code and try again.',
+            ], 422);
+        }
+
+        try {
+            $base = Str::slug($request->ngo_name) ?: 'ngo';
+            $slug = $base;
+            $counter = 1;
+            while (NGO::where('slug', $slug)->exists()) {
+                $slug = $base.'-'.$counter++;
+            }
+
+            $ngo = new NGO;
+            $ngo->fill([
+                'name' => $request->ngo_name,
+                'slug' => $slug,
+                'founder_name' => $request->founder_name,
+                'founder_phone' => $request->phone,
+                'founder_email' => $request->email,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'verification_status' => 'pending',
+                'is_active' => false,
+            ]);
+            $ngo->save();
+
+            $user = new User;
+            $user->fill([
+                'name' => $request->founder_name,
+                'first_name' => $request->founder_name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'user_type' => 'ngo',
+                'ngo_id' => $ngo->id,
+                'is_active' => true,
+                'email_verified_at' => now(),
+                'phone_verified_at' => now(),
+            ]);
+            $user->password = Hash::make((string) $request->password);
+            $user->save();
+
+            try {
+                $user->assignRole('ngo_admin');
+            } catch (\Throwable $e) {
+                // Don't block onboarding if the role seed is missing in an environment.
+            }
+
+            // Mail is best-effort — a missing/slow mailer must never fail signup.
+            try {
+                Mail::to($user->email)->send(new WelcomeNgoMail($ngo, $user));
+            } catch (\Throwable $e) {
+            }
+
+            Auth::login($user);
+            session()->forget(['ngo_chat_otp_verified_phone', 'ngo_chat_otp_verified_at']);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Welcome to FEVOURD-K — your account is ready.',
+                'ngo_id' => $ngo->id,
+                'redirect_url' => url('/register/ngo/setup'),
+            ]);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Signup failed: '.$e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Progressive NGO onboarding — STEP 2: render the setup wizard with the
+     * current NGO state and per-step completion so the user can resume anytime.
+     */
+    public function showNgoSetup(Request $request)
+    {
+        $user = $request->user();
+        if (! $user || ! $user->ngo_id) {
+            return redirect('/register/ngo-chat');
+        }
+        $ngo = NGO::find($user->ngo_id);
+        if (! $ngo) {
+            return redirect('/register/ngo-chat');
+        }
+
+        $cityName = $ngo->city_id ? optional(\App\Models\City::find($ngo->city_id))->name : null;
+
+        return inertia('Auth/NgoSetup', [
+            'ngo' => [
+                'id' => $ngo->id,
+                'name' => $ngo->name,
+                'registration_number' => $ngo->registration_number,
+                'pan' => $ngo->pan,
+                'address' => $ngo->address,
+                'city' => $cityName,
+                'latitude' => $ngo->latitude,
+                'longitude' => $ngo->longitude,
+                'description' => $ngo->description,
+                'focus_areas' => $ngo->focus_areas ?: [],
+                'has_documents' => $ngo->documents()->count() > 0,
+                'verification_status' => $ngo->verification_status,
+            ],
+            'focusOptions' => $this->focusOptionList(),
+            'completion' => $this->ngoSetupCompletion($ngo),
+            'dashboardUrl' => url('/ngo/dashboard'),
+        ]);
+    }
+
+    /**
+     * Progressive NGO onboarding — persist a single wizard step. Each step is
+     * independent and skippable; nothing here is required to keep the account.
+     */
+    public function saveNgoSetupStep(Request $request)
+    {
+        $user = $request->user();
+        if (! $user || ! $user->ngo_id) {
+            return response()->json(['success' => false, 'message' => 'Not authorised.'], 403);
+        }
+        $ngo = NGO::find($user->ngo_id);
+        if (! $ngo) {
+            return response()->json(['success' => false, 'message' => 'NGO not found.'], 404);
+        }
+
+        switch ($request->input('step')) {
+            case 'legal':
+                $v = Validator::make($request->all(), [
+                    'registration_number' => ['nullable', 'string', 'max:100', Rule::unique('ngos', 'registration_number')->ignore($ngo->id)],
+                    'pan' => ['nullable', 'string', 'max:20', Rule::unique('ngos', 'pan')->ignore($ngo->id)],
+                    'legal_structure' => 'nullable|string|in:trust,society,section8,other',
+                ]);
+                if ($v->fails()) {
+                    return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+                }
+                $ngo->registration_number = $request->input('registration_number') ?: null;
+                $ngo->pan = $request->filled('pan') ? strtoupper((string) $request->input('pan')) : null;
+                if ($request->filled('legal_structure')) {
+                    session(['ngo_setup_legal_structure' => $request->input('legal_structure')]);
+                }
+                $ngo->save();
+                break;
+
+            case 'address':
+                $v = Validator::make($request->all(), [
+                    'address' => 'nullable|string|max:500',
+                    'city' => 'nullable|string|max:100',
+                    'state_name' => 'nullable|string|max:100',
+                    'postal_code' => 'nullable|string|max:10',
+                    'latitude' => 'nullable|numeric|between:-90,90',
+                    'longitude' => 'nullable|numeric|between:-180,180',
+                ]);
+                if ($v->fails()) {
+                    return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+                }
+                $ngo->address = $request->input('address') ?: null;
+                if ($request->filled('postal_code') && \Illuminate\Support\Facades\Schema::hasColumn('ngos', 'postal_code')) {
+                    $ngo->postal_code = $request->input('postal_code');
+                }
+                if ($request->filled('city')) {
+                    $stateId = $this->getStateIdByName($request->input('state_name'));
+                    $cityId = $this->getCityIdByName($request->input('city'), $stateId);
+                    if ($cityId) {
+                        $ngo->city_id = $cityId;
+                        if ($stateId) {
+                            $ngo->state_id = $stateId;
+                        }
+                    }
+                }
+                $ngo->latitude = $request->input('latitude');
+                $ngo->longitude = $request->input('longitude');
+                $ngo->save();
+                break;
+
+            case 'about':
+                $focus = $request->input('focus_areas');
+                if (is_string($focus)) {
+                    $decoded = json_decode($focus, true);
+                    if (json_last_error() === JSON_ERROR_NONE) {
+                        $focus = $decoded;
+                    }
+                }
+                $v = Validator::make(['description' => $request->input('description'), 'focus_areas' => $focus], [
+                    'description' => 'nullable|string|max:2000',
+                    'focus_areas' => 'nullable|array',
+                ]);
+                if ($v->fails()) {
+                    return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+                }
+                $ngo->description = $request->input('description') ?: null;
+                $ngo->focus_areas = (is_array($focus) && count($focus)) ? array_values($focus) : null;
+                $ngo->save();
+                break;
+
+            case 'documents':
+                $v = Validator::make($request->all(), [
+                    'logo' => 'nullable|image|mimes:jpg,jpeg,png|max:5120',
+                    'registration_certificate' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                    'pan_card' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+                ]);
+                if ($v->fails()) {
+                    return response()->json(['success' => false, 'errors' => $v->errors()], 422);
+                }
+                if ($request->hasFile('logo')) {
+                    $ngo->logo = $request->file('logo')->store('ngo_logos', 'public');
+                    $ngo->save();
+                }
+                foreach (['registration_certificate' => 'registration_certificate', 'pan_card' => 'pan_card'] as $field => $type) {
+                    if ($request->hasFile($field)) {
+                        $path = $request->file($field)->store('ngo_documents', 'public');
+                        $ngo->documents()->create([
+                            'document_type' => $type,
+                            'file_path' => $path,
+                            'status' => 'pending',
+                            'remarks' => 'Uploaded during NGO setup wizard',
+                        ]);
+                    }
+                }
+                break;
+
+            default:
+                return response()->json(['success' => false, 'message' => 'Unknown step.'], 422);
+        }
+
+        return response()->json(['success' => true, 'completion' => $this->ngoSetupCompletion($ngo->fresh())]);
+    }
+
+    /**
+     * Progressive NGO onboarding — STEP 3: submit for verification. Whatever has
+     * been filled is accepted; the website is generated and verification kicked off.
+     */
+    public function finalizeNgoSetup(Request $request)
+    {
+        $user = $request->user();
+        if (! $user || ! $user->ngo_id) {
+            return response()->json(['success' => false, 'message' => 'Not authorised.'], 403);
+        }
+        $ngo = NGO::find($user->ngo_id);
+        if (! $ngo) {
+            return response()->json(['success' => false, 'message' => 'NGO not found.'], 404);
+        }
+
+        try {
+            try {
+                $this->generateNGOWebsite($ngo);
+            } catch (\Throwable $e) {
+            }
+            $ngo->verification_status = 'pending';
+            $ngo->save();
+
+            if ($ngo->registration_number) {
+                try {
+                    $this->performNgoRegistrationVerification(
+                        (string) $ngo->registration_number,
+                        (string) session('ngo_setup_legal_structure', 'other'),
+                        ['pan' => $ngo->pan, 'ngo_name' => $ngo->name]
+                    );
+                } catch (\Throwable $e) {
+                }
+            }
+
+            return response()->json(['success' => true, 'redirect_url' => url('/ngo/dashboard')]);
+        } catch (\Throwable $e) {
+            return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+
+    /** Focus-area options offered in the NGO setup wizard. */
+    private function focusOptionList(): array
+    {
+        return [
+            'Children’s Rights', 'Education', 'Healthcare', 'Environment', 'Climate Action',
+            'Women & SHGs', 'Farmers & FPOs', 'Rural Development', 'Disability Inclusion',
+            'Livelihoods', 'Water & Sanitation', 'Community Development', 'Disaster Response',
+            'Democratic Participation', 'Cultural Heritage',
+        ];
+    }
+
+    /** Per-step completion flags + overall percent for the setup wizard. */
+    private function ngoSetupCompletion(NGO $ngo): array
+    {
+        $steps = [
+            'legal' => ! empty($ngo->registration_number) && ! empty($ngo->pan),
+            'address' => ! empty($ngo->address) && ! empty($ngo->city_id),
+            'about' => ! empty($ngo->description) && ! empty($ngo->focus_areas),
+            'documents' => $ngo->documents()->count() > 0,
+        ];
+        $done = count(array_filter($steps));
+
+        return ['steps' => $steps, 'percent' => (int) round($done / count($steps) * 100)];
+    }
+
+    /**
      * Verify NGO chat OTP during the wizard (consumes code). Registration accepts either a fresh
      * verifyOTP() or a recent successful verify here via session.
      */
@@ -670,9 +992,11 @@ class MultiRoleRegistrationController extends Controller
             return null;
         }
 
+        // Cities relate to a state THROUGH their district (cities has no state_id column),
+        // so scope by the district's state_id rather than a non-existent cities.state_id.
         $cityQuery = \App\Models\City::query();
         if ($stateId) {
-            $cityQuery->where('state_id', $stateId);
+            $cityQuery->whereHas('district', fn ($q) => $q->where('state_id', $stateId));
         }
 
         $city = (clone $cityQuery)->where('name', 'like', "%{$cityName}%")->first();
@@ -682,7 +1006,7 @@ class MultiRoleRegistrationController extends Controller
 
         // Fallback: any city in the selected state (or global first city).
         $fallback = $stateId
-            ? \App\Models\City::query()->where('state_id', $stateId)->first()
+            ? \App\Models\City::whereHas('district', fn ($q) => $q->where('state_id', $stateId))->first()
             : \App\Models\City::query()->first();
 
         return $fallback?->id;
@@ -1219,12 +1543,19 @@ class MultiRoleRegistrationController extends Controller
             $emailSent = false;
 
             if ($request->filled('email') && $plainOtp) {
-                Mail::to($request->email)->send(new OtpCodeMail(
-                    otp: $plainOtp,
-                    minutes: 10,
-                    phone: $request->phone
-                ));
-                $emailSent = true;
+                // Email delivery is a best-effort side channel — the OTP is already
+                // issued for SMS, so a rejected/unreachable inbox must not fail the
+                // request (e.g. reserved test domains or a flaky mail server).
+                try {
+                    Mail::to($request->email)->send(new OtpCodeMail(
+                        otp: $plainOtp,
+                        minutes: 10,
+                        phone: $request->phone
+                    ));
+                    $emailSent = true;
+                } catch (\Throwable $e) {
+                    $emailSent = false;
+                }
             }
 
             // New OTP invalidates a prior wizard verification for this browser session.

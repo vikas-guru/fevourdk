@@ -91,8 +91,8 @@ class City extends Model
     public function getLocationStats()
     {
         return [
-            'ngos_count' => $this->ngos()->where('is_verified', true)->count(),
-            'active_campaigns' => $this->campaigns()->where('status', 'active')->count(),
+            'ngos_count' => $this->ngos()->where('verification_status', 'verified')->count(),
+            'active_campaigns' => \App\Models\Campaign::whereHas('ngo', fn ($q) => $q->where('city_id', $this->id))->where('status', 'active')->count(),
             'total_population' => $this->population,
             'type' => $this->type
         ];
@@ -119,7 +119,8 @@ class City extends Model
      */
     public function scopeInState($query, $stateId)
     {
-        return $query->where('state_id', $stateId);
+        // cities has no state_id column — a city belongs to a state THROUGH its district
+        return $query->whereHas('district', fn ($q) => $q->where('state_id', $stateId));
     }
 
     /**

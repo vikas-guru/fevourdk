@@ -26,13 +26,16 @@ class WelcomeController extends Controller
             'cbos' => 1000, // Example data - should come from CBO partnerships
         ];
 
-        // Get featured campaigns with enhanced data
-        $featuredCampaigns = Campaign::with(['ngo'])
-            ->where('status', 'active')
-            ->where('is_featured', true)
-            ->orderBy('created_at', 'desc')
-            ->take(6)
-            ->get()
+        // Get featured campaigns — featured first, then fill with recent active
+        // ones so the home always shows real organisations, never placeholders.
+        $base = Campaign::with(['ngo'])->where('status', 'active');
+        $featured = (clone $base)->where('is_featured', true)->latest()->take(6)->get();
+        if ($featured->count() < 3) {
+            $fill = (clone $base)->where('is_featured', false)
+                ->latest()->take(6 - $featured->count())->get();
+            $featured = $featured->concat($fill);
+        }
+        $featuredCampaigns = $featured
             ->map(function ($campaign) {
                 return [
                     'id' => $campaign->id,
@@ -54,6 +57,29 @@ class WelcomeController extends Controller
                 ];
             });
 
+        // Featured organisations — real verified NGOs people can follow & support.
+        $featuredNgos = NGO::where('verification_status', 'verified')
+            ->where('is_active', true)
+            ->whereNotNull('logo')
+            ->withCount([
+                'supporters as followers_count' => fn ($q) => $q->where('is_following', true),
+                'supporters as supporters_count' => fn ($q) => $q->where('is_supporting', true),
+            ])
+            ->orderByDesc('followers_count')
+            ->take(3)
+            ->get(['id', 'name', 'slug', 'logo', 'theme_color', 'description', 'focus_areas', 'address'])
+            ->map(fn ($n) => [
+                'id' => $n->id,
+                'name' => $n->name,
+                'slug' => $n->slug,
+                'logo' => $n->logo,
+                'theme_color' => $n->theme_color ?: '#2e7d32',
+                'description' => $n->description,
+                'focus_areas' => array_slice(is_array($n->focus_areas) ? $n->focus_areas : [], 0, 3),
+                'followers_count' => $n->followers_count,
+                'supporters_count' => $n->supporters_count,
+            ]);
+
         // Get upcoming events
         $upcomingEvents = [
             [
@@ -69,6 +95,7 @@ class WelcomeController extends Controller
         return Inertia::render('Welcome', [
             'stats' => $stats,
             'featuredCampaigns' => $featuredCampaigns,
+            'featuredNgos' => $featuredNgos,
             'upcomingEvents' => $upcomingEvents,
             'seo' => array_merge(Seo::page(
                 'FEVOURD-K — Karnataka voluntary organisations hub',
