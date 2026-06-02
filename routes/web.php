@@ -134,6 +134,9 @@ Route::get('/focus/environment', [WelcomeController::class, 'focusEnvironment'])
 Route::get('/focus/community', [WelcomeController::class, 'focusCommunity'])->name('focus.community');
 Route::get('/focus/disability', [WelcomeController::class, 'focusDisability'])->name('focus.disability');
 
+// Public feed browsing — guests can read the community feed and the nearby-NGO
+// view; posting/reacting/commenting stay behind auth (see the auth group below).
+Route::get('/feeds', [FeedController::class, 'index'])->name('feeds.index');
 Route::get('/feeds/{post}', [FeedController::class, 'show'])
     ->whereNumber('post')
     ->name('feeds.show');
@@ -210,7 +213,6 @@ Route::middleware('auth')->group(function () {
     Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
     Route::get('/settings', [\App\Http\Controllers\SettingsController::class, 'index'])->name('settings.index');
     Route::put('/settings', [\App\Http\Controllers\SettingsController::class, 'update'])->name('settings.update');
-    Route::get('/feeds', [FeedController::class, 'index'])->name('feeds.index');
     Route::post('/feeds', [FeedController::class, 'store'])->name('feeds.store');
     Route::post('/feeds/{post}/react', [FeedController::class, 'react'])->name('feeds.react');
     Route::post('/feeds/{post}/comment', [FeedController::class, 'comment'])->name('feeds.comment');
