@@ -34,8 +34,8 @@
                         class="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-xl border border-slate-100 bg-slate-50 text-lg font-bold text-slate-600"
                     >
                         <img
-                            v-if="ngo.logo"
-                            :src="'/storage/' + ngo.logo"
+                            v-if="logoUrl"
+                            :src="logoUrl"
                             :alt="ngo.name"
                             class="h-full w-full object-cover"
                         >
@@ -432,6 +432,21 @@ const financeOnlyNav = computed(() => {
 const accentColor = computed(() => {
     const c = props.ngo?.theme_color
     return typeof c === 'string' && /^#(?:[0-9a-fA-F]{3}|[0-9a-fA-F]{6})$/.test(c) ? c : '#2563eb'
+})
+
+// Logo may be a public asset (/assets/...), an absolute URL, or a storage key.
+const logoUrl = computed(() => {
+    const raw = props.ngo?.logo
+    if (!raw || typeof raw !== 'string') {
+        return null
+    }
+    if (/^https?:\/\//i.test(raw) || raw.startsWith('/assets/') || raw.startsWith('/storage/')) {
+        return raw
+    }
+    if (raw.startsWith('assets/')) {
+        return `/${raw}`
+    }
+    return `/storage/${raw.replace(/^\/+/, '')}`
 })
 
 const initials = computed(() => {

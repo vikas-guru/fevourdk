@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\NGO;
 
 use App\Http\Controllers\Controller;
+use App\Models\FeedPost;
 use App\Models\NGO;
 use App\Models\NgoInventoryItem;
 use App\Models\NGOLedgerEntry;
@@ -35,6 +36,20 @@ class NGODashboardController extends Controller
                 ->where('status', 'completed')
                 ->whereMonth('created_at', now()->month)
                 ->sum('amount'),
+            // Community reach (real, from ngo_supporters via accessors)
+            'followers' => (int) $ngo->followers_count,
+            'supporters' => (int) $ngo->supporters_count,
+        ];
+
+        // Feed engagement (real, same source as Feed Studio: posts, views, reactions)
+        $feedPosts = FeedPost::where('ngo_id', $ngo->id)
+            ->withCount('reactions')
+            ->get(['id', 'views_count']);
+
+        $feed = [
+            'posts' => $feedPosts->count(),
+            'views' => (int) $feedPosts->sum('views_count'),
+            'reactions' => (int) $feedPosts->sum('reactions_count'),
         ];
 
         $inventorySummary = [
@@ -67,6 +82,7 @@ class NGODashboardController extends Controller
         return Inertia::render('NGO/Dashboard', [
             'ngo' => $ngo,
             'stats' => $stats,
+            'feed' => $feed,
             'recentDonations' => $recentDonations,
             'ledgerSummary' => [
                 'current_balance' => (float) ($ngo->ledgerEntries()->latest('id')->value('balance_after') ?? 0),
