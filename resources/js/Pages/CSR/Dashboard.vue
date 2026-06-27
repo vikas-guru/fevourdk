@@ -91,7 +91,7 @@
                                 <div class="ml-5 w-0 flex-1">
                                     <dl>
                                         <dt class="text-sm font-medium text-gray-500 truncate">Funds Distributed</dt>
-                                        <dd class="text-lg font-semibold text-gray-900">₹{{ NumberFormat(stats.total_funds_distributed).toLocaleString('en-IN') }}</dd>
+                                        <dd class="text-lg font-semibold text-gray-900">₹{{ formatNumber(stats.total_funds_distributed) }}</dd>
                                     </dl>
                                 </div>
                             </div>
@@ -123,8 +123,8 @@
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <div class="w-full">
                                             <div class="flex items-center justify-between mb-1">
-                                                <div class="text-sm text-gray-600">₹{{ NumberFormat(campaign.raised_amount).toLocaleString('en-IN') }}</div>
-                                                <div class="text-sm text-gray-500">/ ₹{{ NumberFormat(campaign.target_amount).toLocaleString('en-IN') }}</div>
+                                                <div class="text-sm text-gray-600">₹{{ formatNumber(campaign.raised_amount) }}</div>
+                                                <div class="text-sm text-gray-500">/ ₹{{ formatNumber(campaign.target_amount) }}</div>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-2">
                                                 <div class="bg-green-500 h-2 rounded-full" :style="{ width: (campaign.raised_amount / campaign.target_amount * 100) + '%' }"></div>
