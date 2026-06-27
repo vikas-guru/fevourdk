@@ -17,6 +17,7 @@
 /public/build
 /public/hot
 /public/storage
+/outputs/
 /storage/*.key
 /storage/pail
 /vendor
@@ -25,9 +26,12 @@ Homestead.yaml
 Thumbs.db
 
 # Local scratch / session artifacts
+/.agency/
 /.playwright-mcp
 /*.png
 /*.zip
 /agentdb.rvf
 /agentdb.rvf.lock
 /ruvector.db
+*.db
+*.sqlite

@@ -4,6 +4,33 @@
 
 Fevourd-K is a comprehensive technology-enabled social impact ecosystem that connects NGOs, Corporates/CSR teams, Individual donors, Vendors, and Citizens & volunteers. The platform enables transparent funding, measurable impact, and scalable social initiatives while never acting as a financial intermediary.
 
+## UiPath AgentHack Submission
+
+**ImpactOps Maestro** is the UiPath agentic automation layer for Fevourd-K. It coordinates NGO and CSR back-office workflows while Fevourd-K remains the system of record for campaigns, field proof, finance claims, ledgers, and compliance reports.
+
+### Agent Type
+
+Hybrid agentic process: UiPath Maestro orchestrates workflow decisions and human approvals, UiPath automations execute the repeatable work, and Fevourd-K provides the Laravel/Vue operating portal and APIs.
+
+### UiPath Solutions
+
+1. **Compliance Review** - reviews NGO/CSR compliance inputs and produces findings, recommendations, and status updates.
+2. **Campaign Draft** - prepares campaign/social-update drafts from Fevourd-K campaign and feed data.
+3. **Field Proof** - checks field-task evidence, active sessions, GPS trail points, and completion status.
+4. **Finance Claim** - reviews expense claims and routes approvals before approved claims post to the NGO ledger.
+5. **CSR Report** - assembles CSR impact and compliance summaries for corporate CSR users.
+6. **ImpactOps Maestro Agentic Process** - coordinates the end-to-end workflow and handoffs across the above solutions.
+
+### UiPath Components To Include In Submission
+
+- UiPath Maestro process for ImpactOps orchestration.
+- UiPath Studio projects/packages for the six workflow solutions.
+- Orchestrator queues, triggers, folders, and assets used by the demo tenant.
+- Human-in-the-loop approval evidence, such as Action Center tasks or equivalent review screens.
+- Sanitized sample payloads that show how UiPath reads from and writes back to Fevourd-K.
+
+See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklist.md](docs/agenthack-submission-checklist.md) for the current submission artifact checklist.
+
 ## 🏗️ Architecture
 
 ### Core Principles

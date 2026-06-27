@@ -2,7 +2,8 @@
 set -Eeuo pipefail
 
 # Fevourd-K Hostinger FTP deployment.
-# Keep this file local/private because it contains production credentials.
+# Public-safe wrapper: provide host, database, and FTP credentials through
+# environment variables or a private shell profile before running.
 
 APP_URL="${APP_URL:-https://fevourdk.online}"
 APP_ENV="${APP_ENV:-production}"
@@ -11,14 +12,14 @@ APP_DEBUG="${APP_DEBUG:-false}"
 DB_CONNECTION="${DB_CONNECTION:-mysql}"
 DB_HOST="${DB_HOST:-localhost}"
 DB_PORT="${DB_PORT:-3306}"
-DB_DATABASE="${DB_DATABASE:-u794352432_fevoud}"
-DB_USERNAME="${DB_USERNAME:-u794352432_fevoud}"
-DB_PASSWORD="${DB_PASSWORD:-u794352432_fevouD}"
+DB_DATABASE="${DB_DATABASE:?Set DB_DATABASE before running deploy-hostinger.sh}"
+DB_USERNAME="${DB_USERNAME:?Set DB_USERNAME before running deploy-hostinger.sh}"
+DB_PASSWORD="${DB_PASSWORD:?Set DB_PASSWORD before running deploy-hostinger.sh}"
 
-FTP_HOST="${FTP_HOST:-89.117.139.88}"
+FTP_HOST="${FTP_HOST:?Set FTP_HOST before running deploy-hostinger.sh}"
 FTP_PORT="${FTP_PORT:-21}"
-FTP_USERNAME="${FTP_USERNAME:-u794352432.fevourdk.online}"
-FTP_PASSWORD="${FTP_PASSWORD:-Daiva@Vikas2026}"
+FTP_USERNAME="${FTP_USERNAME:?Set FTP_USERNAME before running deploy-hostinger.sh}"
+FTP_PASSWORD="${FTP_PASSWORD:?Set FTP_PASSWORD before running deploy-hostinger.sh}"
 # This FTP login lands directly in the domain web root. Override to public_html
 # only if your FTP account starts one level above it.
 FTP_REMOTE_DIR="${FTP_REMOTE_DIR:-}"

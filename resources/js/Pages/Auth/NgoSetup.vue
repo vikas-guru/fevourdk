@@ -311,14 +311,14 @@ function loadLeaflet() {
 }
 
 /* ---- Google Maps Platform (Places + Geocoding) for accurate search & full address ----
-   NOTE: a browser key is public by design — RESTRICT it in Google Cloud Console
-   (HTTP referrers: 127.0.0.1:8000, fevourdk.online) and enable only
-   Maps JavaScript API + Places API + Geocoding API. Falls back to free OSM if unavailable. */
-const GMAPS_KEY = 'AIzaSyDjz8dCm4MMlLTACIFkd3B8k0F-roEQjAI'
+   Browser keys are public by design, but keep them out of source and restrict them
+   in Google Cloud Console. Falls back to free OSM if unavailable. */
+const GMAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_BROWSER_KEY || ''
 let gReady = null
 let gAuto = null, gGeocoder = null, gPlaces = null, gToken = null
 
 function loadGoogle() {
+    if (!GMAPS_KEY) return Promise.reject(new Error('Google Maps key is not configured'))
     if (window.google?.maps?.places) return Promise.resolve(window.google)
     if (gReady) return gReady
     gReady = new Promise((resolve, reject) => {
