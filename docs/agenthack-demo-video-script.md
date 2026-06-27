@@ -1,8 +1,12 @@
 # Fevourd-K × UiPath "ImpactOps Maestro" — AgentHack Demo Video Plan
 
-**Target length:** 4:45 (hard ceiling < 5:00)
+**Target length:** 4:54 (hard ceiling < 5:00)
 **Format:** Screen recording (1080p/60fps) + voiceover. No live faces required.
 **One-line promise:** *Fevourd-K is the NGO/CSR system of record; UiPath ImpactOps Maestro is the agentic operations layer that runs six back-office workflows and hands humans only the decisions that matter.*
+
+**Companion files:**
+- `docs/agenthack-video-animatic.html` — the cinematic HTML demo film (timeline-driven, self-contained). Scene timings below mirror its `data-t` / `SHOTS` `t` values exactly. It now includes a dedicated **"How we harness UiPath"** architecture scene at 0:40.
+- `docs/agenthack-voiceover.md` — the clean, timed voiceover narration (read-aloud or TTS) keyed to the same scene cues.
 
 **Branded video assets (cut these in — see §8):** `docs/agenthack-assets/video/` — `title-card.svg` (0:00), `architecture-card.svg` (4:10), `end-card.svg` (4:36), `lower-third.svg` (reusable section/persistent overlay). All carry the real Fevourd-K logo and the official blue/orange/slate palette.
 
@@ -39,6 +43,12 @@
 - **0:33** [Highlight the BPMN-style nodes in sequence.] "It coordinates six workflows: Compliance Review, Campaign Draft, Field Proof, Finance Claim, CSR Report — and the Maestro process that ties them together."
 - **0:44** [Point to a human-approval node (Action Center task) glowing in the diagram.] "Each agent reads from Fevourd-K, runs the repeatable work, and escalates real decisions to a person." **Overlay: Read → Act → Escalate → Write back**
 - **0:52** [Zoom to the start trigger.] "Let's trigger a real operations run."
+
+### 0:40–1:02 — How We Harness UiPath (architecture explainer)
+> In the **animatic**, this is the dedicated "How we harness UiPath" scene (`data-t="40"`). In a screen-recorded cut, hold the `architecture-card.svg` here (or the animatic scene itself) and let the boxes animate in. This is the judge's "aha — I get the wiring" beat; pace it slightly slower.
+- **0:40** [Architecture diagram: Fevourd-K box on top; Maestro below; Orchestrator / Studio Agents / Action Center as three pillars.] "Here's exactly how it fits together. Fevourd-K is the system of record and the human portal — it stays the single source of truth." **Overlay: Fevourd-K = system of record**
+- **0:48** [Maestro box + three pillars animate.] "UiPath Maestro orchestrates one agentic process across all six workflows. Orchestrator runs the queues, triggers, and assets. Studio agents do the work — five packages, each one reads, checks, and writes back. Action Center holds the two human gates." **Overlay: Maestro → Orchestrator · Studio · Action Center → Fevourd-K API**
+- **0:57** [Read→Act→Escalate→Write-back flow line + tagline highlight.] "The rule never bends: Fevourd-K never loses control of the data, and UiPath never decides the money alone." **Overlay: Read → Act → Escalate → Write back**
 
 ### 0:55–1:35 — Workflow 1: Compliance Review
 - **0:55** [Fevourd-K `/ngo/documents` — compliance/registration docs list, sandbox docs.] "It starts in Fevourd-K. Our demo NGO just uploaded renewal documents." **Overlay: ① Compliance Review**
@@ -168,7 +178,9 @@
 
 **Key moment overlays (timed):**
 - 0:16 — *The busywork is still manual →*
-- 0:44 — *Read → Act → Escalate → Write back*
+- 0:40 — *How we harness UiPath* (architecture scene title)
+- 0:48 — *Maestro → Orchestrator · Studio · Action Center → Fevourd-K API*
+- 0:44 / 0:57 — *Read → Act → Escalate → Write back*
 - 1:22 — *Human-in-the-loop ✓*
 - 2:04 — *Draft, not auto-post — control stays human*
 - 2:38 — *Verifiable proof, not self-reported*
@@ -221,7 +233,8 @@ All assets live in `docs/agenthack-assets/video/` (1920×1080, self-contained, r
 |------|-------|-----|
 | 0:00–0:05 | `title-card.svg` | Hold ~3s under the opening hook, then dissolve to the live `/ngo/dashboard`. |
 | Per workflow (0:55, 1:35, 2:10, 2:45, 3:25) | `lower-third.svg` | Section chip in (slide from left), swap number + label; persistent tag stays bottom-right the whole video. |
-| 4:10–4:25 | `architecture-card.svg` | Full-frame cut; optionally animate the read / write-back arrows. |
+| 0:40–1:02 | `architecture-card.svg` / animatic harness scene | **Primary "How we harness UiPath" explainer** — boxes animate in (Fevourd-K ↔ Maestro ↔ Orchestrator / Studio / Action Center). |
+| 4:10–4:25 | `architecture-card.svg` | Optional recap before the close; animate the read / write-back arrows. |
 | 4:36–4:44 | `end-card.svg` | Closing CTA; hold to fade. Fill in the GitHub / Demo / Sandbox link text before export. |
 
 ---
@@ -246,6 +259,6 @@ All assets live in `docs/agenthack-assets/video/` (1920×1080, self-contained, r
 
 **Captions / subtitles:** burn-in or sidecar `.srt` for accessibility and silent autoplay (judges often scrub muted). White text, slate `#0f172a` @ 70% rounded background, Helvetica/Arial ~32px, bottom-center but **above** the persistent tag. Mirror the voiceover verbatim; keep lines ≤ 2 rows.
 
-**Export:** 1920×1080, 60fps (or 30fps if file size matters), H.264 high profile, ~12–16 Mbps, AAC 320kbps audio. Keep the final timeline **≤ 4:50** to stay safely under the 5:00 cap.
+**Export:** 1920×1080, 60fps (or 30fps if file size matters), H.264 high profile, ~12–16 Mbps, AAC 320kbps audio. The animatic runs **4:54**; keep the final timeline **≤ 4:54** to stay safely under the 5:00 cap.
 
 **Public-safety pass before export:** confirm sandbox labels only ("Vikasana (Demo Tenant)", "Acme CSR (Sandbox)"), OTP `1234`, masked API-token asset, redacted amounts/last-4, address bar shows `localhost:8080` or a sandbox URL — no `.env`, FTP/DB/payment/social tokens, or production host on any frame.

@@ -57,6 +57,38 @@
   .arrow{opacity:0;color:#475569;font-size:clamp(18px,2.4vw,30px);font-weight:700}
   .layer.on .arrow{animation:rise .6s ease forwards;animation-delay:var(--d,0s)}
 
+  /* ===== "How we harness UiPath" architecture diagram ===== */
+  .harness{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:7.5vh 5% 3vh}
+  .hbox{opacity:0;border-radius:14px;border:1px solid #2a3a5c;background:rgba(15,23,42,.72);
+        padding:1.3vh 1.5vw;text-align:center;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+  .layer.on .hbox{animation:pop .7s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+  .hbox .ht{font-family:Cambria,serif;font-weight:700;font-size:clamp(14px,1.85vw,24px)}
+  .hbox .hs{font-size:clamp(10px,1.15vw,15px);color:#94a3b8;margin-top:.4vh}
+  .hbox.record{border-color:#2b50a8;background:linear-gradient(180deg,rgba(29,78,216,.22),rgba(15,23,42,.78))}
+  .hbox.record .ht{color:#bfdbfe}
+  .hbox.maestro{border-color:#7c3a14;background:linear-gradient(180deg,rgba(249,115,22,.20),rgba(15,23,42,.8))}
+  .hbox.maestro .ht{color:#fdba74}
+  .hpillars{display:flex;gap:1.5vw;justify-content:center;align-items:flex-start;margin:1.2vh 0}
+  .hpillar{flex:1 1 0;min-width:0;max-width:22vw}
+  .hpillar .ht{font-size:clamp(13px,1.55vw,20px)}
+  .hpillar.orch{border-color:#2b50a8}.hpillar.orch .ht{color:#93c5fd}
+  .hpillar.studio{border-color:#2b50a8}.hpillar.studio .ht{color:#93c5fd}
+  .hpillar.action{border-color:#7c3a14}.hpillar.action .ht{color:#fdba74}
+  .pkgs{display:flex;flex-wrap:wrap;gap:.4vw;justify-content:center;margin-top:.85vh}
+  .pkg{opacity:0;font-size:clamp(9px,1.02vw,13px);font-weight:600;color:#cbd5e1;
+       background:rgba(37,99,235,.16);border:1px solid rgba(96,165,250,.32);border-radius:999px;padding:.42vh .7vw;white-space:nowrap}
+  .layer.on .pkg{animation:rise .5s ease forwards;animation-delay:var(--d,0s)}
+  .gate{opacity:0;font-size:clamp(9px,1.02vw,13px);font-weight:700;color:#1a1206;
+        background:#fdba74;border-radius:8px;padding:.5vh .7vw;margin-top:.55vh;white-space:nowrap}
+  .layer.on .gate{animation:rise .5s ease forwards;animation-delay:var(--d,0s)}
+  .hconn{opacity:0;color:#475569;font-weight:700;font-size:clamp(14px,1.9vw,24px);line-height:1;margin:.2vh 0}
+  .layer.on .hconn{animation:rise .55s ease forwards;animation-delay:var(--d,0s)}
+  .hflow{opacity:0;display:flex;align-items:center;flex-wrap:wrap;justify-content:center;gap:.55vw;font-size:clamp(10px,1.2vw,16px);font-weight:700;letter-spacing:.4px;margin-top:1.3vh}
+  .layer.on .hflow{animation:rise .6s ease forwards;animation-delay:var(--d,0s)}
+  .hflow b{font-family:Cambria,serif}
+  .hflow .r{color:#93c5fd}.hflow .a{color:#cbd5e1}.hflow .e{color:#fdba74}.hflow .w{color:#86efac}
+  .hflow .sep{color:#475569;font-weight:400}
+
   /* screenshot scene */
   .scene{position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 8%,#16264d,#0b1220 55%,#070b16)}
   .browser{position:absolute;top:50%;left:50%;width:73%;border-radius:14px;overflow:hidden;background:#0f172a;
@@ -148,8 +180,69 @@
       </div>
     </div>
 
+    <!-- 3 · HOW WE HARNESS UiPath (architecture explainer) -->
+    <div class="layer cine" data-t="40" data-label="How we harness UiPath" data-cap="The architecture: Fevourd-K is the system of record; UiPath is the agentic layer that reads, acts, escalates, and writes back.">
+      <div class="water"></div><div class="vig"></div><div class="grain"></div>
+      <div class="harness">
+        <div class="kt eyebrow" style="--d:.05s;position:absolute;top:5vh;left:0;right:0;text-align:center">How we harness UiPath</div>
+
+        <!-- system of record -->
+        <div class="hbox record" style="--d:.35s">
+          <div class="ht">Fevourd-K — System of Record &amp; Human Portal</div>
+          <div class="hs">Laravel · Vue / Inertia · secure API — the single source of truth</div>
+        </div>
+
+        <div class="hconn" style="--d:.7s">▲ write back &nbsp;·&nbsp; read ▼</div>
+
+        <!-- maestro -->
+        <div class="hbox maestro" style="--d:.95s">
+          <div class="ht">UiPath · ImpactOps Maestro</div>
+          <div class="hs">agentic process — orchestrates all six workflows</div>
+        </div>
+
+        <div class="hconn" style="--d:1.25s">▼</div>
+
+        <!-- three pillars -->
+        <div class="hpillars">
+          <div class="hbox hpillar orch" style="--d:1.5s">
+            <div class="ht">Orchestrator</div>
+            <div class="hs">queues · triggers · assets</div>
+            <div class="pkgs">
+              <span class="pkg" style="--d:1.7s">5 queues</span>
+              <span class="pkg" style="--d:1.8s">cron + event triggers</span>
+              <span class="pkg" style="--d:1.9s">sandbox token · ₹ threshold</span>
+            </div>
+          </div>
+          <div class="hbox hpillar studio" style="--d:1.7s">
+            <div class="ht">Studio Agents</div>
+            <div class="hs">read → check → write</div>
+            <div class="pkgs">
+              <span class="pkg" style="--d:1.95s">① Compliance</span>
+              <span class="pkg" style="--d:2.05s">② Campaign</span>
+              <span class="pkg" style="--d:2.15s">③ Field Proof</span>
+              <span class="pkg" style="--d:2.25s">④ Finance Claim</span>
+              <span class="pkg" style="--d:2.35s">⑤ CSR Report</span>
+            </div>
+          </div>
+          <div class="hbox hpillar action" style="--d:1.9s">
+            <div class="ht">Action Center</div>
+            <div class="hs">human-in-the-loop gates</div>
+            <div class="pkgs" style="flex-direction:column">
+              <span class="gate" style="--d:2.2s">✋ Compliance sign-off</span>
+              <span class="gate" style="--d:2.35s">✋ Finance approve / reject</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hflow" style="--d:2.7s">
+          <b class="r">Read</b><span class="sep">→</span><b class="a">Act</b><span class="sep">→</span><b class="e">Escalate</b><span class="sep">→</span><b class="w">Write back</b>
+          <span class="sep">&nbsp;·&nbsp; Fevourd-K never loses the data · UiPath never decides the money alone</span>
+        </div>
+      </div>
+    </div>
+
     <!-- IMPACT (inserted later by time) -->
-    <div class="layer cine" data-t="232" data-label="The impact" data-cap="Less time on paperwork. More clean water delivered.">
+    <div class="layer cine" data-t="242" data-label="The impact" data-cap="Less time on paperwork. More clean water delivered.">
       <div class="water"></div><div class="vig"></div><div class="grain"></div>
       <div class="cwrap center">
         <div class="kt eyebrow" style="--d:.1s">Vikasana · this quarter (sandbox)</div>
@@ -167,10 +260,10 @@
 
   <div id="brand"></div>
   <div id="cap"><span id="captext"></span></div>
-  <div id="ctl"><span id="tcode">0:00 / 4:45</span><button id="mute">🔊 Music</button><button id="pp">Pause</button><button id="rs">Restart</button></div>
+  <div id="ctl"><span id="tcode">0:00 / 4:54</span><button id="mute">🔊 Music</button><button id="pp">Pause</button><button id="rs">Restart</button></div>
   <div id="start">
     <h1>ImpactOps Maestro</h1>
-    <p>Fevourd-K × UiPath — a 4:45 demo film · click to play (sound on)</p>
+    <p>Fevourd-K × UiPath — a 4:54 demo film · click to play (sound on)</p>
     <div class="play"></div>
   </div>
 </div></div>
@@ -182,21 +275,21 @@ const shot = n => base+"screenshots/"+n+".png";
 
 // screenshot scenes (built via DOM, inserted by data-t)
 const SHOTS = [
-  {t:50, img:'04-ngo-dashboard', url:'localhost:8080/ngo/dashboard', label:'System of record', otag:'Fevourd-K — NGO/CSR System of Record', otagCls:'blue', cap:'Fevourd-K is the single source of truth — campaigns, field work, finance, compliance.'},
-  {t:62, img:'05-compliance-documents', url:'localhost:8080/ngo/documents', chip:'Compliance Review', chipN:'1', label:'① Compliance', cap:'Vikasana uploads its 12A / 80G renewal docs. The agent checks expiry, fields, status.'},
-  {t:78, img:'05-compliance-documents', url:'UiPath Action Center · sign-off', chip:'Compliance Review', chipN:'1', label:'① Compliance', otag:'Human-in-the-loop ✓', cap:'It flags a doc expiring soon and routes a summary to a compliance officer.'},
-  {t:92, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', cap:'A donor update for the Clean Water campaign — ₹5.12L raised of ₹8L.'},
-  {t:108, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', otag:'Draft, not auto-post — control stays human', otagCls:'blue', cap:'The agent drafts the copy and impact numbers — the NGO reviews and schedules.'},
-  {t:122, img:'08-field-proof-trail', url:'localhost:8080/ngo/field/sessions/…/trail', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', cap:'In Mandya, staff log a borewell visit — captured as a live GPS trail.'},
-  {t:140, img:'08-field-proof-trail', url:'Orchestrator · field-proof-queue', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', otag:'Verifiable proof, not self-reported', otagCls:'green', cap:'The agent verifies the session against the assigned site, then marks it Verified.'},
-  {t:156, img:'09-finance-claims', url:'localhost:8080/ngo/finance/claims', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', cap:'A ₹4,250 field-travel claim arrives. The agent checks budget line and policy limits.'},
-  {t:172, img:'09-finance-claims', url:'UiPath Action Center · Approve / Reject', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Money decisions = always human', cap:'Over threshold? Escalated — a finance officer approves or rejects in Action Center.'},
-  {t:186, img:'10-ledger-writeback', url:'localhost:8080/ngo/ledger', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Approved → posted to ledger', otagCls:'green', cap:'On approval, the entry posts straight to the NGO ledger — no manual re-keying.'},
-  {t:200, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', cap:'Acme CSR wants this quarter’s impact report — verified proof, approved spend, compliance.'},
-  {t:218, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', otag:'From a week of chasing → on demand', otagCls:'blue', cap:'One CSR-ready summary — every number traceable to a verified source.'},
+  {t:62, img:'04-ngo-dashboard', url:'localhost:8080/ngo/dashboard', label:'System of record', otag:'Fevourd-K — NGO/CSR System of Record', otagCls:'blue', cap:'Fevourd-K is the single source of truth — campaigns, field work, finance, compliance.'},
+  {t:74, img:'05-compliance-documents', url:'localhost:8080/ngo/documents', chip:'Compliance Review', chipN:'1', label:'① Compliance', cap:'Vikasana uploads its 12A / 80G renewal docs. The agent checks expiry, fields, status.'},
+  {t:90, img:'05-compliance-documents', url:'UiPath Action Center · sign-off', chip:'Compliance Review', chipN:'1', label:'① Compliance', otag:'Human-in-the-loop ✓', cap:'It flags a doc expiring soon and routes a summary to a compliance officer.'},
+  {t:104, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', cap:'A donor update for the Clean Water campaign — ₹5.12L raised of ₹8L.'},
+  {t:120, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', otag:'Draft, not auto-post — control stays human', otagCls:'blue', cap:'The agent drafts the copy and impact numbers — the NGO reviews and schedules.'},
+  {t:134, img:'08-field-proof-trail', url:'localhost:8080/ngo/field/sessions/…/trail', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', cap:'In Mandya, staff log a borewell visit — captured as a live GPS trail.'},
+  {t:152, img:'08-field-proof-trail', url:'Orchestrator · field-proof-queue', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', otag:'Verifiable proof, not self-reported', otagCls:'green', cap:'The agent verifies the session against the assigned site, then marks it Verified.'},
+  {t:168, img:'09-finance-claims', url:'localhost:8080/ngo/finance/claims', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', cap:'A ₹4,250 field-travel claim arrives. The agent checks budget line and policy limits.'},
+  {t:184, img:'09-finance-claims', url:'UiPath Action Center · Approve / Reject', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Money decisions = always human', cap:'Over threshold? Escalated — a finance officer approves or rejects in Action Center.'},
+  {t:198, img:'10-ledger-writeback', url:'localhost:8080/ngo/ledger', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Approved → posted to ledger', otagCls:'green', cap:'On approval, the entry posts straight to the NGO ledger — no manual re-keying.'},
+  {t:212, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', cap:'Acme CSR wants this quarter’s impact report — verified proof, approved spend, compliance.'},
+  {t:228, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', otag:'From a week of chasing → on demand', otagCls:'blue', cap:'One CSR-ready summary — every number traceable to a verified source.'},
 ];
 // closing card
-const CARDS = [{t:262, img:'end-card', label:'Close', cap:'ImpactOps Maestro — the agentic back-office for social impact.'}];
+const CARDS = [{t:272, img:'end-card', label:'Close', cap:'ImpactOps Maestro — the agentic back-office for social impact.'}];
 
 const layers=document.getElementById('layers');
 function dots(bar){['#ef4444','#f59e0b','#22c55e'].forEach(c=>{const d=document.createElement('span');d.className='dot';d.style.background=c;bar.appendChild(d);});}
@@ -220,7 +313,7 @@ CARDS.forEach(s=>{
 // unify + sort all layers by time
 const ALL=[...document.querySelectorAll('.layer')].map(el=>({el,t:+el.dataset.t,cap:el.dataset.cap||'',label:el.dataset.label||'',cine:el.classList.contains('cine')}))
   .sort((a,b)=>a.t-b.t);
-const TOTAL=288;
+const TOTAL=294;
 
 // brand strip
 (function(){const b=document.getElementById('brand');const b1=document.createElement('b');b1.textContent='Fevourd-K';const sp=document.createElement('span');sp.className='o';sp.textContent='UiPath ImpactOps Maestro';
@@ -251,7 +344,7 @@ function show(i){
 function frame(now){
   if(!playing)return;elapsed=(now-t0)/1000;if(elapsed>=TOTAL){elapsed=TOTAL;playing=false;}
   let idx=0;for(let i=0;i<ALL.length;i++){if(elapsed>=ALL[i].t)idx=i;}
-  show(idx);fill.style.width=(elapsed/TOTAL*100)+'%';tcode.textContent=fmt(elapsed)+' / 4:48';
+  show(idx);fill.style.width=(elapsed/TOTAL*100)+'%';tcode.textContent=fmt(elapsed)+' / 4:54';
   if(playing)raf=requestAnimationFrame(frame);
 }
 
