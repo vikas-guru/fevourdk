@@ -8,15 +8,28 @@
 
 ## ⬛ FILL THESE 4 LINKS (do this first so you don't forget)
 
-1. **GitHub:** `https://github.com/spreadmarketingservice-ux/fevourdk`
+1. **GitHub:** `https://github.com/vikas-guru/fevourdk`
    - ⚠️ Repo is currently **PRIVATE**. Make it public before submitting (judges must be able to open it signed-out):
-     - One command: `gh repo edit spreadmarketingservice-ux/fevourdk --visibility public --accept-visibility-change-consequences`
+     - One command: `gh repo edit vikas-guru/fevourdk --visibility public --accept-visibility-change-consequences`
      - Or via UI: GitHub → repo → Settings → General → Danger Zone → Change visibility → Public.
      - Then open it in an **incognito window** to confirm it loads signed-out.
      - Note: everything lives on branch `codex/agenthack-submission-prep` — either submit that branch URL or merge to `main` first.
 2. **Demo video URL:** `<paste YouTube unlisted (public-link) URL>`  ← must play signed-out, < 5:00, audio audible.
 3. **Deck:** upload `docs/agenthack-deck.pptx` directly on Devpost (4.0 MB, 13 slides) — or paste a public deck link if you'd rather host it.
-4. **Live sandbox URL:** `available on request` (read-only sandbox API; do not publish the token).
+4. **Live sandbox URL:** `https://fevourdk.online/` — the live product/portal (HTTP 200, works now). This is the "Live demo (sandbox)" link judges click.
+
+### URL strategy (read before pasting link #4)
+
+| What | URL | Status |
+|---|---|---|
+| **Live demo (sandbox)** — the product/portal | `https://fevourdk.online/` | ✅ Live now (HTTP 200) |
+| **UiPath agent API base** (bearer token) | `https://fevourdk.online/api` | 🟡 Live after the API deploy (see `docs/agenthack-deploy-api-to-prod.md`) |
+| **UiPath agent API base** (local fallback) | `http://127.0.0.1:8080/api` | ✅ Works locally now (`php artisan serve`) |
+
+- Put **`https://fevourdk.online/`** in the Devpost "Live demo" field — it always works signed-out.
+- The **agent API** (`/api`, token-guarded) is what UiPath calls. Until it is deployed to prod (a one-time, ~5-minute upload — see `docs/agenthack-deploy-api-to-prod.md`), it runs on `:8080` locally. `https://fevourdk.online/api/health` returns 404 until then.
+- **Never publish the token.** In all docs/screenshots show it masked: `Authorization: Bearer ****`. Default sandbox token is `sandbox-impactops-demo-token`, overridable via the `UIPATH_AGENT_TOKEN` env var.
+- Orchestration walkthrough for judges: **`docs/agenthack-orchestration.md`** (six worked examples + end-to-end diagram + live curl).
 
 ---
 
@@ -124,7 +137,7 @@ Tailwind CSS
 | Try it out links → GitHub | FILL-LINKS #1 (make public first!) | ☐ |
 | Video demo link | FILL-LINKS #2 | ☐ |
 | Deck / additional links | FILL-LINKS #3 (upload `docs/agenthack-deck.pptx`) | ☐ |
-| Live demo / sandbox | FILL-LINKS #4 ("available on request") | ☐ |
+| Live demo / sandbox | FILL-LINKS #4 (`https://fevourdk.online/`) | ☐ |
 
 ---
 

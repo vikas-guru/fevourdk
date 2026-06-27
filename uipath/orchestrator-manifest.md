@@ -32,13 +32,17 @@ A long-running Maestro process that coordinates the six workflows and the human 
 
 ## 2. Studio packages (one per workflow)
 
-| Package | Reads from Fevourd-K | Writes back |
+Base URL (live): `https://fevourdk.online/api` · local fallback `http://127.0.0.1:8080/api`.
+All reads are the real, token-guarded endpoints below; writes go through the authenticated app routes.
+
+| Package | Reads from Fevourd-K (live endpoint) | Writes back |
 |---------|----------------------|-------------|
-| `Compliance Review` | `GET /api/ngo/documents` | doc status → `Reviewed` |
-| `Campaign Draft` | `GET /api/ngo/campaigns`, `/feed` | draft post in Feed Studio |
-| `Field Proof` | `GET /api/ngo/field/sessions/{id}/trail` | task badge → `Verified` |
-| `Finance Claim` | `GET /api/ngo/finance/claims` | `PATCH …/claims/{id}` decide → ledger entry |
-| `CSR Report` | aggregates verified proof + approved spend + compliance | CSR report artifact |
+| `Compliance Review` | `GET /api/ngo/vikasana/documents` | doc status → `Reviewed` (app route) |
+| `Campaign Draft` | `GET /api/ngo/vikasana/campaigns/{slug}` | draft post in Feed Studio (app route) |
+| `Field Proof` | `GET /api/field/sessions/{id}/trail` | task badge → `Verified` (app route) |
+| `Finance Claim` | `GET /api/ngo/vikasana/finance/claims` | claim decide → ledger entry (app route) |
+| `CSR Report` | `GET /api/ngo/vikasana/csr/impact` (aggregate) | CSR report artifact (app route) |
+| `Health probe` | `GET /api/health` | — |
 
 ---
 
@@ -56,8 +60,8 @@ A long-running Maestro process that coordinates the six workflows and the human 
 
 | Asset | Type | Value (sandbox) |
 |-------|------|-----------------|
-| `fevourdk-api-base` | Text | `https://sandbox.fevourdk.local/api` |
-| `fevourdk-api-token` | Credential | **masked** — demo bearer token |
+| `fevourdk-api-base` | Text | `https://fevourdk.online/api` (live) — local fallback `http://127.0.0.1:8080/api` |
+| `fevourdk-api-token` | Credential | **masked** — `Bearer ****` (env `UIPATH_AGENT_TOKEN`) |
 | `finance-approval-threshold` | Integer | `5000` (₹) |
 | `csr-report-schedule` | Text | `cron(0 6 1 */3 *)` |
 

@@ -6,6 +6,11 @@ This folder is the public manifest for the UiPath AgentHack submission.
 
 **ImpactOps Maestro Agentic Process** coordinates the Fevourd-K NGO/CSR operations workflows and keeps Fevourd-K as the system of record.
 
+**API base URL:** `https://fevourdk.online/api` (live, after the API deploy — see
+`docs/agenthack-deploy-api-to-prod.md`) · local fallback `http://127.0.0.1:8080/api`.
+Bearer-token guarded (shown masked everywhere as `Bearer ****`; env `UIPATH_AGENT_TOKEN`).
+Full worked walkthrough: `docs/agenthack-orchestration.md`.
+
 ## Solutions To Export
 
 1. Compliance Review

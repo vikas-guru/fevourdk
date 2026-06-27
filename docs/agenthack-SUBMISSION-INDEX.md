@@ -25,6 +25,8 @@ Status legend: ✅ ready · 🟡 needs you tomorrow.
 | ✅ | Orchestrator/Maestro manifest | `uipath/orchestrator-manifest.md` | Maestro nodes, Studio packages, queues, assets, triggers, Action Center tasks. |
 | ✅ | Sample payloads (sanitized) | `uipath/sample-payloads.md` | Read/write request/response bodies; token masked. |
 | ✅ | UiPath artifacts README | `uipath/README.md` | What UiPath evidence to include + public-safety rules. |
+| ✅ | Orchestration walkthrough (judge-facing) | `docs/agenthack-orchestration.md` | Six worked Vikasana examples + Mermaid sequence diagram + live curl + 2 roadmap workflows. |
+| ✅ | Prod API deploy plan (go/no-go) | `docs/agenthack-deploy-api-to-prod.md` | Ready-to-run plan to make `/api` live on fevourdk.online (5 files, env token, cache cmds, verify curl). NOT executed. |
 | ✅ | Screenshot capture checklist | `uipath/screenshots/README.md` | Exact filenames + what each sandbox screenshot must show. |
 | 🟡 | Real UiPath screenshots | `uipath/screenshots/*.png` | **You capture tomorrow** from the sandbox (token masked). |
 

@@ -3,7 +3,10 @@
 Demo-tenant payloads showing how each UiPath workflow reads from and writes back to
 Fevourd-K. **Public-safe:** fake IDs, fake amounts, redacted PII, sandbox token (masked).
 
-Auth header on every call (value masked): `Authorization: Bearer ****sandbox****`
+**Base URL:** `https://fevourdk.online/api` (live, after the API deploy — see
+`docs/agenthack-deploy-api-to-prod.md`) · local fallback `http://127.0.0.1:8080/api`.
+
+Auth header on every call (value masked): `Authorization: Bearer ****`
 
 > **These are live, built endpoints.** Fevourd-K exposes a read-only, token-guarded agent
 > API (`routes/api.php`, guarded by `VerifyUipathToken`). UiPath agents **read** state from it;
@@ -26,7 +29,7 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 
 ## ① Compliance Review
 
-**Read** — `GET /api/ngo/documents?ngo_id=VK-DEMO-001`
+**Read** — `GET https://fevourdk.online/api/ngo/vikasana/documents`
 ```json
 { "documents": [
   { "id": "doc_12a", "type": "registration_certificate", "status": "verified", "expires_on": "2027-03-31" },
@@ -42,7 +45,7 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 
 ## ② Campaign Draft
 
-**Read** — `GET /api/ngo/campaigns/clean-water-mandya`
+**Read** — `GET https://fevourdk.online/api/ngo/vikasana/campaigns/clean-drinking-water-for-mandya-villages`
 ```json
 { "title": "Clean Drinking Water for Mandya Villages", "raised": 512000, "target": 800000,
   "field_progress": { "villages_covered": 12, "borewells": 3 } }
@@ -55,7 +58,7 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 
 ## ③ Field Proof
 
-**Read** — `GET /api/ngo/field/sessions/sess_4471/trail`
+**Read** — `GET https://fevourdk.online/api/field/sessions/4471/trail`
 ```json
 { "session_id": "sess_4471", "assigned_site": "Kyathanahalli, Mandya",
   "active": true, "points": 38, "start": "09:12", "end": "11:40", "completed": true }
@@ -68,7 +71,7 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 
 ## ④ Finance Claim  ← the bidirectional proof point
 
-**Read** — `GET /api/ngo/finance/claims/claim_2207`
+**Read** — `GET https://fevourdk.online/api/ngo/vikasana/finance/claims` (then select `claim_2207`)
 ```json
 { "id": "claim_2207", "claimant": "M. C. Guru", "amount": 4250, "category": "travel",
   "budget_line": "field-operations", "receipt": "rcpt_2207.jpg", "status": "submitted" }
@@ -88,7 +91,7 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 
 ## ⑤ CSR Report
 
-**Read** (aggregate) — `GET /api/csr/impact?corporate_id=ACME-CSR&period=2026-Q2`
+**Read** (aggregate) — `GET https://fevourdk.online/api/ngo/vikasana/csr/impact`
 ```json
 { "verified_field_sessions": 12, "approved_spend": 1475750, "compliance": "1 item due",
   "beneficiaries": 1240, "sdg": ["SDG 6"] }
@@ -104,3 +107,36 @@ Auth header on every call (value masked): `Authorization: Bearer ****sandbox****
 **Why this matters:** every agent action is a real read + a real write back into Fevourd-K,
 with the two money/compliance decisions gated by a human. Fevourd-K stays the system of record
 and the audit trail; UiPath is the agentic operations layer.
+
+---
+
+## How UiPath calls the live API (real curl)
+
+Token shown masked. Set the real token in the Orchestrator credential asset / `UIPATH_AGENT_TOKEN`.
+
+```bash
+BASE="https://fevourdk.online/api"   # local fallback: http://127.0.0.1:8080/api
+TOKEN="****"                          # never commit the real value
+
+# 0) Health
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/health"
+
+# 1) Compliance Review — documents
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/ngo/vikasana/documents"
+
+# 2) Campaign Draft — campaign
+curl -s -H "Authorization: Bearer $TOKEN" \
+  "$BASE/ngo/vikasana/campaigns/clean-drinking-water-for-mandya-villages"
+
+# 3) Finance Claim — claims
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/ngo/vikasana/finance/claims"
+
+# 4) CSR Report — aggregate impact
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/ngo/vikasana/csr/impact"
+
+# 5) Field Proof — GPS trail for a session
+curl -s -H "Authorization: Bearer $TOKEN" "$BASE/field/sessions/4471/trail"
+```
+
+A missing/invalid token returns `401 {"error":"unauthorized"}`. Until the API is deployed to prod,
+`https://fevourdk.online/api/health` returns `404` — use the local base until then.
