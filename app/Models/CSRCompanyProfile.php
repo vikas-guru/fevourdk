@@ -11,6 +11,8 @@ class CSRCompanyProfile extends Model
 {
     use HasFactory;
 
+    protected $table = 'csr_company_profiles';
+
     protected $fillable = [
         'company_name',
         'company_type',
@@ -51,7 +53,7 @@ class CSRCompanyProfile extends Model
 
     public function contactPerson(): HasMany
     {
-        return $this->hasMany(CSRContactPerson::class);
+        return $this->hasMany(CSRContactPerson::class, 'csr_company_profile_id');
     }
 
     public function campaigns(): HasMany
@@ -61,17 +63,17 @@ class CSRCompanyProfile extends Model
 
     public function domains(): HasMany
     {
-        return $this->hasMany(CSRDomain::class);
+        return $this->hasMany(CSRDomain::class, 'company_id');
     }
 
     public function analytics(): HasMany
     {
-        return $this->hasMany(CSRAnalytics::class);
+        return $this->hasMany(CSRAnalytics::class, 'company_id');
     }
 
     public function complianceReports(): HasMany
     {
-        return $this->hasMany(CSRComplianceReport::class);
+        return $this->hasMany(CSRComplianceReport::class, 'company_id');
     }
 
     public function getCompanyLogoUrlAttribute(): string

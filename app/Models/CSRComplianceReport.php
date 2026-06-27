@@ -10,6 +10,8 @@ class CSRComplianceReport extends Model
 {
     use HasFactory;
 
+    protected $table = 'csr_compliance_reports';
+
     protected $fillable = [
         'company_id',
         'report_type',
@@ -35,7 +37,7 @@ class CSRComplianceReport extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(CSRCompanyProfile::class);
+        return $this->belongsTo(CSRCompanyProfile::class, 'company_id');
     }
 
     public function getComplianceScoreColorAttribute(): string

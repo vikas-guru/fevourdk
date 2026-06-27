@@ -182,7 +182,7 @@ class CSRController extends Controller
             ->groupBy('year')
             ->orderBy('year', 'desc')
             ->get()
-            ->map(function ($year) {
+            ->map(function ($year) use ($company) {
                 $year->quarters = $company->analytics()
                     ->where('year', $year->year)
                     ->get();
@@ -198,9 +198,15 @@ class CSRController extends Controller
         // Get domains
         $domains = $company->domains()->get();
 
+        $hasCsrCampaignLink = \Illuminate\Support\Facades\Schema::hasColumn('campaigns', 'company_id');
+        $campaignCount = $hasCsrCampaignLink ? $company->campaigns()->count() : 0;
+        $recentCampaigns = $hasCsrCampaignLink
+            ? $company->campaigns()->latest()->take(5)->get()
+            : collect();
+
         // Calculate stats
         $stats = [
-            'total_campaigns' => $company->campaigns()->count(),
+            'total_campaigns' => $campaignCount,
             'active_domains' => $company->domains()->where('verification_status', 'verified')->count(),
             'sdg_aligned' => 12, // This would be calculated from actual SDG alignment
             'compliance_score' => $complianceReports->first() ? $complianceReports->first()->compliance_score : 0,
@@ -209,7 +215,7 @@ class CSRController extends Controller
         return Inertia::render('CSR/Dashboard', [
             'company' => $company,
             'stats' => $stats,
-            'recent_campaigns' => $company->campaigns()->latest()->take(5)->get(),
+            'recent_campaigns' => $recentCampaigns,
             'analytics' => $analytics,
             'complianceReports' => $complianceReports,
             'domains' => $domains,

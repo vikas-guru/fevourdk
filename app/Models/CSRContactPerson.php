@@ -10,6 +10,8 @@ class CSRContactPerson extends Model
 {
     use HasFactory;
 
+    protected $table = 'csr_contact_persons';
+
     protected $fillable = [
         'name',
         'designation',

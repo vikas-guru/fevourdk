@@ -10,6 +10,8 @@ class CSRAnalytics extends Model
 {
     use HasFactory;
 
+    protected $table = 'csr_analytics';
+
     protected $fillable = [
         'company_id',
         'year',
@@ -38,7 +40,7 @@ class CSRAnalytics extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(CSRCompanyProfile::class);
+        return $this->belongsTo(CSRCompanyProfile::class, 'company_id');
     }
 
     public function getFormattedTotalFundsAttribute(): string

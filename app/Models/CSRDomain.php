@@ -10,6 +10,8 @@ class CSRDomain extends Model
 {
     use HasFactory;
 
+    protected $table = 'csr_domains';
+
     protected $fillable = [
         'company_id',
         'domain_name',
@@ -26,7 +28,7 @@ class CSRDomain extends Model
 
     public function company(): BelongsTo
     {
-        return $this->belongsTo(CSRCompanyProfile::class);
+        return $this->belongsTo(CSRCompanyProfile::class, 'company_id');
     }
 
     public function getVerificationStatusBadgeAttribute(): string
