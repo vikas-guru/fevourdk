@@ -69,4 +69,12 @@ return [
         'client_id' => env('ADSENSE_CLIENT_ID'),
     ],
 
+    /*
+    | UiPath "ImpactOps Maestro" agent API bearer token. Sandbox/demo default;
+    | override via UIPATH_AGENT_TOKEN. Guards the read-only /api/* agent endpoints.
+    */
+    'uipath' => [
+        'token' => env('UIPATH_AGENT_TOKEN', 'sandbox-impactops-demo-token'),
+    ],
+
 ];

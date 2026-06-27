@@ -5,6 +5,23 @@ Fevourd-K. **Public-safe:** fake IDs, fake amounts, redacted PII, sandbox token 
 
 Auth header on every call (value masked): `Authorization: Bearer ****sandbox****`
 
+> **These are live, built endpoints.** Fevourd-K exposes a read-only, token-guarded agent
+> API (`routes/api.php`, guarded by `VerifyUipathToken`). UiPath agents **read** state from it;
+> **writes** (claim decisions, ledger posts, doc reviews) go through the existing authenticated
+> app routes so the human-in-the-loop and audit trail stay intact. Verified against the seeded
+> `vikasana` demo NGO. Real paths:
+>
+> | Purpose | Live endpoint |
+> |---|---|
+> | Documents | `GET /api/ngo/vikasana/documents` |
+> | Campaign | `GET /api/ngo/vikasana/campaigns/clean-drinking-water-for-mandya-villages` |
+> | Claims | `GET /api/ngo/vikasana/finance/claims` |
+> | CSR impact | `GET /api/ngo/vikasana/csr/impact` |
+> | Field trail | `GET /api/field/sessions/{id}/trail` |
+> | Health | `GET /api/health` |
+>
+> The JSON shapes below are illustrative; the live responses carry the same fields from the seeded sandbox data.
+
 ---
 
 ## ① Compliance Review
