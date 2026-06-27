@@ -29,7 +29,7 @@ Hybrid agentic process: UiPath Maestro orchestrates workflow decisions and human
 - Human-in-the-loop approval evidence, such as Action Center tasks or equivalent review screens.
 - Sanitized sample payloads that show how UiPath reads from and writes back to Fevourd-K.
 
-See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklist.md](docs/agenthack-submission-checklist.md) for the current submission artifact checklist.
+See [docs/agenthack-GO-LIVE-tomorrow.md](docs/agenthack-GO-LIVE-tomorrow.md) for the submission runbook, [docs/agenthack-SUBMISSION-INDEX.md](docs/agenthack-SUBMISSION-INDEX.md) for the full artifact index, the branded deck at [docs/agenthack-deck.pptx](docs/agenthack-deck.pptx), and [uipath/README.md](uipath/README.md) for the UiPath manifest.
 
 ## 🏗️ Architecture
 
@@ -45,11 +45,11 @@ See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklis
 ### Technology Stack
 
 **Backend:**
-- Laravel 11+
+- Laravel 12
 - PHP 8.2+
-- REST APIs (JSON)
-- Queue system (Redis)
-- Job processing (Horizon)
+- REST APIs (JSON) — incl. the read-only ImpactOps Maestro agent API (`routes/api.php`)
+- Queue system
+- Job processing
 
 **Frontend:**
 - Laravel + Inertia.js
@@ -58,8 +58,8 @@ See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklis
 - PWA enabled
 
 **Database:**
-- PostgreSQL
-- Redis (cache, queues)
+- MySQL 8+ / MariaDB
+- Redis optional (cache, queues)
 
 **Mobile Strategy:**
 - Android: Trusted Web Activity (TWA)
@@ -156,8 +156,8 @@ See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklis
 - PHP 8.2+
 - Composer
 - Node.js & NPM
-- PostgreSQL
-- Redis
+- MySQL 8+ / MariaDB (XAMPP works fine)
+- Redis (optional)
 
 ### Installation Steps
 
@@ -180,18 +180,32 @@ See [uipath/README.md](uipath/README.md) and [docs/agenthack-submission-checklis
    ```
 
 4. **Database configuration**
-   - Configure PostgreSQL in `.env`
+   - Create a MySQL database and set `DB_*` in `.env` (default connection is `mysql`)
    - Run migrations: `php artisan migrate`
    - Seed data: `php artisan db:seed`
 
 5. **Start development servers**
    ```bash
-   # Laravel server
-   php artisan serve
+   # Laravel server (local dev runs on :8080)
+   php artisan serve --port=8080
    
    # Vite dev server (in another terminal)
    npm run dev
    ```
+
+### Demo / showcase accounts
+
+After seeding, the **Vikasana** NGO showcase is preloaded (real demo campaign
+"Clean Water for Mandya", ₹5.12L / ₹8L). Log in from the home page and use the
+**OTP `1234`** for any demo account. To reset the demo data at any time:
+
+```bash
+php artisan migrate:fresh --seed
+```
+
+The seeders that matter: `VikasanaShowcaseSeeder` (showcase NGO + campaign + field
+proof + finance + CSR data), `RolePermissionSeeder` (the 8 roles), and
+`EnsureDemoNgoAdminSeeder` (demo NGO admin login).
 
 ## 🏢 User Roles & Permissions
 

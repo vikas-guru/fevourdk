@@ -35,3 +35,8 @@ Thumbs.db
 /ruvector.db
 *.db
 *.sqlite
+.claude/
+.playwright-cli/
+output/playwright/harness-scene.png
+docs/agenthack-assets/*.mp4
+docs/agenthack-assets/*.mp3
