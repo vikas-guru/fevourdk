@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>ImpactOps Maestro — Fevourd-K × UiPath · Demo Animatic</title>
+<style>
+  :root{
+    --navy:#0f172a; --blue3:#2563eb; --orange:#f97316; --green:#16a34a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%;background:#070b16;color:#fff;font-family:Calibri,"Segoe UI",system-ui,sans-serif;overflow:hidden}
+  #app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  #stage{position:relative;width:min(100vw,177.78vh);height:min(56.25vw,100vh);background:#0b1220;overflow:hidden;
+         box-shadow:0 30px 90px rgba(0,0,0,.6)}
+  .layer{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+  .layer.on{opacity:1}
+  .card-bg{width:100%;height:100%;object-fit:cover}
+  .scene{position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 10%, #16264d 0%, #0b1220 55%, #070b16 100%)}
+  .browser{position:absolute;top:50%;left:50%;width:74%;border-radius:14px;overflow:hidden;background:#0f172a;
+      box-shadow:0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(148,163,184,.25);
+      transform:translate(-50%,-50%) scale(1.04);animation:kb 9s ease-out both}
+  @keyframes kb{from{transform:translate(-50%,-50%) scale(1.04)}to{transform:translate(-50%,-50%) scale(1.10)}}
+  .barb{display:flex;gap:6px;align-items:center;padding:9px 12px;background:#111c33;border-bottom:1px solid #1e2a44}
+  .dot{width:11px;height:11px;border-radius:50%}
+  .url{margin-left:12px;font-size:13px;color:#93a4c2;background:#0b1426;padding:4px 12px;border-radius:6px}
+  .browser img{display:block;width:100%}
+  .chip{position:absolute;left:5%;top:7%;display:flex;align-items:center;gap:12px;
+      background:rgba(15,23,42,.72);border:1px solid rgba(96,165,250,.35);
+      padding:10px 18px 10px 12px;border-radius:999px;font-weight:700;font-size:clamp(12px,1.5vw,19px);letter-spacing:.5px}
+  .chip .n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--blue3);font-family:Cambria,serif}
+  .chip.fin .n{background:var(--orange)} .chip.field .n{background:var(--green)}
+  .otag{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);
+      background:var(--orange);color:#1a1206;font-weight:700;font-size:clamp(13px,1.7vw,22px);
+      padding:10px 22px;border-radius:10px;box-shadow:0 10px 30px rgba(249,115,22,.45);white-space:nowrap}
+  .otag.blue{background:#dbeafe;color:#0f2a6b} .otag.green{background:#dcfce7;color:#14532d}
+  #cap{position:absolute;left:0;right:0;bottom:5.5%;text-align:center;padding:0 8%}
+  #captext{display:inline-block;background:rgba(7,11,22,.78);font-size:clamp(13px,1.8vw,23px);line-height:1.4;
+      padding:10px 22px;border-radius:12px;border:1px solid rgba(148,163,184,.2)}
+  #brand{position:absolute;left:3.5%;bottom:3.2%;font-size:clamp(10px,1.15vw,15px);color:#93a4c2;opacity:0;transition:opacity .5s}
+  #brand.on{opacity:.9} #brand b{color:#fff} #brand .o{color:var(--orange)}
+  #bar{position:absolute;left:0;right:0;top:0;height:4px;background:rgba(255,255,255,.08);z-index:5}
+  #fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue3),var(--orange))}
+  #ctl{position:absolute;right:3.5%;bottom:3.0%;display:flex;gap:10px;align-items:center;z-index:6}
+  #ctl button{background:rgba(15,23,42,.8);color:#fff;border:1px solid rgba(148,163,184,.35);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  #ctl button:hover{border-color:var(--blue3)}
+  #tcode{font-variant-numeric:tabular-nums;color:#93a4c2;font-size:13px;min-width:88px;text-align:right}
+  #start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(7,11,22,.55);z-index:10;cursor:pointer}
+  #start h1{font-family:Cambria,serif;font-size:clamp(22px,3.2vw,40px);margin-bottom:8px}
+  #start p{color:#93a4c2;font-size:clamp(13px,1.6vw,18px)}
+  #start .play{margin-top:22px;width:74px;height:74px;border-radius:50%;background:var(--blue3);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(37,99,235,.5)}
+  #start .play::after{content:"";border-left:24px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent;margin-left:6px}
+</style>
+</head>
+<body>
+<div id="app"><div id="stage">
+  <div id="bar"><div id="fill"></div></div>
+  <div id="layers"></div>
+  <div id="brand"></div>
+  <div id="cap"><span id="captext"></span></div>
+  <div id="ctl"><span id="tcode">0:00 / 4:45</span><button id="pp">Pause</button><button id="rs">Restart</button></div>
+  <div id="start">
+    <h1>ImpactOps Maestro</h1>
+    <p>Fevourd-K × UiPath — 4:45 demo animatic · click to play</p>
+    <div class="play"></div>
+  </div>
+</div></div>
+
+<script>
+const base = location.href.includes("/docs/") ? "agenthack-assets/" : "docs/agenthack-assets/";
+const card = n => base+"video/"+n+".png";
+const shot = n => base+"screenshots/"+n+".png";
+
+const SC = [
+  {t:0,  type:'card', img:card('title-card'), cap:'Every NGO runs on the same six chores — done by hand, across spreadsheets and WhatsApp.'},
+  {t:8,  type:'shot', img:shot('04-ngo-dashboard'), url:'localhost:8080/ngo/dashboard', otag:'Fevourd-K — NGO/CSR System of Record', otagCls:'blue', cap:'Meet Fevourd-K — the operating system for NGOs and corporate CSR teams.'},
+  {t:16, type:'shot', img:shot('04-ngo-dashboard'), url:'localhost:8080/ngo/dashboard', otag:'The busywork is still manual →', cap:'But the work between these screens is manual. That’s where agents come in.'},
+  {t:25, type:'card', img:card('architecture-card'), otag:'Read → Act → Escalate → Write back', otagCls:'blue', cap:'UiPath ImpactOps Maestro — an agentic process coordinating six workflows.'},
+  {t:44, type:'card', img:card('architecture-card'), cap:'Each agent reads from Fevourd-K, runs the work, and escalates real decisions to a person.'},
+  {t:55, type:'shot', img:shot('05-compliance-documents'), url:'localhost:8080/ngo/documents', chip:'Compliance Review', chipN:'1', cap:'It starts in Fevourd-K. Vikasana just uploaded its 12A / 80G renewal documents.'},
+  {t:75, type:'shot', img:shot('05-compliance-documents'), url:'Orchestrator · compliance-review-queue', chip:'Compliance Review', chipN:'1', otag:'Human-in-the-loop ✓', cap:'The agent checks expiry, mandatory fields, status — then routes findings to a compliance officer.'},
+  {t:95, type:'shot', img:shot('06-feed-studio-campaign-draft'), url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', cap:'Next: a donor update for the Clean Water campaign — ₹5.12L raised of ₹8L.'},
+  {t:114,type:'shot', img:shot('06-feed-studio-campaign-draft'), url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', otag:'Draft, not auto-post — control stays human', otagCls:'blue', cap:'It assembles a donor-ready update as a draft. The NGO reviews and schedules.'},
+  {t:130,type:'shot', img:shot('08-field-proof-trail'), url:'localhost:8080/ngo/field/sessions/…/trail', chip:'Field Proof', chipN:'3', chipCls:'field', cap:'Out in Mandya, staff log a borewell visit — captured as a live GPS trail.'},
+  {t:148,type:'shot', img:shot('08-field-proof-trail'), url:'Orchestrator · field-proof-queue', chip:'Field Proof', chipN:'3', chipCls:'field', otag:'Verifiable proof, not self-reported', otagCls:'green', cap:'The agent verifies the session against the assigned site, then marks it Verified.'},
+  {t:165,type:'shot', img:shot('09-finance-claims'), url:'localhost:8080/ngo/finance/claims', chip:'Finance Claim', chipN:'4', chipCls:'fin', cap:'A ₹4,250 field-travel claim comes in. The agent checks budget line and policy limits.'},
+  {t:185,type:'shot', img:shot('09-finance-claims'), url:'UiPath Action Center · Approve / Reject', chip:'Finance Claim', chipN:'4', chipCls:'fin', otag:'Money decisions = always human', cap:'Anything over threshold is escalated — a finance officer approves or rejects.'},
+  {t:195,type:'shot', img:shot('10-ledger-writeback'), url:'localhost:8080/ngo/ledger', chip:'Finance Claim', chipN:'4', chipCls:'fin', otag:'Approved → posted to ledger', otagCls:'green', cap:'On approval, the entry posts straight to the NGO ledger — no manual re-keying.'},
+  {t:205,type:'shot', img:shot('12-csr-dashboard-report'), url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', cap:'Acme CSR wants this quarter’s impact report — verified proof, approved spend, compliance.'},
+  {t:240,type:'shot', img:shot('12-csr-dashboard-report'), url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', otag:'From a week of chasing → on demand', otagCls:'blue', cap:'One CSR-ready summary — every number traceable to a verified source.'},
+  {t:250,type:'card', img:card('architecture-card'), cap:'Fevourd-K stays the source of truth. UiPath runs the busywork and escalates the judgment calls.'},
+  {t:276,type:'card', img:card('end-card'), cap:'ImpactOps Maestro — the agentic back-office for social impact.'},
+];
+const TOTAL=285;
+
+// build brand strip safely
+(function(){
+  const b=document.getElementById('brand');
+  const b1=document.createElement('b'); b1.textContent='Fevourd-K';
+  const sp=document.createElement('span'); sp.className='o'; sp.textContent='UiPath ImpactOps Maestro';
+  b.appendChild(b1); b.appendChild(document.createTextNode(' = system of record  ·  '));
+  b.appendChild(sp); b.appendChild(document.createTextNode(' = agentic layer'));
+})();
+
+const layers=document.getElementById('layers');
+SC.forEach((s,i)=>{
+  const L=document.createElement('div'); L.className='layer'; L.dataset.i=i;
+  if(s.type==='card'){
+    const im=document.createElement('img'); im.className='card-bg'; im.src=s.img; L.appendChild(im);
+  } else {
+    const scene=document.createElement('div'); scene.className='scene';
+    const br=document.createElement('div'); br.className='browser';
+    const bar=document.createElement('div'); bar.className='barb';
+    ['#ef4444','#f59e0b','#22c55e'].forEach(c=>{const d=document.createElement('span');d.className='dot';d.style.background=c;bar.appendChild(d);});
+    const u=document.createElement('span'); u.className='url'; u.textContent=s.url||''; bar.appendChild(u);
+    const im=document.createElement('img'); im.src=s.img;
+    br.appendChild(bar); br.appendChild(im); scene.appendChild(br); L.appendChild(scene);
+  }
+  if(s.chip){
+    const c=document.createElement('div'); c.className='chip '+(s.chipCls||'');
+    const n=document.createElement('span'); n.className='n'; n.textContent=s.chipN||'';
+    c.appendChild(n); c.appendChild(document.createTextNode(s.chip)); L.appendChild(c);
+  }
+  if(s.otag){
+    const o=document.createElement('div'); o.className='otag '+(s.otagCls||''); o.textContent=s.otag; L.appendChild(o);
+  }
+  layers.appendChild(L);
+});
+
+const captext=document.getElementById('captext'), fill=document.getElementById('fill'),
+      tcode=document.getElementById('tcode'), brand=document.getElementById('brand');
+let cur=-1, playing=false, t0=0, elapsed=0, raf;
+function fmt(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
+function show(i){
+  if(i===cur)return; cur=i;
+  document.querySelectorAll('.layer').forEach(l=>l.classList.toggle('on',+l.dataset.i===i));
+  const b=document.querySelector('.layer.on .browser'); if(b){b.style.animation='none';b.offsetHeight;b.style.animation='';}
+  captext.textContent=SC[i].cap||'';
+  brand.classList.toggle('on', SC[i].type!=='card');
+}
+function frame(now){
+  if(!playing)return;
+  elapsed=(now-t0)/1000;
+  if(elapsed>=TOTAL){elapsed=TOTAL;playing=false;}
+  let idx=0; for(let i=0;i<SC.length;i++){if(elapsed>=SC[i].t)idx=i;}
+  show(idx); fill.style.width=(elapsed/TOTAL*100)+'%'; tcode.textContent=fmt(elapsed)+' / 4:45';
+  if(playing)raf=requestAnimationFrame(frame);
+}
+function play(){if(playing)return;playing=true;t0=performance.now()-elapsed*1000;raf=requestAnimationFrame(frame);document.getElementById('pp').textContent='Pause';}
+function pause(){playing=false;cancelAnimationFrame(raf);document.getElementById('pp').textContent='Play';}
+document.getElementById('start').addEventListener('click',function(){this.style.display='none';elapsed=0;play();});
+document.getElementById('pp').addEventListener('click',()=>playing?pause():play());
+document.getElementById('rs').addEventListener('click',()=>{elapsed=0;cur=-1;play();});
+show(0);
+</script>
+</body>
+</html>
