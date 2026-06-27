@@ -3,65 +3,174 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>ImpactOps Maestro — Fevourd-K × UiPath · Demo Animatic</title>
+<title>ImpactOps Maestro — Fevourd-K × UiPath · Demo Film</title>
 <style>
-  :root{
-    --navy:#0f172a; --blue3:#2563eb; --orange:#f97316; --green:#16a34a;
-  }
+  :root{ --navy:#0f172a; --blue:#1d4ed8; --blue3:#2563eb; --ice:#93c5fd; --orange:#f97316; --green:#22c55e; }
   *{box-sizing:border-box;margin:0;padding:0}
-  html,body{height:100%;background:#070b16;color:#fff;font-family:Calibri,"Segoe UI",system-ui,sans-serif;overflow:hidden}
+  html,body{height:100%;background:#05080f;color:#fff;font-family:Calibri,"Segoe UI",system-ui,sans-serif;overflow:hidden}
   #app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
-  #stage{position:relative;width:min(100vw,177.78vh);height:min(56.25vw,100vh);background:#0b1220;overflow:hidden;
-         box-shadow:0 30px 90px rgba(0,0,0,.6)}
-  .layer{position:absolute;inset:0;opacity:0;transition:opacity .6s ease}
+  #stage{position:relative;width:min(100vw,177.78vh);height:min(56.25vw,100vh);background:#070b16;overflow:hidden;box-shadow:0 30px 90px rgba(0,0,0,.7)}
+  /* drifting water-mesh backdrop for cinematic scenes */
+  .water{position:absolute;inset:-20%;background:
+     radial-gradient(40% 50% at 25% 30%, rgba(37,99,235,.40), transparent 60%),
+     radial-gradient(45% 55% at 78% 65%, rgba(14,165,233,.32), transparent 60%),
+     radial-gradient(50% 60% at 60% 20%, rgba(29,78,216,.30), transparent 60%),
+     linear-gradient(160deg,#0b1730,#070b16 70%);
+     filter:saturate(1.1);animation:drift 26s ease-in-out infinite alternate}
+  @keyframes drift{from{transform:translate(-2%,-1%) scale(1.05)}to{transform:translate(3%,2%) scale(1.12)}}
+  .grain{position:absolute;inset:0;pointer-events:none;opacity:.05;mix-blend-mode:overlay;
+     background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")}
+  .vig{position:absolute;inset:0;pointer-events:none;background:radial-gradient(120% 100% at 50% 45%,transparent 55%,rgba(0,0,0,.55))}
+
+  .layer{position:absolute;inset:0;opacity:0;transition:opacity .8s ease}
   .layer.on{opacity:1}
   .card-bg{width:100%;height:100%;object-fit:cover}
-  .scene{position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 10%, #16264d 0%, #0b1220 55%, #070b16 100%)}
-  .browser{position:absolute;top:50%;left:50%;width:74%;border-radius:14px;overflow:hidden;background:#0f172a;
-      box-shadow:0 24px 60px rgba(0,0,0,.55), 0 0 0 1px rgba(148,163,184,.25);
-      transform:translate(-50%,-50%) scale(1.04);animation:kb 9s ease-out both}
-  @keyframes kb{from{transform:translate(-50%,-50%) scale(1.04)}to{transform:translate(-50%,-50%) scale(1.10)}}
+
+  /* cinematic text */
+  .cwrap{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:center;padding:0 9%}
+  .cwrap.center{align-items:center;text-align:center}
+  .eyebrow{font-size:clamp(11px,1.4vw,18px);letter-spacing:4px;font-weight:700;color:var(--ice);text-transform:uppercase}
+  .kt{opacity:0;transform:translateY(22px);font-family:Cambria,Georgia,serif}
+  .layer.on .kt{animation:rise 1s cubic-bezier(.2,.7,.2,1) forwards;animation-delay:var(--d,0s)}
+  @keyframes rise{to{opacity:1;transform:none}}
+  .big{font-size:clamp(26px,4.2vw,58px);font-weight:700;line-height:1.06}
+  .mid{font-size:clamp(18px,2.6vw,34px);font-weight:700;line-height:1.12}
+  .sub{font-size:clamp(13px,1.7vw,22px);color:#cbd5e1;font-family:Calibri,sans-serif;font-weight:400}
+  .amber{color:#fdba74} .grad{background:linear-gradient(90deg,#93c5fd,#fff,#fdba74);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+  /* count-up stat tiles */
+  .stats{display:flex;gap:2.2vw;margin-top:3.2vh;flex-wrap:wrap;justify-content:center}
+  .stat{opacity:0}
+  .layer.on .stat{animation:rise 1s ease forwards;animation-delay:var(--d,0s)}
+  .stat .num{font-family:Cambria,serif;font-size:clamp(28px,4.6vw,62px);font-weight:700;line-height:1}
+  .stat .num.b{color:#93c5fd}.stat .num.o{color:#fdba74}.stat .num.g{color:#86efac}
+  .stat .lbl{font-size:clamp(11px,1.3vw,16px);color:#94a3b8;margin-top:.6vh}
+
+  /* agent loop diagram */
+  .loop{display:flex;align-items:center;gap:1.4vw;margin-top:4vh}
+  .node{opacity:0;min-width:14vw;background:rgba(15,23,42,.7);border:1px solid #2a3a5c;border-radius:14px;padding:1.6vh 1.4vw;text-align:center}
+  .layer.on .node{animation:pop .7s ease forwards;animation-delay:var(--d,0s)}
+  @keyframes pop{0%{opacity:0;transform:translateY(14px) scale(.96)}100%{opacity:1;transform:none}}
+  .node .nh{font-family:Cambria,serif;font-size:clamp(15px,1.9vw,26px);font-weight:700}
+  .node .nd{font-size:clamp(10px,1.2vw,15px);color:#94a3b8;margin-top:.5vh}
+  .node.b .nh{color:#93c5fd}.node.o{border-color:#7c3a14}.node.o .nh{color:#fdba74}.node.g .nh{color:#86efac}
+  .arrow{opacity:0;color:#475569;font-size:clamp(18px,2.4vw,30px);font-weight:700}
+  .layer.on .arrow{animation:rise .6s ease forwards;animation-delay:var(--d,0s)}
+
+  /* screenshot scene */
+  .scene{position:absolute;inset:0;background:radial-gradient(120% 90% at 70% 8%,#16264d,#0b1220 55%,#070b16)}
+  .browser{position:absolute;top:50%;left:50%;width:73%;border-radius:14px;overflow:hidden;background:#0f172a;
+     box-shadow:0 26px 70px rgba(0,0,0,.6),0 0 0 1px rgba(148,163,184,.22);
+     transform:translate(-50%,-50%) scale(1.04);animation:kb 9s ease-out both}
+  @keyframes kb{from{transform:translate(-50%,-50%) scale(1.035)}to{transform:translate(-50%,-50%) scale(1.10)}}
   .barb{display:flex;gap:6px;align-items:center;padding:9px 12px;background:#111c33;border-bottom:1px solid #1e2a44}
   .dot{width:11px;height:11px;border-radius:50%}
-  .url{margin-left:12px;font-size:13px;color:#93a4c2;background:#0b1426;padding:4px 12px;border-radius:6px}
+  .url{margin-left:12px;font-size:13px;color:#9fb2d4;background:#0b1426;padding:4px 12px;border-radius:6px}
   .browser img{display:block;width:100%}
-  .chip{position:absolute;left:5%;top:7%;display:flex;align-items:center;gap:12px;
-      background:rgba(15,23,42,.72);border:1px solid rgba(96,165,250,.35);
-      padding:10px 18px 10px 12px;border-radius:999px;font-weight:700;font-size:clamp(12px,1.5vw,19px);letter-spacing:.5px}
-  .chip .n{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--blue3);font-family:Cambria,serif}
+  .chip{position:absolute;left:5%;top:7%;display:flex;align-items:center;gap:12px;background:rgba(10,16,30,.78);border:1px solid rgba(96,165,250,.4);
+     padding:10px 18px 10px 11px;border-radius:999px;font-weight:700;font-size:clamp(12px,1.5vw,20px);letter-spacing:.4px;box-shadow:0 8px 24px rgba(0,0,0,.35)}
+  .chip .n{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;background:var(--blue3);font-family:Cambria,serif}
   .chip.fin .n{background:var(--orange)} .chip.field .n{background:var(--green)}
-  .otag{position:absolute;left:50%;bottom:16%;transform:translateX(-50%);
-      background:var(--orange);color:#1a1206;font-weight:700;font-size:clamp(13px,1.7vw,22px);
-      padding:10px 22px;border-radius:10px;box-shadow:0 10px 30px rgba(249,115,22,.45);white-space:nowrap}
-  .otag.blue{background:#dbeafe;color:#0f2a6b} .otag.green{background:#dcfce7;color:#14532d}
-  #cap{position:absolute;left:0;right:0;bottom:5.5%;text-align:center;padding:0 8%}
-  #captext{display:inline-block;background:rgba(7,11,22,.78);font-size:clamp(13px,1.8vw,23px);line-height:1.4;
-      padding:10px 22px;border-radius:12px;border:1px solid rgba(148,163,184,.2)}
-  #brand{position:absolute;left:3.5%;bottom:3.2%;font-size:clamp(10px,1.15vw,15px);color:#93a4c2;opacity:0;transition:opacity .5s}
-  #brand.on{opacity:.9} #brand b{color:#fff} #brand .o{color:var(--orange)}
-  #bar{position:absolute;left:0;right:0;top:0;height:4px;background:rgba(255,255,255,.08);z-index:5}
-  #fill{height:100%;width:0;background:linear-gradient(90deg,var(--blue3),var(--orange))}
-  #ctl{position:absolute;right:3.5%;bottom:3.0%;display:flex;gap:10px;align-items:center;z-index:6}
-  #ctl button{background:rgba(15,23,42,.8);color:#fff;border:1px solid rgba(148,163,184,.35);border-radius:8px;padding:8px 16px;font-size:14px;font-weight:600;cursor:pointer}
+  .otag{position:absolute;left:50%;bottom:15.5%;transform:translateX(-50%);background:var(--orange);color:#1a1206;font-weight:700;
+     font-size:clamp(13px,1.7vw,23px);padding:11px 24px;border-radius:11px;box-shadow:0 12px 34px rgba(249,115,22,.5);white-space:nowrap;
+     animation:tagin .6s ease both}
+  @keyframes tagin{from{opacity:0;transform:translate(-50%,10px)}to{opacity:1;transform:translateX(-50%)}}
+  .otag.blue{background:#dbeafe;color:#0f2a6b}.otag.green{background:#dcfce7;color:#14532d}
+
+  #cap{position:absolute;left:0;right:0;bottom:5.2%;text-align:center;padding:0 8%}
+  #captext{display:inline-block;background:rgba(5,8,15,.8);font-size:clamp(13px,1.8vw,23px);line-height:1.4;padding:10px 22px;border-radius:12px;border:1px solid rgba(148,163,184,.2)}
+  #brand{position:absolute;left:3.5%;bottom:3.1%;font-size:clamp(10px,1.15vw,15px);color:#9fb2d4;opacity:0;transition:opacity .5s;z-index:4}
+  #brand.on{opacity:.9} #brand b{color:#fff} #brand .o{color:#fdba74}
+
+  #bar{position:absolute;left:0;right:0;top:0;height:4px;background:rgba(255,255,255,.08);z-index:6}
+  #fill{height:100%;width:0;background:linear-gradient(90deg,#2563eb,#f97316)}
+  #chap{position:absolute;top:9px;left:0;right:0;height:0;z-index:6}
+  #chap span{position:absolute;top:-4px;width:2px;height:8px;background:rgba(255,255,255,.25)}
+  #label{position:absolute;left:3.5%;top:16px;font-size:clamp(10px,1.1vw,14px);letter-spacing:2px;color:#9fb2d4;text-transform:uppercase;z-index:6;opacity:.85}
+  #ctl{position:absolute;right:3.3%;bottom:2.8%;display:flex;gap:9px;align-items:center;z-index:7}
+  #ctl button{background:rgba(10,16,30,.82);color:#fff;border:1px solid rgba(148,163,184,.35);border-radius:8px;padding:8px 15px;font-size:13.5px;font-weight:600;cursor:pointer}
   #ctl button:hover{border-color:var(--blue3)}
-  #tcode{font-variant-numeric:tabular-nums;color:#93a4c2;font-size:13px;min-width:88px;text-align:right}
-  #start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(7,11,22,.55);z-index:10;cursor:pointer}
-  #start h1{font-family:Cambria,serif;font-size:clamp(22px,3.2vw,40px);margin-bottom:8px}
-  #start p{color:#93a4c2;font-size:clamp(13px,1.6vw,18px)}
-  #start .play{margin-top:22px;width:74px;height:74px;border-radius:50%;background:var(--blue3);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 40px rgba(37,99,235,.5)}
-  #start .play::after{content:"";border-left:24px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent;margin-left:6px}
+  #tcode{font-variant-numeric:tabular-nums;color:#9fb2d4;font-size:13px;min-width:92px;text-align:right}
+  #start{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:rgba(5,8,15,.5);z-index:10;cursor:pointer}
+  #start h1{font-family:Cambria,serif;font-size:clamp(24px,3.4vw,44px);margin-bottom:8px}
+  #start p{color:#9fb2d4;font-size:clamp(13px,1.6vw,18px)}
+  #start .play{margin-top:22px;width:78px;height:78px;border-radius:50%;background:var(--blue3);display:flex;align-items:center;justify-content:center;box-shadow:0 12px 44px rgba(37,99,235,.55)}
+  #start .play::after{content:"";border-left:25px solid #fff;border-top:15px solid transparent;border-bottom:15px solid transparent;margin-left:7px}
 </style>
 </head>
 <body>
 <div id="app"><div id="stage">
   <div id="bar"><div id="fill"></div></div>
-  <div id="layers"></div>
+  <div id="chap"></div>
+  <div id="label"></div>
+  <div id="layers">
+
+    <!-- ===== CINEMATIC LAYERS (static, animated by CSS) ===== -->
+
+    <!-- 0 · THE CAUSE -->
+    <div class="layer cine on" data-t="0" data-label="The cause" data-cap="In rural Mandya, clean drinking water is still a daily struggle.">
+      <div class="water"></div><div class="vig"></div><div class="grain"></div>
+      <div class="cwrap">
+        <div class="kt eyebrow" style="--d:.1s">Mandya District · Karnataka</div>
+        <div class="kt big" style="--d:.5s">Every day, families walk<br>for <span class="amber">safe drinking water.</span></div>
+        <div class="kt sub" style="--d:1.4s;margin-top:2.2vh;max-width:42ch">Vikasana — a grassroots NGO — is changing that, one borewell and water filter at a time.</div>
+      </div>
+    </div>
+
+    <!-- 1 · THE TENSION -->
+    <div class="layer cine" data-t="11" data-label="The tension" data-cap="But for every rupee of impact, hours vanish into back-office paperwork.">
+      <div class="water"></div><div class="vig"></div><div class="grain"></div>
+      <div class="cwrap center">
+        <div class="kt eyebrow" style="--d:.1s">The hidden cost of doing good</div>
+        <div class="kt mid" style="--d:.5s">Compliance · Campaigns · Field proof<br>Finance claims · CSR reports</div>
+        <div class="stats">
+          <div class="stat" style="--d:1.2s"><div class="num o"><span class="cup" data-to="6">0</span></div><div class="lbl">staff-days / month lost<br>to manual busywork</div></div>
+          <div class="stat" style="--d:1.6s"><div class="num b"><span class="cup" data-to="5">0</span>×</div><div class="lbl">disconnected tools<br>&amp; spreadsheets</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2 · THE SOLUTION LOOP -->
+    <div class="layer cine" data-t="25" data-label="ImpactOps Maestro" data-cap="ImpactOps Maestro — a UiPath agentic layer on top of the Fevourd-K platform.">
+      <div class="water"></div><div class="vig"></div><div class="grain"></div>
+      <div class="cwrap center">
+        <div class="kt eyebrow" style="--d:.1s">UiPath × Fevourd-K</div>
+        <div class="kt mid" style="--d:.4s"><span class="grad">ImpactOps Maestro</span> runs the busywork —<br>and escalates only what needs a human.</div>
+        <div class="loop">
+          <div class="node b" style="--d:1.0s"><div class="nh">Read</div><div class="nd">live state from Fevourd-K</div></div>
+          <div class="arrow" style="--d:1.3s">→</div>
+          <div class="node b" style="--d:1.5s"><div class="nh">Act</div><div class="nd">run the repeatable work</div></div>
+          <div class="arrow" style="--d:1.8s">→</div>
+          <div class="node o" style="--d:2.0s"><div class="nh">Escalate</div><div class="nd">judgment calls to a human</div></div>
+          <div class="arrow" style="--d:2.3s">→</div>
+          <div class="node g" style="--d:2.5s"><div class="nh">Write back</div><div class="nd">results into the record</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- IMPACT (inserted later by time) -->
+    <div class="layer cine" data-t="232" data-label="The impact" data-cap="Less time on paperwork. More clean water delivered.">
+      <div class="water"></div><div class="vig"></div><div class="grain"></div>
+      <div class="cwrap center">
+        <div class="kt eyebrow" style="--d:.1s">Vikasana · this quarter (sandbox)</div>
+        <div class="kt big" style="--d:.4s">Less paperwork.<br><span class="amber">More clean water delivered.</span></div>
+        <div class="stats">
+          <div class="stat" style="--d:1.1s"><div class="num b"><span class="cup" data-to="1240">0</span></div><div class="lbl">beneficiaries reached</div></div>
+          <div class="stat" style="--d:1.4s"><div class="num g"><span class="cup" data-to="12">0</span></div><div class="lbl">villages · GPS-verified</div></div>
+          <div class="stat" style="--d:1.7s"><div class="num o">SDG 6</div><div class="lbl">clean water &amp; sanitation</div></div>
+          <div class="stat" style="--d:2.0s"><div class="num b">₹<span class="cup" data-to="14.75" data-dec="2">0</span>L</div><div class="lbl">tracked · full audit trail</div></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
   <div id="brand"></div>
   <div id="cap"><span id="captext"></span></div>
-  <div id="ctl"><span id="tcode">0:00 / 4:45</span><button id="pp">Pause</button><button id="rs">Restart</button></div>
+  <div id="ctl"><span id="tcode">0:00 / 4:45</span><button id="mute">🔊 Music</button><button id="pp">Pause</button><button id="rs">Restart</button></div>
   <div id="start">
     <h1>ImpactOps Maestro</h1>
-    <p>Fevourd-K × UiPath — 4:45 demo animatic · click to play</p>
+    <p>Fevourd-K × UiPath — a 4:45 demo film · click to play (sound on)</p>
     <div class="play"></div>
   </div>
 </div></div>
@@ -71,84 +180,100 @@ const base = location.href.includes("/docs/") ? "agenthack-assets/" : "docs/agen
 const card = n => base+"video/"+n+".png";
 const shot = n => base+"screenshots/"+n+".png";
 
-const SC = [
-  {t:0,  type:'card', img:card('title-card'), cap:'Every NGO runs on the same six chores — done by hand, across spreadsheets and WhatsApp.'},
-  {t:8,  type:'shot', img:shot('04-ngo-dashboard'), url:'localhost:8080/ngo/dashboard', otag:'Fevourd-K — NGO/CSR System of Record', otagCls:'blue', cap:'Meet Fevourd-K — the operating system for NGOs and corporate CSR teams.'},
-  {t:16, type:'shot', img:shot('04-ngo-dashboard'), url:'localhost:8080/ngo/dashboard', otag:'The busywork is still manual →', cap:'But the work between these screens is manual. That’s where agents come in.'},
-  {t:25, type:'card', img:card('architecture-card'), otag:'Read → Act → Escalate → Write back', otagCls:'blue', cap:'UiPath ImpactOps Maestro — an agentic process coordinating six workflows.'},
-  {t:44, type:'card', img:card('architecture-card'), cap:'Each agent reads from Fevourd-K, runs the work, and escalates real decisions to a person.'},
-  {t:55, type:'shot', img:shot('05-compliance-documents'), url:'localhost:8080/ngo/documents', chip:'Compliance Review', chipN:'1', cap:'It starts in Fevourd-K. Vikasana just uploaded its 12A / 80G renewal documents.'},
-  {t:75, type:'shot', img:shot('05-compliance-documents'), url:'Orchestrator · compliance-review-queue', chip:'Compliance Review', chipN:'1', otag:'Human-in-the-loop ✓', cap:'The agent checks expiry, mandatory fields, status — then routes findings to a compliance officer.'},
-  {t:95, type:'shot', img:shot('06-feed-studio-campaign-draft'), url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', cap:'Next: a donor update for the Clean Water campaign — ₹5.12L raised of ₹8L.'},
-  {t:114,type:'shot', img:shot('06-feed-studio-campaign-draft'), url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', otag:'Draft, not auto-post — control stays human', otagCls:'blue', cap:'It assembles a donor-ready update as a draft. The NGO reviews and schedules.'},
-  {t:130,type:'shot', img:shot('08-field-proof-trail'), url:'localhost:8080/ngo/field/sessions/…/trail', chip:'Field Proof', chipN:'3', chipCls:'field', cap:'Out in Mandya, staff log a borewell visit — captured as a live GPS trail.'},
-  {t:148,type:'shot', img:shot('08-field-proof-trail'), url:'Orchestrator · field-proof-queue', chip:'Field Proof', chipN:'3', chipCls:'field', otag:'Verifiable proof, not self-reported', otagCls:'green', cap:'The agent verifies the session against the assigned site, then marks it Verified.'},
-  {t:165,type:'shot', img:shot('09-finance-claims'), url:'localhost:8080/ngo/finance/claims', chip:'Finance Claim', chipN:'4', chipCls:'fin', cap:'A ₹4,250 field-travel claim comes in. The agent checks budget line and policy limits.'},
-  {t:185,type:'shot', img:shot('09-finance-claims'), url:'UiPath Action Center · Approve / Reject', chip:'Finance Claim', chipN:'4', chipCls:'fin', otag:'Money decisions = always human', cap:'Anything over threshold is escalated — a finance officer approves or rejects.'},
-  {t:195,type:'shot', img:shot('10-ledger-writeback'), url:'localhost:8080/ngo/ledger', chip:'Finance Claim', chipN:'4', chipCls:'fin', otag:'Approved → posted to ledger', otagCls:'green', cap:'On approval, the entry posts straight to the NGO ledger — no manual re-keying.'},
-  {t:205,type:'shot', img:shot('12-csr-dashboard-report'), url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', cap:'Acme CSR wants this quarter’s impact report — verified proof, approved spend, compliance.'},
-  {t:240,type:'shot', img:shot('12-csr-dashboard-report'), url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', otag:'From a week of chasing → on demand', otagCls:'blue', cap:'One CSR-ready summary — every number traceable to a verified source.'},
-  {t:250,type:'card', img:card('architecture-card'), cap:'Fevourd-K stays the source of truth. UiPath runs the busywork and escalates the judgment calls.'},
-  {t:276,type:'card', img:card('end-card'), cap:'ImpactOps Maestro — the agentic back-office for social impact.'},
+// screenshot scenes (built via DOM, inserted by data-t)
+const SHOTS = [
+  {t:50, img:'04-ngo-dashboard', url:'localhost:8080/ngo/dashboard', label:'System of record', otag:'Fevourd-K — NGO/CSR System of Record', otagCls:'blue', cap:'Fevourd-K is the single source of truth — campaigns, field work, finance, compliance.'},
+  {t:62, img:'05-compliance-documents', url:'localhost:8080/ngo/documents', chip:'Compliance Review', chipN:'1', label:'① Compliance', cap:'Vikasana uploads its 12A / 80G renewal docs. The agent checks expiry, fields, status.'},
+  {t:78, img:'05-compliance-documents', url:'UiPath Action Center · sign-off', chip:'Compliance Review', chipN:'1', label:'① Compliance', otag:'Human-in-the-loop ✓', cap:'It flags a doc expiring soon and routes a summary to a compliance officer.'},
+  {t:92, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', cap:'A donor update for the Clean Water campaign — ₹5.12L raised of ₹8L.'},
+  {t:108, img:'06-feed-studio-campaign-draft', url:'localhost:8080/ngo/feed-studio', chip:'Campaign Draft', chipN:'2', label:'② Campaign', otag:'Draft, not auto-post — control stays human', otagCls:'blue', cap:'The agent drafts the copy and impact numbers — the NGO reviews and schedules.'},
+  {t:122, img:'08-field-proof-trail', url:'localhost:8080/ngo/field/sessions/…/trail', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', cap:'In Mandya, staff log a borewell visit — captured as a live GPS trail.'},
+  {t:140, img:'08-field-proof-trail', url:'Orchestrator · field-proof-queue', chip:'Field Proof', chipN:'3', chipCls:'field', label:'③ Field proof', otag:'Verifiable proof, not self-reported', otagCls:'green', cap:'The agent verifies the session against the assigned site, then marks it Verified.'},
+  {t:156, img:'09-finance-claims', url:'localhost:8080/ngo/finance/claims', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', cap:'A ₹4,250 field-travel claim arrives. The agent checks budget line and policy limits.'},
+  {t:172, img:'09-finance-claims', url:'UiPath Action Center · Approve / Reject', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Money decisions = always human', cap:'Over threshold? Escalated — a finance officer approves or rejects in Action Center.'},
+  {t:186, img:'10-ledger-writeback', url:'localhost:8080/ngo/ledger', chip:'Finance Claim', chipN:'4', chipCls:'fin', label:'④ Finance', otag:'Approved → posted to ledger', otagCls:'green', cap:'On approval, the entry posts straight to the NGO ledger — no manual re-keying.'},
+  {t:200, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', cap:'Acme CSR wants this quarter’s impact report — verified proof, approved spend, compliance.'},
+  {t:218, img:'12-csr-dashboard-report', url:'localhost:8080/csr/dashboard', chip:'CSR Report', chipN:'5', label:'⑤ CSR report', otag:'From a week of chasing → on demand', otagCls:'blue', cap:'One CSR-ready summary — every number traceable to a verified source.'},
 ];
-const TOTAL=285;
-
-// build brand strip safely
-(function(){
-  const b=document.getElementById('brand');
-  const b1=document.createElement('b'); b1.textContent='Fevourd-K';
-  const sp=document.createElement('span'); sp.className='o'; sp.textContent='UiPath ImpactOps Maestro';
-  b.appendChild(b1); b.appendChild(document.createTextNode(' = system of record  ·  '));
-  b.appendChild(sp); b.appendChild(document.createTextNode(' = agentic layer'));
-})();
+// closing card
+const CARDS = [{t:262, img:'end-card', label:'Close', cap:'ImpactOps Maestro — the agentic back-office for social impact.'}];
 
 const layers=document.getElementById('layers');
-SC.forEach((s,i)=>{
-  const L=document.createElement('div'); L.className='layer'; L.dataset.i=i;
-  if(s.type==='card'){
-    const im=document.createElement('img'); im.className='card-bg'; im.src=s.img; L.appendChild(im);
-  } else {
-    const scene=document.createElement('div'); scene.className='scene';
-    const br=document.createElement('div'); br.className='browser';
-    const bar=document.createElement('div'); bar.className='barb';
-    ['#ef4444','#f59e0b','#22c55e'].forEach(c=>{const d=document.createElement('span');d.className='dot';d.style.background=c;bar.appendChild(d);});
-    const u=document.createElement('span'); u.className='url'; u.textContent=s.url||''; bar.appendChild(u);
-    const im=document.createElement('img'); im.src=s.img;
-    br.appendChild(bar); br.appendChild(im); scene.appendChild(br); L.appendChild(scene);
-  }
-  if(s.chip){
-    const c=document.createElement('div'); c.className='chip '+(s.chipCls||'');
-    const n=document.createElement('span'); n.className='n'; n.textContent=s.chipN||'';
-    c.appendChild(n); c.appendChild(document.createTextNode(s.chip)); L.appendChild(c);
-  }
-  if(s.otag){
-    const o=document.createElement('div'); o.className='otag '+(s.otagCls||''); o.textContent=s.otag; L.appendChild(o);
-  }
+function dots(bar){['#ef4444','#f59e0b','#22c55e'].forEach(c=>{const d=document.createElement('span');d.className='dot';d.style.background=c;bar.appendChild(d);});}
+SHOTS.forEach(s=>{
+  const L=document.createElement('div'); L.className='layer'; L.dataset.t=s.t; L.dataset.cap=s.cap; L.dataset.label=s.label||'';
+  const sc=document.createElement('div'); sc.className='scene';
+  const br=document.createElement('div'); br.className='browser';
+  const bar=document.createElement('div'); bar.className='barb'; dots(bar);
+  const u=document.createElement('span'); u.className='url'; u.textContent=s.url||''; bar.appendChild(u);
+  const im=document.createElement('img'); im.src=shot(s.img);
+  br.appendChild(bar); br.appendChild(im); sc.appendChild(br); L.appendChild(sc);
+  if(s.chip){const c=document.createElement('div');c.className='chip '+(s.chipCls||'');const n=document.createElement('span');n.className='n';n.textContent=s.chipN||'';c.appendChild(n);c.appendChild(document.createTextNode(s.chip));L.appendChild(c);}
+  if(s.otag){const o=document.createElement('div');o.className='otag '+(s.otagCls||'');o.textContent=s.otag;L.appendChild(o);}
   layers.appendChild(L);
 });
+CARDS.forEach(s=>{
+  const L=document.createElement('div'); L.className='layer'; L.dataset.t=s.t; L.dataset.cap=s.cap; L.dataset.label=s.label||'';
+  const im=document.createElement('img'); im.className='card-bg'; im.src=card(s.img); L.appendChild(im); layers.appendChild(L);
+});
 
-const captext=document.getElementById('captext'), fill=document.getElementById('fill'),
-      tcode=document.getElementById('tcode'), brand=document.getElementById('brand');
-let cur=-1, playing=false, t0=0, elapsed=0, raf;
+// unify + sort all layers by time
+const ALL=[...document.querySelectorAll('.layer')].map(el=>({el,t:+el.dataset.t,cap:el.dataset.cap||'',label:el.dataset.label||'',cine:el.classList.contains('cine')}))
+  .sort((a,b)=>a.t-b.t);
+const TOTAL=288;
+
+// brand strip
+(function(){const b=document.getElementById('brand');const b1=document.createElement('b');b1.textContent='Fevourd-K';const sp=document.createElement('span');sp.className='o';sp.textContent='UiPath ImpactOps Maestro';
+  b.appendChild(b1);b.appendChild(document.createTextNode(' = system of record  ·  '));b.appendChild(sp);b.appendChild(document.createTextNode(' = agentic layer'));})();
+// chapter ticks
+(function(){const c=document.getElementById('chap');ALL.forEach(s=>{const t=document.createElement('span');t.style.left=(s.t/TOTAL*100)+'%';c.appendChild(t);});})();
+
+const captext=document.getElementById('captext'),fill=document.getElementById('fill'),tcode=document.getElementById('tcode'),
+      brand=document.getElementById('brand'),label=document.getElementById('label');
+let cur=-1,playing=false,t0=0,elapsed=0,raf;
 function fmt(s){const m=Math.floor(s/60);return m+':'+String(Math.floor(s%60)).padStart(2,'0');}
+function countUp(el){
+  const to=parseFloat(el.dataset.to),dec=+(el.dataset.dec||0);let st=null;const dur=1500;
+  function tick(ts){if(!st)st=ts;const p=Math.min(1,(ts-st)/dur),e=1-Math.pow(1-p,3),v=to*e;
+    el.textContent=dec?v.toFixed(dec):Math.round(v).toLocaleString('en-IN');if(p<1)requestAnimationFrame(tick);}
+  el.textContent='0';requestAnimationFrame(tick);
+}
+function restartAnims(el){el.querySelectorAll('.kt,.node,.arrow,.stat,.browser,.otag').forEach(n=>{n.style.animation='none';n.offsetHeight;n.style.animation='';});}
 function show(i){
-  if(i===cur)return; cur=i;
-  document.querySelectorAll('.layer').forEach(l=>l.classList.toggle('on',+l.dataset.i===i));
-  const b=document.querySelector('.layer.on .browser'); if(b){b.style.animation='none';b.offsetHeight;b.style.animation='';}
-  captext.textContent=SC[i].cap||'';
-  brand.classList.toggle('on', SC[i].type!=='card');
+  if(i===cur)return;cur=i;const s=ALL[i];
+  ALL.forEach((x,j)=>x.el.classList.toggle('on',j===i));
+  restartAnims(s.el);
+  s.el.querySelectorAll('.cup').forEach(countUp);
+  captext.textContent=s.cap;
+  label.textContent=s.label;
+  brand.classList.toggle('on',!s.cine);
 }
 function frame(now){
-  if(!playing)return;
-  elapsed=(now-t0)/1000;
-  if(elapsed>=TOTAL){elapsed=TOTAL;playing=false;}
-  let idx=0; for(let i=0;i<SC.length;i++){if(elapsed>=SC[i].t)idx=i;}
-  show(idx); fill.style.width=(elapsed/TOTAL*100)+'%'; tcode.textContent=fmt(elapsed)+' / 4:45';
+  if(!playing)return;elapsed=(now-t0)/1000;if(elapsed>=TOTAL){elapsed=TOTAL;playing=false;}
+  let idx=0;for(let i=0;i<ALL.length;i++){if(elapsed>=ALL[i].t)idx=i;}
+  show(idx);fill.style.width=(elapsed/TOTAL*100)+'%';tcode.textContent=fmt(elapsed)+' / 4:48';
   if(playing)raf=requestAnimationFrame(frame);
 }
-function play(){if(playing)return;playing=true;t0=performance.now()-elapsed*1000;raf=requestAnimationFrame(frame);document.getElementById('pp').textContent='Pause';}
-function pause(){playing=false;cancelAnimationFrame(raf);document.getElementById('pp').textContent='Play';}
-document.getElementById('start').addEventListener('click',function(){this.style.display='none';elapsed=0;play();});
+
+// ---- enterprise ambient music: synthesized in-browser, license-free ----
+const music=(function(){
+  let ctx,master,timer,on=true;
+  const chords=[[261.63,329.63,392.00,493.88],[220.00,261.63,329.63,392.00],[174.61,220.00,261.63,329.63],[196.00,246.94,293.66,392.00]];
+  let ci=0;
+  function voice(freq,t,dur){const o=ctx.createOscillator(),g=ctx.createGain(),f=ctx.createBiquadFilter();
+    o.type='triangle';o.frequency.value=freq;o.detune.value=(Math.sin(freq)*6);f.type='lowpass';f.frequency.value=1350;
+    g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(0.08,t+1.8);g.gain.setValueAtTime(0.08,t+dur-2);g.gain.linearRampToValueAtTime(0,t+dur);
+    o.connect(f);f.connect(g);g.connect(master);o.start(t);o.stop(t+dur+0.1);}
+  function step(){if(!ctx)return;const t=ctx.currentTime,dur=8.6,c=chords[ci%chords.length];c.forEach(fr=>voice(fr,t,dur));voice(c[0]*2,t,dur);ci++;}
+  return{toggle(){on=!on;if(master)master.gain.setTargetAtTime(on?0.16:0,ctx.currentTime,0.2);return on;},
+    start(){if(!on)return;if(!ctx){ctx=new(window.AudioContext||window.webkitAudioContext)();master=ctx.createGain();master.gain.value=0.16;master.connect(ctx.destination);}ctx.resume();step();if(timer)clearInterval(timer);timer=setInterval(step,8000);},
+    stop(){if(timer){clearInterval(timer);timer=null;}if(ctx&&ctx.state==='running')ctx.suspend();}};
+})();
+
+function play(){if(playing)return;playing=true;t0=performance.now()-elapsed*1000;raf=requestAnimationFrame(frame);document.getElementById('pp').textContent='Pause';music.start();}
+function pause(){playing=false;cancelAnimationFrame(raf);document.getElementById('pp').textContent='Play';music.stop();}
+document.getElementById('mute').addEventListener('click',function(){this.textContent=music.toggle()?'🔊 Music':'🔇 Muted';});
+document.getElementById('start').addEventListener('click',function(){this.style.display='none';elapsed=0;cur=-1;play();});
 document.getElementById('pp').addEventListener('click',()=>playing?pause():play());
 document.getElementById('rs').addEventListener('click',()=>{elapsed=0;cur=-1;play();});
 show(0);
