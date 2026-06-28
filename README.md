@@ -15,6 +15,7 @@ Less paperwork, more clean water.
 [![Live demo](https://img.shields.io/badge/Live%20demo-fevourdk.online-2ea44f)](https://fevourdk.online)
 
 **[Live demo](https://fevourdk.online)** ·
+**[👩‍⚖️ For judges](FOR-JUDGES.md)** ·
 **[Deck](docs/agenthack-deck.pptx)** ·
 **[Demo video script](docs/agenthack-demo-video-script.md)** ·
 **[Devpost](docs/agenthack-devpost-FINAL.md)** ·
@@ -22,6 +23,12 @@ Less paperwork, more clean water.
 **[Enterprise](docs/ENTERPRISE.md)**
 
 </div>
+
+---
+
+> 👩‍⚖️ **Judges — start here: [FOR-JUDGES.md](FOR-JUDGES.md)** is a 2-minute orientation to this submission (what to look at, in what order).
+>
+> **Agent Type — Low-code Agents.** This solution is built with UiPath **Studio** packages and **API Workflows**, orchestrated by **Maestro** with **Action Center** human-approval gates. There are **no Coded Agents**.
 
 ---
 
@@ -39,6 +46,12 @@ the source of truth; agents read through a guarded read-only API and write back 
 human-approved app routes a staffer would use.
 
 The result: less paperwork, more clean water.
+
+> **Project maturity.** Fevourd-K has been in active development since **February 2026** — **44 commits
+> across ~4.5 months** — spanning the public NGO platform, donor/volunteer/CSR flows, finance & immutable
+> ledger, GPS-verified field proof, compliance documents, a bilingual Kannada (ಕನ್ನಡ) experience, and an
+> in-app help bot with guided tours. **ImpactOps Maestro** is the UiPath agentic layer built on top for
+> AgentHack 2026 — judges are evaluating an agentic layer on a real, maturing platform, not a weekend prototype.
 
 > **AgentHack 2026 submission.** This is a hybrid agentic process — UiPath **Maestro** orchestrates the
 > workflow and human approvals, UiPath **Studio** agents execute the repeatable work, **Action Center** is

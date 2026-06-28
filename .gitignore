@@ -40,3 +40,8 @@ Thumbs.db
 output/playwright/harness-scene.png
 docs/agenthack-assets/*.mp4
 docs/agenthack-assets/*.mp3
+
+# AgentHack judge pack (large/generated — distributed via Devpost upload)
+docs/*.zip
+docs/ImpactOps-Maestro-Judge-Pack/
+docs/agenthack-assets/screenshots/home_register.png

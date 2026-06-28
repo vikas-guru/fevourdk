@@ -1,11 +1,19 @@
 # UiPath ImpactOps Maestro — Orchestrator & Maestro Manifest
 
+> **⚠️ Read first — designed spec vs. what's wired today.** This manifest is the **target
+> orchestration design**. What is **built & published right now** in the live tenant: the
+> orchestrator agent (`ImpactOps Maestro`), the 5 specialist agents, and the `Fevourd-K API
+> Workflow` (see `../uipath/screenshots/` and the Judge Pack PDF). The **queues, assets,
+> triggers, and Action Center tasks below are designed and specified but not yet wired** — the
+> human-in-the-loop is enforced today in each agent's prompt + output contract. See the
+> "Live today vs. designed next" table in `docs/ImpactOps-Maestro-Judge-Pack.pdf`.
+
 Public-safe reference for the UiPath side of the Fevourd-K AgentHack submission.
 All names below are the demo-tenant configuration. **No real tokens or endpoints** — the
 credential asset holds a sandbox value and is shown masked in every screenshot.
 
-- **Tenant:** `AgentHack Sandbox`
-- **Folder:** `Fevourd-K-Demo`
+- **Live tenant (actual):** `cloud.uipath.com/fevourdk` · `DefaultTenant`
+- **Designed folder:** `Fevourd-K-Demo`
 - **System of record:** Fevourd-K (Laravel/Vue) — UiPath reads from and writes back to its JSON API.
 
 ---

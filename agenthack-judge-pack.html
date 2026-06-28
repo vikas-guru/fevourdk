@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>ImpactOps Maestro — Judge Pack</title>
+<style>
+  :root{
+    --ink:#0f2742;        /* deep navy */
+    --ink-soft:#3a536b;
+    --muted:#6b7c8c;
+    --line:#e4e9ee;
+    --teal:#0d9488;       /* accent */
+    --teal-d:#0b7d72;
+    --amber:#d97706;      /* highlight */
+    --bg:#ffffff;
+    --panel:#f6f9fa;
+    --panel-2:#eef4f5;
+    --good:#0d9488;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    font-family:"Helvetica Neue",Arial,sans-serif;
+    color:var(--ink);
+    font-size:13.2px;
+    line-height:1.5;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+    background:var(--bg);
+  }
+  h1,h2,h3,h4{font-family:Georgia,"Times New Roman",serif;color:var(--ink);margin:0 0 .35em}
+  h2{font-size:21px;letter-spacing:-.2px}
+  h3{font-size:15.5px}
+  p{margin:0 0 .7em}
+  a{color:var(--teal-d);text-decoration:none}
+  small{color:var(--muted)}
+  code{font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11.5px;background:var(--panel-2);padding:1px 5px;border-radius:4px;color:#0b3b46}
+
+  /* page model */
+  @page{ size:A4; margin:15mm 16mm 17mm; }
+  @page:first{ margin:0; }
+  .page{ position:relative; }
+  section.page{ page-break-before:always; }
+  section.cover{ page-break-before:avoid; }
+  /* keep blocks from splitting across pages */
+  figure,.callout,.api-row,.loop,.arch,.principle,.member,.api-card,table.matrix tr{ break-inside:avoid; page-break-inside:avoid; }
+  .sec-h{ break-after:avoid; }
+
+  /* running footer on every printed page */
+  .footer{
+    position:fixed; left:0; right:0; bottom:0;
+    height:12mm;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:0 18mm;
+    font-size:9.5px; color:var(--muted);
+    border-top:1px solid var(--line);
+    background:#fff;
+  }
+  .footer .dot{color:var(--teal)}
+
+  /* ---------- COVER ---------- */
+  .cover{
+    padding:0;
+    color:#eaf2f4;
+    background:
+      radial-gradient(1200px 500px at 80% -10%, rgba(13,148,136,.55), transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(217,119,6,.30), transparent 55%),
+      linear-gradient(160deg,#0a1f36 0%, #0f2742 55%, #123a4a 100%);
+    display:flex; flex-direction:column;
+  }
+  .cover-inner{padding:24mm 20mm; display:flex; flex-direction:column; height:297mm}
+  .kicker{font-size:12px;letter-spacing:3px;text-transform:uppercase;color:#7fd6cb;font-weight:600}
+  .cover h1{color:#fff;font-size:54px;line-height:1.02;margin:14px 0 6px;letter-spacing:-1px}
+  .cover .sub{font-size:18px;color:#cfe0e3;font-family:Georgia,serif;font-style:italic;max-width:150mm}
+  .cover .rule{height:3px;width:90px;background:linear-gradient(90deg,var(--teal),var(--amber));border-radius:3px;margin:22px 0}
+  .cover .lead{font-size:14.5px;color:#dbe8ea;max-width:150mm;line-height:1.6}
+  .cover .meta{margin-top:auto;display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .cover .card{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:12px;padding:14px 16px}
+  .cover .card h4{color:#9fe0d6;font-family:"Helvetica Neue",Arial;font-size:10.5px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px}
+  .cover .card p{margin:0;color:#eaf2f4;font-size:12.5px;line-height:1.55}
+  .cover .card a{color:#bfeee6}
+  .badge-live{display:inline-flex;align-items:center;gap:6px;background:rgba(13,148,136,.22);border:1px solid rgba(127,214,203,.5);color:#bff3ea;border-radius:999px;padding:3px 10px;font-size:10.5px;font-weight:600}
+  .badge-live::before{content:"";width:7px;height:7px;border-radius:50%;background:#3be3c9;box-shadow:0 0 0 3px rgba(59,227,201,.25)}
+
+  /* ---------- section header ---------- */
+  .sec-tag{display:inline-block;font-size:10.5px;letter-spacing:2px;text-transform:uppercase;color:var(--teal-d);font-weight:700;margin-bottom:4px}
+  .sec-h{display:flex;align-items:baseline;gap:12px;border-bottom:2px solid var(--line);padding-bottom:10px;margin-bottom:16px}
+  .sec-h h2{margin:0}
+  .sec-h .n{font-family:Georgia,serif;font-size:30px;color:var(--panel-2);font-weight:700;line-height:1}
+
+  .lead-p{font-size:14px;color:var(--ink-soft);max-width:165mm}
+
+  /* callout */
+  .callout{background:var(--panel);border:1px solid var(--line);border-left:4px solid var(--teal);border-radius:8px;padding:12px 16px;margin:14px 0}
+  .callout.amber{border-left-color:var(--amber)}
+  .callout strong{color:var(--ink)}
+
+  /* link list */
+  table.links{width:100%;border-collapse:collapse;margin-top:6px}
+  table.links td{border-bottom:1px solid var(--line);padding:9px 8px;vertical-align:top;font-size:12.5px}
+  table.links td:first-child{width:34px;color:var(--teal-d);font-weight:700;font-family:Georgia,serif}
+  table.links .what{color:var(--muted)}
+
+  /* loop diagram */
+  .loop{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:8px 0 6px}
+  .loop .step{position:relative;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 12px 14px}
+  .loop .step .t{font-family:Georgia,serif;font-size:14px;color:var(--ink);margin-bottom:4px}
+  .loop .step .t b{color:var(--teal-d)}
+  .loop .step p{font-size:11px;color:var(--ink-soft);margin:0;line-height:1.45}
+  .loop .step .num{position:absolute;top:-10px;left:12px;background:var(--teal);color:#fff;font-size:10px;font-weight:700;border-radius:6px;padding:2px 7px}
+  .loop .arrow{position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:var(--line);font-size:16px;z-index:2}
+  .loop .step.gate{border-left:4px solid var(--amber)}
+
+  /* arch diagram */
+  .arch{display:flex;flex-direction:column;gap:10px;margin:6px 0}
+  .arch .row{display:flex;gap:10px;align-items:stretch}
+  .arch .band{border-radius:10px;padding:12px 14px;flex:1}
+  .arch .b-ngo{background:#eef4f5;border:1px solid #dbe7e9}
+  .arch .b-ai{background:linear-gradient(180deg,#0f2742,#143a4a);color:#eaf2f4;border:1px solid #143a4a}
+  .arch .b-h{background:#fff4e6;border:1px solid #f3dcb8}
+  .arch .band h4{font-family:"Helvetica Neue",Arial;font-size:10px;letter-spacing:1.5px;text-transform:uppercase;margin:0 0 8px;color:var(--muted)}
+  .arch .b-ai h4{color:#9fe0d6}
+  .arch .b-h h4{color:#b06f12}
+  .chips{display:flex;flex-wrap:wrap;gap:6px}
+  .chip{font-size:10.5px;background:#fff;border:1px solid var(--line);border-radius:7px;padding:4px 9px;color:var(--ink)}
+  .b-ai .chip{background:rgba(255,255,255,.08);border-color:rgba(255,255,255,.18);color:#eaf2f4}
+  .b-h .chip{background:#fff;border-color:#f0d8b0;color:#8a5a10}
+
+  /* shot grid */
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:14px 16px;margin-top:8px}
+  figure{margin:0}
+  .shot{border:1px solid var(--line);border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(15,39,66,.06);background:#fff}
+  .shot img{display:block;width:100%;height:auto}
+  figcaption{margin-top:7px;font-size:11.5px;color:var(--ink-soft);line-height:1.4}
+  figcaption b{color:var(--ink);font-family:Georgia,serif;font-weight:700}
+  .wf-no{display:inline-block;background:var(--teal);color:#fff;font-size:10px;font-weight:700;border-radius:5px;padding:1px 6px;margin-right:6px}
+
+  .full figure{margin-bottom:14px}
+  .full .shot{display:block}
+  .full .shot img{display:block;width:100%;max-height:97mm;object-fit:contain;background:#fff}
+
+  /* table */
+  table.matrix{width:100%;border-collapse:collapse;margin-top:8px;font-size:12px}
+  table.matrix th{background:var(--ink);color:#fff;text-align:left;padding:9px 11px;font-weight:600;font-family:"Helvetica Neue",Arial}
+  table.matrix th:first-child{border-radius:8px 0 0 0}
+  table.matrix th:last-child{border-radius:0 8px 0 0}
+  table.matrix td{border-bottom:1px solid var(--line);padding:9px 11px;vertical-align:top}
+  table.matrix tr:nth-child(even) td{background:var(--panel)}
+  .pill{display:inline-block;border-radius:999px;padding:2px 9px;font-size:10px;font-weight:700;letter-spacing:.3px}
+  .pill.live{background:#dff3ef;color:#0b6b60;border:1px solid #b6e3da}
+  .pill.design{background:#fdeede;color:#9a5a08;border:1px solid #f4d6ab}
+
+  /* code block */
+  pre{background:#0f2742;color:#dbe8ea;border-radius:10px;padding:14px 16px;font-family:"SF Mono",Menlo,Consolas,monospace;font-size:11px;line-height:1.55;overflow:hidden;margin:10px 0}
+  pre .c{color:#7fd6cb}
+  pre .k{color:#ffd9a3}
+  .api-row{display:flex;gap:10px;margin:10px 0}
+  .api-card{flex:1;border:1px solid var(--line);border-radius:10px;padding:12px 14px;background:var(--panel)}
+  .api-card .code{font-family:"SF Mono",Menlo,monospace;font-size:11px;color:var(--ink)}
+  .http{font-weight:700;font-family:Georgia,serif}
+  .http.ok{color:#0b7d72}
+  .http.no{color:#b4541a}
+
+  /* team */
+  .team{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:8px}
+  .member{border:1px solid var(--line);border-radius:10px;padding:11px 14px;background:var(--panel);display:flex;align-items:center;gap:12px}
+  .member .av{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--ink));color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-family:Georgia,serif;font-size:13px}
+  .member .nm{font-weight:700}
+  .member .rl{font-size:11px;color:var(--muted)}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+  .principle{font-family:Georgia,serif;font-size:18px;line-height:1.4;color:var(--ink);border-left:4px solid var(--amber);padding:6px 0 6px 16px;margin:10px 0}
+  .principle b{color:var(--teal-d)}
+  ul.tight{margin:6px 0 10px;padding-left:18px}
+  ul.tight li{margin-bottom:5px;font-size:12.5px;color:var(--ink-soft)}
+</style>
+</head>
+<body>
+
+<!-- ============ COVER ============ -->
+<section class="page cover">
+  <div class="cover-inner">
+    <div class="kicker">Fevourd-K × UiPath · AgentHack 2026</div>
+    <h1>ImpactOps<br>Maestro</h1>
+    <div class="sub">An agentic back-office for NGOs &amp; CSR — read, act, escalate, write back.</div>
+    <div class="rule"></div>
+    <div class="lead">
+      <b>Fevourd-K</b> is the system of record — the live NGO / CSR platform.
+      <b>UiPath ImpactOps Maestro</b> is the agentic layer on top of it: an orchestrator agent that
+      coordinates five specialist agents across the recurring back-office workflows, defers every
+      money &amp; compliance decision to a human, and writes every result back into Fevourd-K — audit trail intact.
+    </div>
+
+    <div class="meta">
+      <div class="card">
+        <h4>Try it live</h4>
+        <p><span class="badge-live">Product · HTTP 200</span><br>
+        <a href="https://fevourdk.online/">fevourdk.online</a> — click-through, signed-out.<br>
+        <span class="badge-live" style="margin-top:6px">Agent API · token-guarded</span><br>
+        <a href="https://fevourdk.online/api/health">fevourdk.online/api/health</a> — 401 without a token, 200 with one.</p>
+      </div>
+      <div class="card">
+        <h4>What's inside</h4>
+        <p>• 6 published UiPath agents (1 orchestrator + 5 specialists)<br>
+        • 1 published API Workflow calling the live API<br>
+        • The five workflows, shown running in the product<br>
+        • Honest map of what's live vs. designed next</p>
+      </div>
+      <div class="card">
+        <h4>Agent type</h4>
+        <p>Low-code Agents — UiPath Studio agentic processes + an API Workflow, coordinated by a
+        Maestro orchestrator agent, with human-in-the-loop encoded in every specialist.</p>
+      </div>
+      <div class="card">
+        <h4>Team</h4>
+        <p>Vikas Chandra Guru · Kavan Kumar KR · Nithin Annaiah · Hemanth Gowda AP<br>
+        <small style="color:#9fc4c9">Laravel 12 · Inertia · Vue 3 · MySQL · UiPath Studio &amp; Maestro</small></p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ ORIENTATION ============ -->
+<section class="page">
+  <div class="sec-tag">60-second orientation</div>
+  <div class="sec-h"><span class="n">01</span><h2>What this is, and where to look</h2></div>
+
+  <p class="lead-p">Two systems, one honest loop. Fevourd-K owns the data and the audit trail. UiPath
+  removes the recurring operational drudgery — but never makes the money or compliance call alone.</p>
+
+  <div class="principle"><b>Fevourd-K</b> never loses control of the data.
+  <b>UiPath</b> never decides the money alone.</div>
+
+  <h3 style="margin-top:18px">Start here, in order</h3>
+  <table class="links">
+    <tr><td>1</td><td><b>Live product</b> → <a href="https://fevourdk.online/">https://fevourdk.online/</a>
+      <div class="what">The real platform a judge can click, signed-out. Returns HTTP 200.</div></td></tr>
+    <tr><td>2</td><td><b>Live agent API</b> → <a href="https://fevourdk.online/api/health">https://fevourdk.online/api/health</a>
+      <div class="what">The token-guarded API UiPath calls. <b>401 without a token, 200 with one</b> — it's really deployed.</div></td></tr>
+    <tr><td>3</td><td><b>UiPath tenant</b> → cloud.uipath.com/fevourdk
+      <div class="what">Six published agents + an API Workflow (screenshots in §04).</div></td></tr>
+    <tr><td>4</td><td><b>Orchestration walkthrough</b> → <code>docs/agenthack-orchestration.md</code>
+      <div class="what">Six worked examples on real Vikasana data, with live <code>curl</code> for each endpoint.</div></td></tr>
+  </table>
+
+  <h3 style="margin-top:20px">The agentic loop — every workflow runs the same shape</h3>
+  <div class="loop">
+    <div class="step"><span class="num">1</span><span class="arrow">→</span>
+      <div class="t"><b>Perceive</b></div><p>Agent reads live Fevourd-K state over the token-guarded API (read-only, Bearer ****).</p></div>
+    <div class="step"><span class="num">2</span><span class="arrow">→</span>
+      <div class="t"><b>Act</b></div><p>Agent reasons, drafts, or verifies — using only supplied facts. It never owns the data.</p></div>
+    <div class="step gate"><span class="num">3</span><span class="arrow">→</span>
+      <div class="t"><b>Escalate</b></div><p>Money &amp; compliance always go to a human. Lower-risk steps run unattended.</p></div>
+    <div class="step"><span class="num">4</span>
+      <div class="t"><b>Write&nbsp;back</b></div><p>Result lands in Fevourd-K via its authenticated route. Audit trail records who &amp; what.</p></div>
+  </div>
+  <p style="font-size:11.5px;color:var(--muted);margin-top:4px"><b style="color:var(--amber)">▎</b> Amber step = mandatory human gate. Writes never go through the agent API — they go through Fevourd-K's own authenticated routes, so control and audit stay in one system.</p>
+
+  <h3 style="margin-top:18px">Architecture at a glance</h3>
+  <div class="arch">
+    <div class="band b-ngo">
+      <h4>Fevourd-K — system of record (live)</h4>
+      <div class="chips"><span class="chip">NGO &amp; donor data</span><span class="chip">Compliance docs</span><span class="chip">Field sessions + GPS</span><span class="chip">Finance &amp; ledger</span><span class="chip">CSR impact</span><span class="chip">Audit trail</span></div>
+    </div>
+    <div class="row">
+      <div class="band b-ai" style="flex:2">
+        <h4>UiPath ImpactOps Maestro — agentic layer</h4>
+        <div class="chips"><span class="chip">Orchestrator agent</span><span class="chip">Compliance Review</span><span class="chip">Campaign Draft</span><span class="chip">Field Proof</span><span class="chip">Finance Claim</span><span class="chip">CSR Report</span><span class="chip">API Workflow → live API</span></div>
+      </div>
+      <div class="band b-h" style="flex:1">
+        <h4>Human gates</h4>
+        <div class="chips"><span class="chip">Compliance sign-off</span><span class="chip">Finance approve / reject</span></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ WORKFLOWS IN PRODUCT ============ -->
+<section class="page">
+  <div class="sec-tag">The product</div>
+  <div class="sec-h"><span class="n">02</span><h2>The five workflows, shown in Fevourd-K</h2></div>
+  <p class="lead-p">Each agent reads and writes a real surface of the platform. These are live screens
+  from the running product — the same data the agents perceive and write back to.</p>
+
+  <div class="grid">
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/05-compliance-documents.png"></div>
+      <figcaption><span class="wf-no">1</span><b>Compliance Review.</b> NGO 12A/80G/FCRA documents with verify state — the agent flags a pending certificate and routes a finding for sign-off.</figcaption></figure>
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/06-feed-studio-campaign-draft.png"></div>
+      <figcaption><span class="wf-no">2</span><b>Campaign Draft.</b> Feed Studio — the agent assembles a donor-ready update as a <i>draft</i> (never auto-posted).</figcaption></figure>
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/07-field-proof-hub.png"></div>
+      <figcaption><span class="wf-no">3</span><b>Field Proof.</b> Field sessions hub — the agent checks the GPS trail against the assigned site before marking work verifiable.</figcaption></figure>
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/09-finance-claims.png"></div>
+      <figcaption><span class="wf-no">4</span><b>Finance Claim.</b> Expense claims — every money decision is routed to a human; nothing is paid automatically.</figcaption></figure>
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/10-ledger-writeback.png"></div>
+      <figcaption><span class="wf-no">4</span><b>Ledger write-back.</b> On approval, the claim posts a traceable ledger entry tagged <code>source: ImpactOps Maestro</code>.</figcaption></figure>
+    <figure><div class="shot"><img src="docs/agenthack-assets/screenshots/12-csr-dashboard-report.png"></div>
+      <figcaption><span class="wf-no">5</span><b>CSR Report.</b> Impact dashboard — the agent assembles verified proof + approved spend + compliance status into one traceable summary.</figcaption></figure>
+  </div>
+</section>
+
+<!-- ============ UIPATH LAYER ============ -->
+<section class="page full">
+  <div class="sec-tag">The agentic layer · live UiPath tenant</div>
+  <div class="sec-h"><span class="n">03</span><h2>What we actually built in UiPath</h2></div>
+  <p class="lead-p">Captured from the live <code>cloud.uipath.com/fevourdk</code> tenant. Six published
+  agents and one published API Workflow — the orchestrator coordinates five specialists, each
+  prompt-constrained to defer money &amp; compliance to a human.</p>
+
+  <figure><div class="shot"><img src="uipath/screenshots/uipath-02-solutions-published.png"></div>
+    <figcaption><b>Published solutions.</b> ImpactOps Maestro (orchestrator + Agentic Process) plus five specialist agents and the Fevourd-K API Workflow — all Published in UiPath Studio Web.</figcaption></figure>
+
+  <figure><div class="shot"><img src="uipath/screenshots/uipath-01-impactops-maestro-orchestrator.png"></div>
+    <figcaption><b>ImpactOps Maestro — the orchestrator agent.</b> Its system prompt coordinates a public-safe NGO operations case by choosing the next specialist agent or human task — and explicitly does <i>not</i> approve NGOs, publish campaigns, mark field work complete, pay claims, or publish reports directly.</figcaption></figure>
+</section>
+
+<section class="page full">
+  <figure><div class="shot"><img src="uipath/screenshots/uipath-03-finance-claim-agent.png"></div>
+    <figcaption><b>Finance Claim agent — the money gate.</b> "Review NGO expense claim metadata and recommend a public-safe finance decision for a human approver. You never approve payments directly and never post to ledger directly … <b>Always require human approval before payment or ledger posting.</b>" Privacy rules forbid exposing bank details / PAN-FCRA identifiers.</figcaption></figure>
+
+  <figure><div class="shot"><img src="uipath/screenshots/uipath-04-api-workflow.png"></div>
+    <figcaption><b>Fevourd-K API Workflow.</b> A published UiPath API Workflow (HTTP Request, with retry-on-failure) — how agents read live Fevourd-K state over the token-guarded API before they reason.</figcaption></figure>
+
+  <div class="callout amber" style="margin-top:14px">
+    <strong>Honest note on human gates.</strong> The human-in-the-loop is enforced today in every
+    specialist's prompt and output contract (each emits <code>human_review_required</code> and a
+    review artifact, never a direct action). Wiring those into UiPath <b>Action Center</b> tasks and
+    Orchestrator <b>queues/triggers</b> is the next integration step — see §05.
+  </div>
+</section>
+
+<!-- ============ LIVE VS DESIGNED ============ -->
+<section class="page">
+  <div class="sec-tag">Honesty</div>
+  <div class="sec-h"><span class="n">04</span><h2>Live today vs. designed next</h2></div>
+  <p class="lead-p">We'd rather a judge trust every claim. Here's exactly what is running now and what
+  is designed and specified but not yet wired.</p>
+
+  <table class="matrix">
+    <tr><th>Capability</th><th style="width:90px">State</th><th>Evidence</th></tr>
+    <tr><td>Fevourd-K product (NGO/CSR platform)</td><td><span class="pill live">Live</span></td><td><a href="https://fevourdk.online/">fevourdk.online</a> · HTTP 200</td></tr>
+    <tr><td>Token-guarded agent API (6 read endpoints)</td><td><span class="pill live">Live</span></td><td><code>/api/health</code> → 401 without token, 200 with</td></tr>
+    <tr><td>UiPath orchestrator agent (ImpactOps Maestro)</td><td><span class="pill live">Live</span></td><td>Published v1.0.0 · §03</td></tr>
+    <tr><td>5 specialist agents (Compliance, Campaign, Field, Finance, CSR)</td><td><span class="pill live">Live</span></td><td>Published · safety + human-gate prompts · §03</td></tr>
+    <tr><td>API Workflow calling the live API</td><td><span class="pill live">Live</span></td><td>Published · HTTP Request + retry · §03</td></tr>
+    <tr><td>Maestro Agentic Process (Process.bpmn)</td><td><span class="pill live">Live</span></td><td>Published; orchestration canvas</td></tr>
+    <tr><td>Action Center human-task UI (sign-off / approve-reject)</td><td><span class="pill design">Designed</span></td><td>Gate logic in agent prompts; AC wiring is next</td></tr>
+    <tr><td>Orchestrator queues + event/cron triggers</td><td><span class="pill design">Designed</span></td><td>Specified in <code>uipath/orchestrator-manifest.md</code></td></tr>
+    <tr><td>Roadmap workflows: Donor Reconciliation, Grant Milestones</td><td><span class="pill design">Designed</span></td><td>Specified in <code>docs/agenthack-orchestration.md</code></td></tr>
+  </table>
+
+  <div class="callout" style="margin-top:16px">
+    <strong>Why this split is the point.</strong> The hard, novel part — agents that read a real
+    system of record, reason under explicit safety constraints, and are built to never decide money or
+    compliance alone — is <b>built and published</b>. The remaining items are standard UiPath plumbing
+    (queues, triggers, Action Center tasks) on top of agents that already encode the right behaviour.
+  </div>
+</section>
+
+<!-- ============ PROOF + REPRO ============ -->
+<section class="page">
+  <div class="sec-tag">Proof &amp; reproducibility</div>
+  <div class="sec-h"><span class="n">05</span><h2>The live API, end to end</h2></div>
+  <p class="lead-p">The agent API is deployed and token-guarded right now. Anyone can confirm the guard;
+  judges with the demo token get live JSON.</p>
+
+  <div class="api-row">
+    <div class="api-card">
+      <div class="code">curl -s -o /dev/null -w "%{http_code}" \<br>&nbsp;&nbsp;https://fevourdk.online/api/health</div>
+      <p style="margin:8px 0 0"><span class="http no">401</span> &nbsp;<small><code>{"error":"unauthorized"}</code> — guard works, no token.</small></p>
+    </div>
+    <div class="api-card">
+      <div class="code">curl -s -H "Authorization: Bearer ****" \<br>&nbsp;&nbsp;https://fevourdk.online/api/health</div>
+      <p style="margin:8px 0 0"><span class="http ok">200</span> &nbsp;<small>live JSON — valid Orchestrator credential.</small></p>
+    </div>
+  </div>
+
+  <h3 style="margin-top:14px">The six read endpoints UiPath calls</h3>
+<pre><span class="c"># BASE=https://fevourdk.online/api   TOKEN=****  (masked everywhere)</span>
+GET <span class="k">/health</span>
+GET <span class="k">/ngo/vikasana/documents</span>                                   <span class="c"># ① Compliance</span>
+GET <span class="k">/ngo/vikasana/campaigns/clean-drinking-water-for-mandya-villages</span>  <span class="c"># ② Campaign</span>
+GET <span class="k">/field/sessions/4471/trail</span>                               <span class="c"># ③ Field Proof</span>
+GET <span class="k">/ngo/vikasana/finance/claims</span>                             <span class="c"># ④ Finance</span>
+GET <span class="k">/ngo/vikasana/csr/impact</span>                                 <span class="c"># ⑤ CSR Report</span></pre>
+
+  <div class="two" style="margin-top:14px">
+    <div>
+      <h3>Run it yourself</h3>
+      <ul class="tight">
+        <li>Repo <code>README.md</code> → Setup. Local API base <code>http://127.0.0.1:8080/api</code>.</li>
+        <li>Live base <code>https://fevourdk.online/api</code> (Bearer token, masked as <code>****</code>).</li>
+        <li>Copy any <code>curl</code> from <code>docs/agenthack-orchestration.md</code>.</li>
+        <li>Demo NGO <code>vikasana</code> · campaign "Clean Drinking Water for Mandya Villages".</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Public-safe by design</h3>
+      <ul class="tight">
+        <li>Everything runs on a sandbox tenant — fake NGOs/amounts, redacted PII.</li>
+        <li>Tokens masked in every doc and screenshot.</li>
+        <li>Writes go only through Fevourd-K's authenticated routes — never the agent API.</li>
+        <li>Every write is tagged <code>source: ImpactOps Maestro</code> in the audit trail.</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:8px">
+    <strong>The architecture in one line.</strong> Fevourd-K never loses control of the data; UiPath
+    never makes the money or compliance decision alone.
+  </div>
+</section>
+
+<!-- ============ TEAM ============ -->
+<section class="page">
+  <div class="sec-tag">Team &amp; stack</div>
+  <div class="sec-h"><span class="n">06</span><h2>Who built it</h2></div>
+  <div class="team">
+    <div class="member"><div class="av">VG</div><div><div class="nm">Vikas Chandra Guru</div><div class="rl">Architect</div></div></div>
+    <div class="member"><div class="av">KK</div><div><div class="nm">Kavan Kumar KR</div><div class="rl">Senior Full-Stack Developer</div></div></div>
+    <div class="member"><div class="av">NA</div><div><div class="nm">Nithin Annaiah</div><div class="rl">Senior Full-Stack Developer</div></div></div>
+    <div class="member"><div class="av">HG</div><div><div class="nm">Hemanth Gowda AP</div><div class="rl">Tester / QA</div></div></div>
+  </div>
+
+  <h3 style="margin-top:22px">Stack</h3>
+  <div class="chips" style="gap:8px">
+    <span class="chip">Laravel 12</span><span class="chip">Inertia</span><span class="chip">Vue 3</span><span class="chip">MySQL</span>
+    <span class="chip">UiPath Studio Web</span><span class="chip">UiPath Maestro</span><span class="chip">Agentic Processes</span><span class="chip">API Workflows</span>
+  </div>
+
+  <div class="callout amber" style="margin-top:24px">
+    <strong>For the judges.</strong> The product is live, the agent API is deployed and guarded, and
+    the agents are published in our UiPath tenant. We've marked exactly what's wired vs. what's
+    designed next so you can trust every claim in this pack.
+  </div>
+
+  <p style="margin-top:26px;font-size:11px;color:var(--muted)">ImpactOps Maestro · Fevourd-K × UiPath · AgentHack 2026 · Generated from the live tenant and deployed API.</p>
+</section>
+
+</body>
+</html>
