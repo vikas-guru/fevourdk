@@ -28,7 +28,9 @@ Less paperwork, more clean water.
 
 > 👩‍⚖️ **Judges — start here: [FOR-JUDGES.md](FOR-JUDGES.md)** is a 2-minute orientation to this submission (what to look at, in what order).
 >
-> **Agent Type — Low-code Agents.** This solution is built with UiPath **Studio** packages and **API Workflows**, orchestrated by **Maestro** with **Action Center** human-approval gates. There are **no Coded Agents**.
+> **Agent type — low-code runtime agents, built *with* coding agents (a combination).**
+> At **runtime**, the agents are UiPath **Studio** packages and **API Workflows**, orchestrated by **Maestro** with **Action Center** human-approval gates — i.e. **low-code / Agent Builder-style agents, not Coded Agents** in the UiPath runtime sense.
+> At **build time**, the entire solution was developed **with coding agents** — **Codex CLI** and **Claude Code** (see the `codex/…` branch) — used to build the Fevourd-K system of record, the read-only agent API that UiPath orchestrates, the UiPath agent system-prompts, and every integration / test / submission artifact.
 
 ---
 
