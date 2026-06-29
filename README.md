@@ -61,6 +61,26 @@ The result: less paperwork, more clean water.
 
 ---
 
+## UiPath components used
+
+Built in the **UiPath Labs** tenant `https://cloud.uipath.com/fevourdk` (DefaultTenant). Status is marked
+honestly — **Live** = built & published in the tenant; **Designed** = modeled, not yet provisioned at runtime
+(see [FOR-JUDGES.md](FOR-JUDGES.md) for the full live-vs-designed table).
+
+| UiPath component | How this solution uses it | Status |
+|---|---|---|
+| **UiPath Studio (agentic)** | 6 published agentic solutions — 1 orchestrator (`ImpactOps Maestro`) + 5 specialist agents (`Compliance Review`, `Campaign Draft`, `Field Proof`, `Finance Claim`, `CSR Report`), each with real LLM system-prompts that encode safety + `human_review_required` gating | ✅ Live |
+| **UiPath Maestro** | Orchestrates the end-to-end six-workflow process and the human-approval handoffs (`Process.bpmn` inside the orchestrator solution) | ✅ Live |
+| **UiPath API Workflows** | 1 published `Fevourd-K API Workflow` — HTTP Request activities calling the live, token-guarded Fevourd-K agent API | ✅ Live |
+| **UiPath Action Center** | Human-in-the-loop approval gate for the two decisions humans must own — **money** (Finance Claim) and **compliance** sign-off | 🟡 Designed |
+| **UiPath Orchestrator** | Runtime home — per-workflow queues, a credential asset for the API token, a config asset for the finance threshold, and event/cron triggers | 🟡 Designed |
+| **External LLM** | The agent reasoning model (system-prompts authored in Studio); orchestration & governance stay on UiPath | ✅ Live |
+
+**Agent type:** **Low-code / Agent Builder-style agents — no Coded Agents** at runtime. The solution itself was
+**built with coding agents** (Codex CLI + Claude Code), so in the hackathon's terms this is a **combination**.
+
+---
+
 ## How it works
 
 ```mermaid
